@@ -1,6 +1,7 @@
 import { copy } from "@ground-control/copy";
 import { useEffect } from "react";
 import { useMe } from "../auth/useMe.ts";
+import { DeepCheckLink } from "../components/DeepCheckLink.tsx";
 import { StatusBadge } from "../components/StatusBadge.tsx";
 import type { RepoData, SourceData } from "../data.ts";
 import { readableDate, safeExternalUrl } from "../presentation.ts";
@@ -125,6 +126,7 @@ export function RunList({ data }: { data: RepoData }) {
 }
 
 function RepoContent({ data }: { data: RepoData }) {
+  const { me } = useMe();
   return (
     <>
       <a className="repo-back-link" href="/sky">
@@ -147,7 +149,10 @@ function RepoContent({ data }: { data: RepoData }) {
           )}
         </div>
       </header>
-      <RepoFindings data={data} />
+      <RepoFindings
+        data={data}
+        deepCheckAction={<DeepCheckLink data={data} me={me} />}
+      />
       <RepoScanStatus data={data} />
       <SourceList data={data} />
       {data.runs.length > 0 && (

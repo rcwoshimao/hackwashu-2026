@@ -12,6 +12,7 @@ export function ConnectRepoPicker({
   onSelect: (repo: AccountRepoData | null) => void;
 }) {
   const [repos, setRepos] = useState<AccountRepoData[]>([]);
+  const [prefill] = useState(value);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -20,13 +21,17 @@ export function ConnectRepoPicker({
     const load = async () => {
       const result = await api.accountRepos(controller.signal);
       if (controller.signal.aborted) return;
-      if (result.ok) setRepos(connectableRepos(result.value.repos));
-      else setFailed(true);
+      if (result.ok) {
+        const available = connectableRepos(result.value.repos);
+        setRepos(available);
+        const preselected = available.find((repo) => repo.repo === prefill);
+        if (preselected) onSelect(preselected);
+      } else setFailed(true);
       setLoading(false);
     };
     void load();
     return () => controller.abort();
-  }, []);
+  }, [onSelect, prefill]);
   const matches = useMemo(
     () =>
       repos.filter((repo) =>

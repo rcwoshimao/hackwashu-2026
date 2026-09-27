@@ -22,6 +22,11 @@ export const webCopy = {
   reportsAddDocument: "Add a document",
   reportsOpenRepo: "Open repository",
   reportsBack: "Back to my reports",
+  deepScanAddAction: "Add deep scan",
+  deepChecksSetupAction: "Set up deep checks",
+  deepScanTitle: "Add deep scan",
+  deepScanIntro:
+    "Choose a repository you own, then enable deep checks and add the Ground Control Action in its GitHub Actions settings.",
   navMenu: "Menu",
   navHome: "Back to the Sky",
   navSkip: "Skip to content",
@@ -363,9 +368,15 @@ export const webCopy = {
     "Deep checks enabled for your public repository. Save its Actions token now; it will not be shown again.",
   connectDonePublicRuntimeExisting:
     "Deep checks are already enabled for your public repository. Keep using its existing Actions token; reconnecting does not show it again.",
-  connectTokenTitle: "Set up GitHub Actions",
+  connectTokenTitle: "Save your Actions token",
   connectTokenOnce:
-    "This telemetry token is shown only once. Store it as an Actions secret before leaving this page.",
+    "This token appears only once. Save it as a repository Actions secret before leaving this page.",
+  connectTokenExisting:
+    "Keep the existing Actions secret. If it is lost, open deep-check setup to issue a new token.",
+  connectRotateTitle: "Lost the Actions token?",
+  connectRotateHint:
+    "Issue a new one-time token only if needed. This replaces the current token, so update the repository's GROUND_CONTROL_TOKEN secret before its next CI report.",
+  connectRotateAction: "Issue new token",
   connectTokenLabel: "One-time telemetry token",
   connectTokenCopy: "Copy token",
   connectTokenCopied: "Token copied. Add it as the repository Actions secret.",
@@ -373,23 +384,29 @@ export const webCopy = {
     "Clipboard access is unavailable. The token is selected for manual copying.",
   connectTokenShow: "Show token",
   connectTokenHide: "Hide token",
-  connectTokenSecret: "Repository Actions secret:",
-  connectServerVariable: "Repository Actions variable:",
-  connectPublicUrlPlaceholder: "https://<your-public-host>",
-  connectHostedActionHint:
-    "GitHub-hosted Actions need an HTTPS tunnel to this server. Open Ground Control through that HTTPS origin before copying the URL.",
-  connectStepsTitle: "Finish deep-check setup",
+  connectSecretPrompt:
+    "Copy the token, run this command anywhere with GitHub CLI, then paste the token at its prompt. It never appears in the command or shell history.",
+  connectSecretCommand: "gh secret set GROUND_CONTROL_TOKEN -R {repo}",
+  connectSecretGitHub: "Use GitHub settings instead",
+  connectStepsTitle: "Set up deep checks",
+  connectStepsIntro:
+    "Ground Control publishes the generated flight checks to your repository. Add one small GitHub workflow to run them on pull requests and default-branch pushes.",
+  connectChecksTitle: "Add the workflow",
   connectStepPlan:
-    "From the Ground Control project root, generate a plan for a local checkout of this repository:",
-  connectSeedCommand: "bun ops seed-plan <checkout> {repo}",
-  connectStepReview:
-    "Review the generated checks, run them once in that checkout, then commit the three flightchecks files to its default branch.",
-  connectStepWorkflow:
-    "Copy the sample workflow into this repository's .github/workflows directory and replace both Action references with:",
-  connectWorkflowLink: "Open the sample workflow",
-  connectActionRef: "rcwoshimao/hackwashu-2026/action@hussein",
+    "Download this short workflow. It calls Ground Control's maintained workflow, which runs the checks and sends the report.",
+  connectDefaultBranchLabel: "Default branch for push checks",
+  connectHostedUrl: "Ground Control server URL is already filled in:",
+  connectHostedUrlMissing:
+    "Open this page on your hosted HTTPS Ground Control server to download a workflow with its URL filled in.",
+  connectStepWorkflow: "Add the downloaded file to your repository at",
+  connectWorkflowDownload: "Download workflow",
+  connectVerifyTitle: "Open a test pull request",
   connectStepRun:
-    "Open a pull request from a branch in this repository and check the flight-checks and report jobs. The report job needs the HTTPS server URL and saved token above.",
+    "Open a pull request in this repository. The Ground Control check and report appear in Actions; the first passing run establishes a baseline.",
+  connectCommandCopy: "Copy command",
+  connectCommandCopied: "Command copied.",
+  connectCommandCopyFailed:
+    "Clipboard access is unavailable. Select the command to copy it.",
   connectCommentExpectation:
     "A PR comment appears for confirmed drift when a previously passing check fails. It shows cited evidence; the Action does not write a suggested change to your PR. The current iMessage FIX flow can draft a correction for a supported server-port change.",
   connectFailed:

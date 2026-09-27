@@ -1,5 +1,5 @@
 import { copy } from "@ground-control/copy";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { api } from "../api.ts";
 import type { CheckResult, RepoData, RunData } from "../data.ts";
 import { safeExternalUrl } from "../presentation.ts";
@@ -111,7 +111,13 @@ function ResultBody({ run }: { run: RunData }) {
   );
 }
 
-export function RepoFindings({ data }: { data: RepoData }) {
+export function RepoFindings({
+  data,
+  deepCheckAction,
+}: {
+  data: RepoData;
+  deepCheckAction: ReactNode;
+}) {
   const { run, loading } = useLatestRun(data.latestRunId);
   return (
     <section
@@ -126,6 +132,9 @@ export function RepoFindings({ data }: { data: RepoData }) {
         <ResultBody run={run} />
       ) : (
         <h2>{copy.repoNoVerdict}</h2>
+      )}
+      {deepCheckAction && (
+        <div className="repo-result-actions">{deepCheckAction}</div>
       )}
     </section>
   );

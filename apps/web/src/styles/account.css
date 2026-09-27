@@ -87,6 +87,21 @@
 .report-head h2 a {
   text-decoration: none;
 }
+.report-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+.deep-check-link {
+  background: transparent;
+  color: var(--paper);
+}
+.deep-check-link:hover {
+  background: var(--paper);
+  color: var(--night);
+}
 .report-meta {
   display: flex;
   flex-wrap: wrap;

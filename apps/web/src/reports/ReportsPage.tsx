@@ -1,11 +1,13 @@
 import { copy } from "@ground-control/copy";
 import { useMe } from "../auth/useMe.ts";
+import { DeepCheckLink } from "../components/DeepCheckLink.tsx";
 import { StatusBadge } from "../components/StatusBadge.tsx";
+import type { MeData } from "../data.ts";
 import { repoPath } from "../presentation.ts";
 import { RunList } from "../repo/RepoPage.tsx";
 import { useRepo } from "../repo/useRepo.ts";
 
-function ReportCard({ repo }: { repo: string }) {
+function ReportCard({ repo, me }: { repo: string; me: MeData }) {
   const { data, loading } = useRepo(repo);
   return (
     <article className="report-card" aria-labelledby={`report-${repo}`}>
@@ -13,7 +15,12 @@ function ReportCard({ repo }: { repo: string }) {
         <h2 id={`report-${repo}`}>
           <a href={repoPath(repo)}>{repo}</a>
         </h2>
-        {data && <StatusBadge label={data.label} />}
+        {data && (
+          <div className="report-head-actions">
+            <StatusBadge label={data.label} />
+            <DeepCheckLink data={data} me={me} />
+          </div>
+        )}
       </div>
       {loading ? (
         <p role="status">{copy.commonLoading}</p>
@@ -36,7 +43,8 @@ function ReportCard({ repo }: { repo: string }) {
   );
 }
 
-function Reports({ repos }: { repos: string[] }) {
+function Reports({ me }: { me: MeData }) {
+  const repos = me.connectedRepos;
   if (repos.length === 0)
     return (
       <div className="state-panel panel">
@@ -49,7 +57,7 @@ function Reports({ repos }: { repos: string[] }) {
   return (
     <div className="report-list">
       {repos.map((repo) => (
-        <ReportCard key={repo} repo={repo} />
+        <ReportCard key={repo} repo={repo} me={me} />
       ))}
     </div>
   );
@@ -75,7 +83,7 @@ export function ReportsPage() {
       ) : failed ? (
         <p role="alert">{copy.signInUnavailable}</p>
       ) : me?.signedIn ? (
-        <Reports repos={me.connectedRepos} />
+        <Reports me={me} />
       ) : (
         <div className="state-panel panel">
           <p>{copy.reportsSignIn}</p>

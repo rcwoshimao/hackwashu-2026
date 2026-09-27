@@ -45,19 +45,11 @@ function TokenControls({ token }: { token: string }) {
 
 export function ConnectToken({
   token,
-  serverUrl,
   repo,
 }: {
-  token?: string;
-  serverUrl: string;
+  token: string | undefined;
   repo: string;
 }) {
-  const [url, setUrl] = useState(serverUrl.startsWith("https://") ? serverUrl : "");
-  const origin = publicHttpsOrigin(url);
-  const secretCommand = copy.connectSecretCommand.replace("{repo}", repo);
-  const variableCommand = origin
-    ? copy.connectVariableCommand.replace("{repo}", repo).replace("{url}", origin)
-    : null;
   return (
     <section className="connect-token" aria-label={copy.connectTokenTitle}>
       <h3>{copy.connectTokenTitle}</h3>
@@ -65,47 +57,19 @@ export function ConnectToken({
         <>
           <p>{copy.connectTokenOnce}</p>
           <TokenControls token={token} />
+          <p>{copy.connectSecretPrompt}</p>
+          <CopyCommand
+            command={copy.connectSecretCommand.replace("{repo}", repo)}
+          />
         </>
       ) : (
         <p>{copy.connectTokenExisting}</p>
       )}
-      <p>{copy.connectSecretPrompt}</p>
-      <CopyCommand command={secretCommand} />
       <p>
         <a href={`https://github.com/${repo}/settings/secrets/actions`}>
           {copy.connectSecretGitHub}
         </a>
       </p>
-      <label htmlFor="connect-public-url">{copy.connectPublicUrlLabel}</label>
-      <input
-        id="connect-public-url"
-        type="url"
-        value={url}
-        placeholder={copy.connectPublicUrlPlaceholder}
-        onChange={(event) => setUrl(event.target.value)}
-      />
-      <p className="form-hint">{copy.connectPublicUrlHint}</p>
-      {variableCommand ? (
-        <CopyCommand command={variableCommand} />
-      ) : (
-        <p className="form-hint">{copy.connectVariableNeedsUrl}</p>
-      )}
-      <p>
-        <a href={`https://github.com/${repo}/settings/variables/actions`}>
-          {copy.connectVariableGitHub}
-        </a>
-      </p>
     </section>
   );
-}
-
-export function publicHttpsOrigin(value: string): string | null {
-  try {
-    const url = new URL(value);
-    if (url.protocol !== "https:" || url.username || url.password) return null;
-    if (url.pathname !== "/" || url.search || url.hash) return null;
-    return url.origin;
-  } catch {
-    return null;
-  }
 }

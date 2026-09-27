@@ -1,45 +1,35 @@
-const actionRef = "rcwoshimao/hackwashu-2026/action@hussein";
-
 export const workflow = `name: Ground Control
 on:
   pull_request:
   push:
-    branches: [main, "groundcontrol/**"]
-  schedule:
-    - cron: "0 7 * * *"
+    branches: [main]
   workflow_dispatch:
-permissions: {}
+permissions:
+  contents: read
 jobs:
-  flight-checks:
-    if: \${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-          ref: \${{ github.event.pull_request.head.sha || github.sha }}
-      - uses: actions/setup-node@v6
-        with: { node-version: 24, cache: npm }
-      - run: npm ci
-      - uses: ${actionRef}
-        with: { mode: run }
-      - if: always()
-        uses: actions/upload-artifact@v5
-        with: { name: telemetry, path: .groundcontrol/telemetry.json }
-  report:
-    needs: flight-checks
-    if: \${{ always() && needs.flight-checks.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
-    runs-on: ubuntu-latest
-    permissions: {}
-    steps:
-      - uses: actions/download-artifact@v5
-        with: { name: telemetry, path: .groundcontrol }
-      - uses: ${actionRef}
-        with:
-          mode: report
-          server: \${{ vars.GROUND_CONTROL_URL }}
-          token: \${{ secrets.GROUND_CONTROL_TOKEN }}
+  ground-control:
+    uses: rcwoshimao/hackwashu-2026/.github/workflows/ground-control-reusable.yml@main
+    with:
+      server: "https://<your-ground-control-host>"
+    secrets:
+      token: \${{ secrets.GROUND_CONTROL_TOKEN }}
 `;
+
+export function publicHttpsOrigin(value: string): string | null {
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && !url.username && !url.password
+      ? url.origin
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+export function workflowForBranch(branch: string, serverUrl: string): string {
+  const origin = publicHttpsOrigin(serverUrl);
+  if (!origin || !branch.trim()) throw new Error("public_url_required");
+  return workflow
+    .replace("branches: [main]", `branches: [${JSON.stringify(branch.trim())}]`)
+    .replace('"https://<your-ground-control-host>"', JSON.stringify(origin));
+}

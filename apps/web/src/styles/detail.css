@@ -38,6 +38,11 @@
 .repo-result > p:not(.eyebrow) {
   color: var(--mist);
 }
+.repo-result-actions {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 1.25rem;
+}
 .repo-result-counts {
   display: flex;
   flex-wrap: wrap;
