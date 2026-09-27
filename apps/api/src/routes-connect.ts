@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { RepoRecord } from "@ground-control/store";
 import type { Context, Hono } from "hono";
+import { z } from "zod";
 import { sessionToken } from "./access.ts";
 import type { ApiDeps } from "./types.ts";
 import { emit, fail, repoSchema, requestBody, sha256 } from "./write-shared.ts";
@@ -21,20 +22,32 @@ function connectedRepo(
 }
 
 type Connection =
-  | { repo: string; visibility: "public" }
-  | { repo: string; visibility: "private"; telemetryToken: string };
+  | {
+      repo: string;
+      visibility: "public";
+      runtimeEnabled: boolean;
+      telemetryToken?: string;
+    }
+  | {
+      repo: string;
+      visibility: "private";
+      runtimeEnabled: true;
+      telemetryToken: string;
+    };
 
 function connectionFor(
   repo: string,
   visibility: RepoRecord["visibility"],
+  runtime: boolean,
 ): Connection {
-  return visibility === "private"
+  return visibility === "private" || runtime
     ? {
         repo,
         visibility,
+        runtimeEnabled: true,
         telemetryToken: randomBytes(32).toString("base64url"),
       }
-    : { repo, visibility };
+    : { repo, visibility, runtimeEnabled: false };
 }
 
 function queueRefresh(
@@ -89,29 +102,54 @@ async function discoveryResponse(
 }
 
 async function connect(c: Context, deps: ApiDeps) {
-  const parsed = repoSchema.safeParse(await requestBody(c.req.raw));
+  const parsed = repoSchema
+    .extend({ runtime: z.boolean().optional() })
+    .safeParse(await requestBody(c.req.raw));
   if (!parsed.success) return fail(c, "invalid_request", 400);
   const session = deps.auth.session(sessionToken(c.req.raw));
   if (session === null) return fail(c, "sign_in_required", 401);
   const access = await deps.auth.access(session, parsed.data.repo);
   if (!access.ok) return fail(c, "github_unavailable", 502);
   if (!access.value.canAdmin) return fail(c, "admin_access_required", 403);
+  if (
+    parsed.data.runtime === true &&
+    access.value.visibility === "public" &&
+    parsed.data.repo.split("/")[0]?.toLowerCase() !==
+      session.login.toLowerCase()
+  )
+    return fail(c, "personal_repo_required", 403);
   const old = deps.store.getRepo(parsed.data.repo);
   if (old?.visibility === "private" && access.value.visibility === "public") {
     deps.store.putRepo({ ...old, tokenHash: null });
     return fail(c, "repository_visibility_changed", 409);
   }
-  const connection = connectionFor(parsed.data.repo, access.value.visibility);
+  const runtime =
+    access.value.visibility === "private" || parsed.data.runtime === true;
+  const runtimeEnabled =
+    runtime ||
+    (old?.visibility === access.value.visibility &&
+      old.runtimeEnabled === true);
+  const connection = connectionFor(
+    parsed.data.repo,
+    access.value.visibility,
+    runtime,
+  );
+  connection.runtimeEnabled = runtimeEnabled;
+  const tokenHash = connection.telemetryToken
+    ? sha256(connection.telemetryToken).toString("hex")
+    : old?.visibility === access.value.visibility && old.runtimeEnabled === true
+      ? old.tokenHash
+      : null;
   deps.store.putRepo({
     ...(old ?? connectedRepo(parsed.data.repo, access.value.visibility)),
     visibility: access.value.visibility,
     connected: true,
-    tokenHash:
-      connection.visibility === "private"
-        ? sha256(connection.telemetryToken).toString("hex")
-        : null,
+    tokenHash,
+    runtimeEnabled,
   });
   emit(deps, "repo_connected", { repo: parsed.data.repo });
+  if (runtime && deps.store.getFlightPlan(parsed.data.repo))
+    deps.schedulePlan?.(parsed.data.repo);
   return discoveryResponse(c, deps, connection, session.oauthToken);
 }
 

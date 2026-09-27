@@ -1,4 +1,4 @@
-import { privateRunRepository } from "./git-context.ts";
+import { matchingRunRepository } from "./git-context.ts";
 
 export type ReportIdentity = {
   repo: string;
@@ -69,7 +69,7 @@ export function trustedReportIdentity(
     !workflowSha ||
     !repoPattern.test(repository) ||
     !shaPattern.test(workflowSha) ||
-    !privateRunRepository(event, repository)
+    !matchingRunRepository(event, repository)
   )
     return null;
   if (eventName === "pull_request")

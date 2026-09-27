@@ -40,6 +40,7 @@ export interface ApiDeps {
   publicUrl: string;
   webDist?: string;
   clientIp?: (request: Request) => string;
+  schedulePlan?: (repo: string) => void;
 }
 
 export class EventHub {

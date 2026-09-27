@@ -23,6 +23,9 @@ test("API serves built web assets and SPA routes without swallowing API", async 
   const asset = await app.request("/assets/app.js");
   expect(asset.status).toBe(200);
   expect(asset.headers.get("cache-control")).toContain("immutable");
+  const favicon = await app.request("/favicon.svg");
+  expect(favicon.status).toBe(200);
+  expect(favicon.headers.get("content-type")).toContain("image/svg+xml");
   expect((await app.request("/api/sky")).headers.get("content-type")).toContain(
     "application/json",
   );

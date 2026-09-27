@@ -50,13 +50,18 @@ export function AccountMenu() {
   };
   return (
     <details className="account-menu">
-      <summary className="account-slot" aria-label={copy.navAccount}>
+      <summary
+        className="account-slot"
+        aria-label={`${copy.navSignedInAs} @${me.login}. ${copy.navAccount}`}
+      >
         <Avatar login={me.login} />
+        <span className="account-login">@{me.login}</span>
       </summary>
       <div className="account-popover">
         <p>
           {copy.signInConnected} <strong>{me.login}</strong>
         </p>
+        <a href="/signin">{copy.navMyRepos}</a>
         <a href="/reports">{copy.navReports}</a>
         <button
           type="button"

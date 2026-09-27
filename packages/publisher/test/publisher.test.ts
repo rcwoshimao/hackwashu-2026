@@ -43,7 +43,7 @@ test("only connected repos publish deterministic flight checks", async () => {
   ]);
 });
 
-test("connected public repos do not publish generated flight checks", async () => {
+test("public docs-only connections do not publish generated flight checks", async () => {
   const store = new MemoryStore();
   const writer = new FakePlanWriter();
   store.putFlightPlan(plan);
@@ -59,10 +59,20 @@ test("connected public repos do not publish generated flight checks", async () =
 
   expect(await publishFlightPlan(store, plan.repo, writer)).toEqual({
     ok: false,
-    error: { code: "private_repository_required" },
+    error: { code: "runtime_not_enabled" },
   });
   expect(writer.writes).toEqual([]);
   expect(writer.files.size).toBe(0);
+  const connected = store.getRepo(plan.repo);
+  if (connected === null) throw new Error("missing connected repo");
+  store.putRepo({
+    ...connected,
+    tokenHash: "scoped-hash",
+    runtimeEnabled: true,
+  });
+  const enabled = await publishFlightPlan(store, plan.repo, writer);
+  expect(enabled.ok && enabled.value.state).toBe("published");
+  expect(writer.writes).toEqual([plan.repo]);
 });
 
 test("GitHub writer rejects a repo made public since connection", async () => {
@@ -78,15 +88,19 @@ test("GitHub writer rejects a repo made public since connection", async () => {
     },
   } as unknown as Octokit;
   const writer = new OctokitPlanWriter("unused", client);
-  const result = await writer.publish(plan.repo, [
-    { path: "flightchecks/flightplan.json", content: "{}" },
-    { path: "flightchecks/flight.test.mjs", content: "" },
-    { path: "flightchecks/runner.mjs", content: "" },
-  ]);
+  const result = await writer.publish(
+    plan.repo,
+    [
+      { path: "flightchecks/flightplan.json", content: "{}" },
+      { path: "flightchecks/flight.test.mjs", content: "" },
+      { path: "flightchecks/runner.mjs", content: "" },
+    ],
+    "private",
+  );
 
   expect(result).toEqual({
     ok: false,
-    error: { code: "private_repository_required" },
+    error: { code: "repository_visibility_changed" },
   });
   expect(metadataCalls).toBe(1);
 });

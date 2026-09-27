@@ -9,7 +9,9 @@ import { useMe } from "./useMe.ts";
 type State = "idle" | "pending" | "invalid" | "error" | "visibility_changed";
 
 function ConnectForm() {
-  const [repo, setRepo] = useState("");
+  const params = new URLSearchParams(window.location.search);
+  const [repo, setRepo] = useState(params.get("repo") ?? "");
+  const [runtime, setRuntime] = useState(params.get("runtime") === "1");
   const [state, setState] = useState<State>("idle");
   const [connection, setConnection] = useState<Connection | null>(null);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -20,7 +22,7 @@ function ConnectForm() {
     }
     setState("pending");
     setConnection(null);
-    const result = await api.connect(repo.trim());
+    const result = await api.connect(repo.trim(), runtime);
     if (result.ok) setConnection(result.value);
     setState(
       result.ok
@@ -52,6 +54,15 @@ function ConnectForm() {
         autoComplete="off"
       />
       <p className="form-hint">{copy.formRepoHint}</p>
+      <label className="checkbox-row">
+        <input
+          type="checkbox"
+          checked={runtime}
+          onChange={(event) => setRuntime(event.target.checked)}
+        />
+        {copy.connectRuntimeOption}
+      </label>
+      <p className="form-hint">{copy.connectRuntimeHint}</p>
       <button type="submit" disabled={state === "pending"}>
         {copy.connectAction}
       </button>

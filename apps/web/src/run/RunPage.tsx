@@ -194,11 +194,11 @@ function RunContent({
             {data.verdict === "failure"
               ? copy.commonFailure
               : data.verdict === "success"
-                ? copy.commonSuccess
+                ? copy.runNoConfirmedFailures
                 : copy.commonPending}
           </strong>
         </div>
-        <a href={repoPath(data.repo)}>{copy.skyOpenRepo}</a>
+        <a href={repoPath(data.repo)}>{copy.skyOpenRepoResult}</a>
       </header>
       <EvidenceGroups data={data} />
       <section className="panel check-results">

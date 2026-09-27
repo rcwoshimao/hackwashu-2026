@@ -24,10 +24,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
+  min-width: 44px;
   height: 44px;
+  gap: 0.5rem;
   cursor: pointer;
   list-style: none;
+}
+.account-login {
+  color: var(--paper);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 .account-slot::-webkit-details-marker {
   display: none;
@@ -133,5 +139,8 @@
 @media (max-width: 760px) {
   .header-end {
     gap: 0.6rem;
+  }
+  .account-login {
+    display: none;
   }
 }

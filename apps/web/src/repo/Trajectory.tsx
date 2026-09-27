@@ -56,7 +56,7 @@ function useTrajectory(repo: RepoData): {
 
 export function Trajectory({ repo }: { repo: RepoData }) {
   const { points, loading, unavailable } = useTrajectory(repo);
-  if (loading || points.length === 0)
+  if (loading || points.length < 2)
     return (
       <section className="trajectory panel">
         <h2>{copy.repoTrajectory}</h2>
@@ -65,7 +65,7 @@ export function Trajectory({ repo }: { repo: RepoData }) {
             ? copy.repoTrajectoryLoading
             : unavailable
               ? copy.repoTrajectoryUnavailable
-              : copy.repoTrajectoryEmpty}
+              : copy.repoTrajectoryShort}
         </p>
       </section>
     );

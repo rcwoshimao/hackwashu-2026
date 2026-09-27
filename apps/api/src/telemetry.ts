@@ -175,6 +175,7 @@ export function ingestTelemetry(
     commitSha: input.commitSha,
     createdAt: now.toISOString(),
     verdict: verdictFor(results),
+    origin: "ci",
     ...(input.pullRequestNumber
       ? { pullRequestNumber: input.pullRequestNumber }
       : {}),

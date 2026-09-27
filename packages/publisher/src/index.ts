@@ -10,14 +10,19 @@ export type PublishResult =
       error: {
         code:
           | "not_connected"
-          | "private_repository_required"
+          | "runtime_not_enabled"
+          | "repository_visibility_changed"
           | "github_failed"
           | "bundle_failed";
       };
     };
 
 export interface PlanWritePort {
-  publish(repo: string, files: readonly FileUpdate[]): Promise<PublishResult>;
+  publish(
+    repo: string,
+    files: readonly FileUpdate[],
+    visibility: "public" | "private",
+  ): Promise<PublishResult>;
 }
 
 async function runnerBundle(): Promise<string | null> {
@@ -42,8 +47,8 @@ export async function publishFlightPlan(
   const record = store.getRepo(repo);
   if (record?.connected !== true)
     return { ok: false, error: { code: "not_connected" } };
-  if (record.visibility !== "private")
-    return { ok: false, error: { code: "private_repository_required" } };
+  if (record.visibility === "public" && record.runtimeEnabled !== true)
+    return { ok: false, error: { code: "runtime_not_enabled" } };
   const plan = store.getFlightPlan(repo);
   if (!plan) return { ok: false, error: { code: "bundle_failed" } };
   const filtered: FlightPlan = {
@@ -54,14 +59,18 @@ export async function publishFlightPlan(
   };
   const runner = await runnerBundle();
   if (!runner) return { ok: false, error: { code: "bundle_failed" } };
-  return writer.publish(repo, [
-    {
-      path: "flightchecks/flightplan.json",
-      content: `${JSON.stringify(filtered, null, 2)}\n`,
-    },
-    { path: "flightchecks/flight.test.mjs", content: planToTests(filtered) },
-    { path: "flightchecks/runner.mjs", content: runner },
-  ]);
+  return writer.publish(
+    repo,
+    [
+      {
+        path: "flightchecks/flightplan.json",
+        content: `${JSON.stringify(filtered, null, 2)}\n`,
+      },
+      { path: "flightchecks/flight.test.mjs", content: planToTests(filtered) },
+      { path: "flightchecks/runner.mjs", content: runner },
+    ],
+    record.visibility,
+  );
 }
 
 export { FakePlanWriter, OctokitPlanWriter } from "./octokit.ts";

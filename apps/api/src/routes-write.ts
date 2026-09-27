@@ -159,8 +159,8 @@ async function telemetry(c: Context, deps: ApiDeps) {
   ) {
     return fail(c, "telemetry_unauthorized", 401);
   }
-  if (repo.visibility !== "private")
-    return fail(c, "private_repository_required", 403);
+  if (repo.visibility === "public" && repo.runtimeEnabled !== true)
+    return fail(c, "runtime_not_enabled", 403);
   const run = ingestTelemetry(deps.store, parsed.data, deps.now());
   const statusPosted = await publishStatus(deps, run);
   if (parsed.data.docsChanged === true && !parsed.data.pullRequestNumber)

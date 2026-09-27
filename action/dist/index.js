@@ -10052,8 +10052,8 @@ function stringField(value, path) {
   const found = field(value, path);
   return typeof found === "string" && found.length > 0 ? found : null;
 }
-function privateRunRepository(event, expectedRepo) {
-  return typeof expectedRepo === "string" && expectedRepo.length > 0 && field(event, ["repository", "private"]) === true && stringField(event, ["repository", "full_name"]) === expectedRepo;
+function matchingRunRepository(event, expectedRepo) {
+  return typeof expectedRepo === "string" && expectedRepo.length > 0 && typeof field(event, ["repository", "private"]) === "boolean" && stringField(event, ["repository", "full_name"]) === expectedRepo;
 }
 function systemGitDiff(root, args) {
   const result = spawnSync("git", [...args], {
@@ -10184,7 +10184,7 @@ function pullRequestIdentity(event, repo) {
 }
 function trustedReportIdentity(context) {
   const { repository, workflowSha, eventName, event } = context;
-  if (!repository || !workflowSha || !repoPattern.test(repository) || !shaPattern.test(workflowSha) || !privateRunRepository(event, repository))
+  if (!repository || !workflowSha || !repoPattern.test(repository) || !shaPattern.test(workflowSha) || !matchingRunRepository(event, repository))
     return null;
   if (eventName === "pull_request")
     return pullRequestIdentity(event, repository);
@@ -26010,9 +26010,9 @@ async function loadRunner(root) {
   }
   return module.runPlan;
 }
-async function loadPrivateRunner(root, event, repo) {
-  if (!repo || !privateRunRepository(event, repo))
-    return { ok: false, error: { code: "private_repository_required" } };
+async function loadConnectedRunner(root, event, repo) {
+  if (!repo || !matchingRunRepository(event, repo))
+    return { ok: false, error: { code: "repository_identity_required" } };
   readPlan(root, repo);
   return { ok: true, value: await loadRunner(root) };
 }
@@ -26066,7 +26066,7 @@ async function main() {
     throw new TypeError("Action mode must be run or report");
   const repo = process.env.GITHUB_REPOSITORY ?? "";
   const event = readActionEvent(process.env.GITHUB_EVENT_PATH);
-  const runner = await loadPrivateRunner(root, event, repo);
+  const runner = await loadConnectedRunner(root, event, repo);
   if (!runner.ok) {
     process.stderr.write(`${runner.error.code}
 `);

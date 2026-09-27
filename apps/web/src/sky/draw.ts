@@ -1,4 +1,4 @@
-import type { SkyLayout, SkyPoint } from "./layout.ts";
+import type { BlimpPoint, SkyLayout, SkyPoint } from "./layout.ts";
 import { placePoint, skyTurn } from "./motion.ts";
 
 const ink = "#F2F3ED";
@@ -103,8 +103,30 @@ export function drawSky(
   selectedRepo: string | null,
   reducedMotion: boolean,
   arrivals: ReadonlyMap<string, number>,
+  blimps: BlimpPoint[],
 ): void {
   drawGrid(context, layout, width, height, reducedMotion ? 0 : skyTurn(timeMs));
+  for (const point of blimps) {
+    context.strokeStyle = point.repo.visibility === "private" ? rule : quiet;
+    context.lineWidth = 1.4;
+    context.beginPath();
+    context.ellipse(
+      point.x,
+      point.y,
+      point.radius + 2,
+      point.radius,
+      0,
+      0,
+      Math.PI * 2,
+    );
+    context.stroke();
+    if (point.repo.repo === selectedRepo) {
+      context.strokeStyle = ink;
+      context.beginPath();
+      context.arc(point.x, point.y, point.radius + 7, 0, Math.PI * 2);
+      context.stroke();
+    }
+  }
   for (const resting of layout.points) {
     const point = {
       ...resting,

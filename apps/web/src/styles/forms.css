@@ -6,6 +6,9 @@
 .form-panel {
   width: min(620px, 100%);
 }
+.account-page .form-panel {
+  width: min(1160px, 100%);
+}
 .form-panel h1 {
   font-size: clamp(2.1rem, 4vw, 3.5rem);
 }
@@ -45,6 +48,91 @@
   border-top: 1px solid var(--rule);
   margin-top: 2rem;
   padding-top: 1rem;
+}
+.account-repos {
+  margin-top: 2rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 2rem;
+}
+.account-repo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.account-repo-toolbar > div {
+  flex: 1 1 16rem;
+}
+.account-repo-toolbar label {
+  display: block;
+  margin: 0 0 0.45rem;
+}
+.account-repo-toolbar button {
+  margin: 0;
+}
+.account-repo-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr));
+  gap: 0.8rem;
+}
+.account-repo-item {
+  min-width: 0;
+  border: 1px solid var(--rule);
+  padding: 1rem;
+  background: var(--night);
+}
+.account-repo-item > p {
+  color: var(--mist);
+  margin: 0.7rem 0;
+}
+.account-repo-topline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  overflow-wrap: anywhere;
+}
+.account-repo-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.account-repo-tags span {
+  border: 1px solid var(--rule);
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+  color: var(--mist);
+}
+.account-repo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+.account-repo-actions button {
+  margin: 0;
+}
+.account-repo-actions .button-secondary {
+  background: transparent;
+  color: var(--paper);
+}
+.account-repo-actions .button-secondary:hover {
+  background: var(--hull);
+}
+.account-repo-pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.3rem;
+}
+.account-repo-pages button {
+  margin: 0;
 }
 
 .imessage-link p {

@@ -1,38 +1,14 @@
 import { copy } from "@ground-control/copy";
+import { useEffect } from "react";
 import { useMe } from "../auth/useMe.ts";
 import { StatusBadge } from "../components/StatusBadge.tsx";
 import type { RepoData, SourceData } from "../data.ts";
 import { readableDate, safeExternalUrl } from "../presentation.ts";
 import { SourceSync } from "../sources/SourceSync.tsx";
+import { RepoFindings } from "./RepoFindings.tsx";
+import { RepoScanStatus } from "./RepoScanStatus.tsx";
 import { Trajectory } from "./Trajectory.tsx";
 import { useRepo } from "./useRepo.ts";
-
-function DegreesDial({ degrees }: { degrees: number }) {
-  const angle = (degrees * Math.PI) / 180;
-  const endX = 20 + Math.cos(angle) * 140;
-  const endY = 160 - Math.sin(angle) * 140;
-  return (
-    <div
-      className="degrees-dial"
-      role="img"
-      aria-label={`${copy.repoDial}: ${degrees.toFixed(1)} ${copy.skyDegreesUnit}`}
-    >
-      <svg viewBox="0 0 180 180" aria-hidden="true">
-        <path d="M160 160 A140 140 0 0 0 20 20" className="dial-track" />
-        {degrees > 0 && (
-          <path
-            d={`M160 160 A140 140 0 0 0 ${endX} ${endY}`}
-            className="dial-value"
-          />
-        )}
-      </svg>
-      <div>
-        <strong>{degrees.toFixed(1)}°</strong>
-        <span>{copy.repoDial}</span>
-      </div>
-    </div>
-  );
-}
 
 function SourceRow({
   source,
@@ -54,11 +30,14 @@ function SourceRow({
         </div>
         {link && (
           <a href={link} target="_blank" rel="noreferrer">
-            {copy.commonOpen}
+            {copy.repoSourceOpen}
           </a>
         )}
       </div>
-      <SourceSync source={source} canRefresh={canRefresh} />
+      <details className="repo-source-details">
+        <summary>{copy.repoSourceDetails}</summary>
+        <SourceSync source={source} canRefresh={canRefresh} />
+      </details>
     </li>
   );
 }
@@ -105,6 +84,7 @@ export function RunList({ data }: { data: RepoData }) {
                 <th>{copy.repoCommit}</th>
                 <th>{copy.repoCheckedAt}</th>
                 <th>{copy.repoRunStatus}</th>
+                <th>{copy.repoRunTier}</th>
                 <th>{copy.repoRunFailures}</th>
                 <th>{copy.repoViewRun}</th>
               </tr>
@@ -118,8 +98,15 @@ export function RunList({ data }: { data: RepoData }) {
                     {run.verdict === "failure"
                       ? copy.commonFailure
                       : run.verdict === "success"
-                        ? copy.commonSuccess
+                        ? copy.repoRunNoConfirmedFailures
                         : copy.commonPending}
+                  </td>
+                  <td>
+                    {run.origin === "ci"
+                      ? copy.repoRunDeep
+                      : run.origin === "public_scan"
+                        ? copy.repoRunPublic
+                        : copy.repoRunUnknown}
                   </td>
                   <td className="mono">{run.failingCount.toLocaleString()}</td>
                   <td>
@@ -140,27 +127,52 @@ export function RunList({ data }: { data: RepoData }) {
 function RepoContent({ data }: { data: RepoData }) {
   return (
     <>
+      <a className="repo-back-link" href="/sky">
+        {copy.repoBackToSky}
+      </a>
       <header className="repo-heading">
         <div>
           <p className="eyebrow">
             {data.visibility === "private" ? copy.repoPrivate : copy.repoPublic}
           </p>
           <h1>{data.repo}</h1>
-          <StatusBadge label={data.label} />
+          {data.visibility === "public" &&
+          data.scan === null &&
+          data.runs.length === 0 ? (
+            <span className="status-badge no-telemetry">
+              {copy.repoNotScanned}
+            </span>
+          ) : (
+            <StatusBadge label={data.label} />
+          )}
         </div>
-        {data.runs.length > 0 && <DegreesDial degrees={data.driftDegrees} />}
       </header>
-      <Trajectory repo={data} />
-      <div className="repo-panels">
-        <SourceList data={data} />
-        <RunList data={data} />
-      </div>
+      <RepoFindings data={data} />
+      <RepoScanStatus data={data} />
+      <SourceList data={data} />
+      {data.runs.length > 0 && (
+        <details className="repo-technical panel">
+          <summary>{copy.repoTechnicalDetails}</summary>
+          {data.runs.length > 1 ? (
+            <Trajectory repo={data} />
+          ) : (
+            <p>{copy.repoTrajectoryShort}</p>
+          )}
+          <RunList data={data} />
+        </details>
+      )}
     </>
   );
 }
 
 export function RepoPage({ repo }: { repo: string }) {
   const { data, loading, denied } = useRepo(repo);
+  useEffect(() => {
+    if (!data || window.location.hash !== "#findings") return;
+    window.requestAnimationFrame(() =>
+      document.getElementById("findings")?.scrollIntoView({ block: "start" }),
+    );
+  }, [data]);
   return (
     <main className="page repo-page">
       {loading && (

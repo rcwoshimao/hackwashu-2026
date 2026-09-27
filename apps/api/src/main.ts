@@ -23,19 +23,13 @@ import { ConfluenceCloud } from "@ground-control/sources";
 import { SqliteStore } from "@ground-control/store";
 import { planPublishDebounceMs } from "../../../config/limits.ts";
 import { OctokitCommitAuthor } from "./commit-author.ts";
-import {
-  createApi,
-  EventHub,
-  GitHubCommitStatus,
-  seedLocalDemo,
-} from "./index.ts";
+import { createApi, EventHub, GitHubCommitStatus } from "./index.ts";
 import { startMessaging } from "./messaging.ts";
 import { FlightPlanPublishQueue } from "./publish-schedule.ts";
 
 const dbPath = process.env.DATABASE_PATH || "data/groundcontrol.db";
 mkdirSync(dirname(dbPath), { recursive: true });
 const store = new SqliteStore(dbPath);
-seedLocalDemo(store, new Date());
 const publicUrl = (process.env.PUBLIC_URL || "http://localhost:8787").replace(
   /\/$/,
   "",
@@ -131,7 +125,8 @@ const sourceSync = new SourceSync({
     if (
       claimCount !== null &&
       connectedRepo?.connected === true &&
-      connectedRepo.visibility === "private"
+      (connectedRepo.visibility === "private" ||
+        connectedRepo.runtimeEnabled === true)
     )
       publishQueue?.schedule(repo);
   },
@@ -176,6 +171,9 @@ const app = createApi({
   events,
   scanner,
   sourceSync,
+  ...(publishQueue === null
+    ? {}
+    : { schedulePlan: (repo: string) => publishQueue.schedule(repo) }),
   confluenceSite: process.env.CONFLUENCE_SITE,
   ...(messaging === null ? {} : { messaging }),
   ...(status === undefined ? {} : { status }),

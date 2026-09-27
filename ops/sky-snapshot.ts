@@ -68,7 +68,9 @@ export function snapshotSky(store: AppStore, exportedAt: string): SkySnapshot {
   const names = satellites.map((item) => item.repo);
   const repos = names.flatMap((name) => {
     const repo = store.getRepo(name);
-    return repo ? [{ ...repo, connected: false, tokenHash: null }] : [];
+    return repo
+      ? [{ ...repo, connected: false, tokenHash: null, runtimeEnabled: false }]
+      : [];
   });
   const runs = names.flatMap((name) => [...store.listRuns(name)]);
   const sources = names.flatMap((name) => [...store.listSources(name)]);
@@ -111,15 +113,27 @@ export function restoreSky(
   );
   for (const repo of snapshot.repos.filter((item) => allowed.has(item.repo))) {
     const prior = store.getRepo(repo.repo);
+    const priorCiRun = prior?.latestRunId
+      ? store.getRun(prior.latestRunId)?.origin === "ci"
+      : false;
     store.putRepo({
       ...repo,
       visibility: "public",
       connected: prior?.connected ?? false,
       tokenHash: prior?.tokenHash ?? null,
+      runtimeEnabled: prior?.runtimeEnabled ?? false,
+      ...(priorCiRun && prior
+        ? {
+            label: prior.label,
+            driftDegrees: prior.driftDegrees,
+            latestRunId: prior.latestRunId,
+          }
+        : {}),
     });
   }
   const runs = snapshot.runs.filter((item) => allowed.has(item.repo));
-  for (const run of runs) store.putRun(run);
+  for (const run of runs)
+    store.putRun({ ...run, origin: run.origin ?? "public_scan" });
   for (const source of snapshot.sources)
     if (allowed.has(source.repo)) store.putSource(source);
   for (const entry of snapshot.trust)

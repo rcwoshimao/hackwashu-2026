@@ -63,14 +63,20 @@ function savePublicRecord(
 ): void {
   requirePublicRecord(store, repo);
   const prior = store.getRepo(repo);
+  const hasCiResult =
+    prior?.runtimeEnabled === true &&
+    prior.latestRunId !== null &&
+    prior.latestRunId !== undefined &&
+    store.getRun(prior.latestRunId)?.origin === "ci";
   store.putRepo({
     repo,
     visibility: "public",
     connected: prior?.connected ?? false,
     tokenHash: prior?.tokenHash ?? null,
-    label,
-    driftDegrees,
-    latestRunId,
+    ...(prior?.runtimeEnabled === true ? { runtimeEnabled: true } : {}),
+    label: hasCiResult ? prior.label : label,
+    driftDegrees: hasCiResult ? prior.driftDegrees : driftDegrees,
+    latestRunId: hasCiResult ? prior.latestRunId : latestRunId,
   });
 }
 
@@ -247,6 +253,7 @@ export class PublicScanner {
       )
         ? "failure"
         : "success",
+      origin: "public_scan",
       results,
       evidence: evidenceFor(results),
     };

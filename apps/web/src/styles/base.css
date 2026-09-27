@@ -170,9 +170,9 @@ pre,
 }
 .brand-mark {
   display: inline-block;
+  width: 1.65rem;
+  height: 1.65rem;
   margin-right: 0.55rem;
-  font-size: 1.55rem;
-  line-height: 0.7;
   vertical-align: middle;
 }
 .brand small {
@@ -193,6 +193,11 @@ pre,
 }
 .desktop-nav a:hover {
   color: var(--paper);
+}
+.desktop-nav .nav-account {
+  color: var(--paper);
+  border: 1px solid var(--rule);
+  padding: 0.55rem 0.75rem;
 }
 .mobile-nav {
   display: none;

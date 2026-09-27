@@ -14,9 +14,13 @@ export function ConnectResult({
       <p className="form-feedback" role="status">
         {connection.visibility === "private"
           ? copy.connectDonePrivate
-          : copy.connectDonePublic}
+          : connection.telemetryToken
+            ? copy.connectDonePublicRuntime
+            : connection.runtimeEnabled
+              ? copy.connectDonePublicRuntimeExisting
+              : copy.connectDonePublic}
       </p>
-      {connection.visibility === "private" && (
+      {connection.telemetryToken && (
         <ConnectToken token={connection.telemetryToken} serverUrl={serverUrl} />
       )}
       <a href={`/sources/new?repo=${encodeURIComponent(connection.repo)}`}>

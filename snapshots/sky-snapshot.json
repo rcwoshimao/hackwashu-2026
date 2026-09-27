@@ -11,10 +11,7 @@
       "driftDegrees": 0,
       "commitSha": "bd756f8b2283a38560efe83cb30af38324d4e9e9",
       "scannedAt": "2026-09-27T01:29:32.242Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -26,10 +23,7 @@
       "driftDegrees": 90,
       "commitSha": "defdcdb55d850cd12c4c657eb83729fd66e215c0",
       "scannedAt": "2026-09-27T01:36:23.766Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -41,10 +35,7 @@
       "driftDegrees": 32,
       "commitSha": "e3ba2aa6f1e6f0bc4d69eb09c9f0d0a93af56156",
       "scannedAt": "2026-09-27T01:28:26.166Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -56,10 +47,7 @@
       "driftDegrees": 45,
       "commitSha": "6df3065f1d8ddc2ce3615314d1d493f36d6b1c80",
       "scannedAt": "2026-09-27T01:37:25.867Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -71,10 +59,7 @@
       "driftDegrees": 0,
       "commitSha": "47a10808d78561546a02555d0d2c7fa96fa96300",
       "scannedAt": "2026-09-27T01:35:34.142Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -86,10 +71,7 @@
       "driftDegrees": 0,
       "commitSha": "31f891d3053dc2af6c2fd1a0b94af233496a718c",
       "scannedAt": "2026-09-27T01:27:16.134Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -101,10 +83,7 @@
       "driftDegrees": 26,
       "commitSha": "e482e579415fde18357cafce70f177ae19fd7f03",
       "scannedAt": "2026-09-27T01:25:07.562Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -116,10 +95,7 @@
       "driftDegrees": 90,
       "commitSha": "8ed19247bef145e3cc41b24a02dd1fe6d9b5e681",
       "scannedAt": "2026-09-27T01:27:59.157Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -131,10 +107,7 @@
       "driftDegrees": 0,
       "commitSha": "319a3c4f3268f4f96ac4acdbb118737d2261e0be",
       "scannedAt": "2026-09-27T01:32:11.754Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -146,10 +119,7 @@
       "driftDegrees": 0,
       "commitSha": "b471c2b4495747353af768fbf2e0790c9d820ce2",
       "scannedAt": "2026-09-27T01:25:39.012Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -161,10 +131,7 @@
       "driftDegrees": 0,
       "commitSha": "dd35657cf5b84014b45151d36b2963d81b83b8ee",
       "scannedAt": "2026-09-27T01:32:20.700Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -176,10 +143,7 @@
       "driftDegrees": 0,
       "commitSha": "961241f6c19798eff16b0869486c125430a17961",
       "scannedAt": "2026-09-27T01:31:15.528Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -191,10 +155,7 @@
       "driftDegrees": 0,
       "commitSha": "477b4f420553e8a52c2fbccc464d7561b239c443",
       "scannedAt": "2026-09-27T01:25:23.937Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -206,10 +167,7 @@
       "driftDegrees": 0,
       "commitSha": "2b0a123de98318c2ff8069661721ce0c3794c34e",
       "scannedAt": "2026-09-27T01:30:10.645Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -221,10 +179,7 @@
       "driftDegrees": 0,
       "commitSha": "afed9e6e27dd1cd5cc52857a405f7bea5312d813",
       "scannedAt": "2026-09-27T01:29:29.004Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -236,10 +191,7 @@
       "driftDegrees": 0,
       "commitSha": "9a34acf03cb818ff3f8bc40e44176e277a25cbb9",
       "scannedAt": "2026-09-27T01:03:34.113Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -251,10 +203,7 @@
       "driftDegrees": 0,
       "commitSha": "8917c7c8c0be657661ed205b3ffdeb5b7798857e",
       "scannedAt": "2026-09-27T01:08:05.124Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -266,10 +215,7 @@
       "driftDegrees": 8,
       "commitSha": "01593aa67c94780528e8f5121e47362502410ced",
       "scannedAt": "2026-09-27T01:29:22.118Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -281,10 +227,7 @@
       "driftDegrees": 90,
       "commitSha": "2fe7c2d3f065dc40ad573d50b2091116f8a4aa18",
       "scannedAt": "2026-09-27T01:31:44.067Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -296,10 +239,7 @@
       "driftDegrees": 0,
       "commitSha": "6b978d0c0d3dfddf43c9138314bc7d1c5e5295d2",
       "scannedAt": "2026-09-27T01:29:54.142Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -311,10 +251,7 @@
       "driftDegrees": 0,
       "commitSha": "5eaeec966cf0234a3b2d70e3f7ab1ceed7ca6d86",
       "scannedAt": "2026-09-27T01:28:53.205Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -326,10 +263,7 @@
       "driftDegrees": 6,
       "commitSha": "90dc23a3fd7c9497f85449a7ff7f6fb81d51d137",
       "scannedAt": "2026-09-27T01:36:43.060Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -341,10 +275,7 @@
       "driftDegrees": 0,
       "commitSha": "725611b2e9a425519e9fcb4dcc579bafea936d27",
       "scannedAt": "2026-09-27T01:27:30.667Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -356,10 +287,7 @@
       "driftDegrees": 0,
       "commitSha": "f1c5847ff16299efe438b929b01c766c7e5d3ba3",
       "scannedAt": "2026-09-27T01:37:49.521Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -371,10 +299,7 @@
       "driftDegrees": 0,
       "commitSha": "b6adc19d00e4e6700f4b6ffc64a5c4e105e8004c",
       "scannedAt": "2026-09-27T01:34:42.250Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -386,10 +311,7 @@
       "driftDegrees": 45,
       "commitSha": "69778e6e995cd72c6cb524449d8e08ee3d231628",
       "scannedAt": "2026-09-27T01:35:25.567Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -401,10 +323,7 @@
       "driftDegrees": 0,
       "commitSha": "78085398be0dea7abaaf5eda914817f46f6ddbbc",
       "scannedAt": "2026-09-27T01:33:44.519Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -416,10 +335,7 @@
       "driftDegrees": 0,
       "commitSha": "b9a34ac7783a1b6c2e1dfff0c08ac744c048fa59",
       "scannedAt": "2026-09-27T01:34:01.783Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -431,10 +347,7 @@
       "driftDegrees": 0,
       "commitSha": "9cf0128b9822dcd8a533f08ef7312956a4390301",
       "scannedAt": "2026-09-27T01:26:23.017Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -446,10 +359,7 @@
       "driftDegrees": 0,
       "commitSha": "f46d9578190b476b3501923ea8977d899e8db2cb",
       "scannedAt": "2026-09-27T01:35:12.163Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -461,10 +371,7 @@
       "driftDegrees": 0,
       "commitSha": "1af6de5bd8cd481993483dc6127eba668e818dfd",
       "scannedAt": "2026-09-27T01:29:41.635Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -476,10 +383,7 @@
       "driftDegrees": 0,
       "commitSha": "190a83cf3784c53b57d7a80cf96df27276eed079",
       "scannedAt": "2026-09-27T01:32:31.571Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -491,10 +395,7 @@
       "driftDegrees": 0,
       "commitSha": "7cc0450ae47469b13406c3e4910b67251a54b9bc",
       "scannedAt": "2026-09-27T01:25:46.259Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -506,10 +407,7 @@
       "driftDegrees": 6,
       "commitSha": "1b47e60bd46641469fcd8b69c496c4e3a548bc28",
       "scannedAt": "2026-09-27T01:33:22.342Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -521,10 +419,7 @@
       "driftDegrees": 0,
       "commitSha": "68253fc20036740210ed99f6513abd16a678d18f",
       "scannedAt": "2026-09-27T01:08:24.936Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -536,10 +431,7 @@
       "driftDegrees": 18,
       "commitSha": "030a6eca356ef4a3c760dfffed558bd1879af323",
       "scannedAt": "2026-09-27T01:23:47.611Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -551,10 +443,7 @@
       "driftDegrees": 0,
       "commitSha": "a6c4e7a8d11a2cd87a22d38544076cf9bf5f03e7",
       "scannedAt": "2026-09-27T01:37:04.879Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -566,10 +455,7 @@
       "driftDegrees": 0,
       "commitSha": "6cfe4df6db196c107ce94118fe40ec001a11de72",
       "scannedAt": "2026-09-27T01:34:06.609Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -581,10 +467,7 @@
       "driftDegrees": 0,
       "commitSha": "6254386531d263688ccfa542d0e628fbc0de0b28",
       "scannedAt": "2026-09-27T01:31:59.704Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -596,10 +479,7 @@
       "driftDegrees": 0,
       "commitSha": "d083ec1da1e5252abd3ddfdde6dfbc09701a2c51",
       "scannedAt": "2026-09-27T01:25:15.048Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -611,10 +491,7 @@
       "driftDegrees": 0,
       "commitSha": "98a1fe67b439324ddc857f47fbdce056600a4329",
       "scannedAt": "2026-09-27T01:29:36.257Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -626,10 +503,7 @@
       "driftDegrees": 0,
       "commitSha": "5efca7a6ab523726d4a0f2fbea00bbf5b66c3fe1",
       "scannedAt": "2026-09-27T01:34:58.578Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -641,10 +515,7 @@
       "driftDegrees": 0,
       "commitSha": "36371de15127206280d2d40786e8578dfe1b681a",
       "scannedAt": "2026-09-27T01:30:00.132Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -656,10 +527,7 @@
       "driftDegrees": 0,
       "commitSha": "f90853565966bc0bab57c99fe7d669a91bef0f4c",
       "scannedAt": "2026-09-27T01:36:29.353Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -671,10 +539,7 @@
       "driftDegrees": 0,
       "commitSha": "fa81d697fe572a10ac150d18964a093a7a874081",
       "scannedAt": "2026-09-27T01:33:25.692Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -686,10 +551,7 @@
       "driftDegrees": 23,
       "commitSha": "7d0355413c2aaa3fa57fe6788b2ba2717fa7ff6f",
       "scannedAt": "2026-09-27T01:34:27.791Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -701,10 +563,7 @@
       "driftDegrees": 1,
       "commitSha": "85293e3e2b88f4d2ce330d956b139cf628aa1e82",
       "scannedAt": "2026-09-27T01:26:15.172Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -716,10 +575,7 @@
       "driftDegrees": 0,
       "commitSha": "0423222b7eb3a1373b5bff4c939fd69858928993",
       "scannedAt": "2026-09-27T01:28:42.920Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -731,10 +587,7 @@
       "driftDegrees": 0,
       "commitSha": "bc598a6a8a6b7d6e157e9f19c16911cff8d2360c",
       "scannedAt": "2026-09-27T01:37:31.763Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -746,10 +599,7 @@
       "driftDegrees": 0,
       "commitSha": "9e88707940088cb1f4cd7dd210c9168a50dc347c",
       "scannedAt": "2026-09-27T01:25:32.043Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     },
     {
@@ -761,10 +611,7 @@
       "driftDegrees": 0,
       "commitSha": "e1d28e8886c0b6ff3e50da991ce0e895134ddc59",
       "scannedAt": "2026-09-27T01:28:37.394Z",
-      "tiersRun": [
-        "static",
-        "ai"
-      ],
+      "tiersRun": ["static", "ai"],
       "simulated": false
     }
   ],

@@ -2,6 +2,7 @@
   .site-header {
     align-items: flex-start;
     padding: 1rem;
+    gap: 0.5rem;
   }
   .brand small {
     font-size: 0.75rem;
@@ -16,9 +17,13 @@
   .mobile-nav summary {
     cursor: pointer;
     min-height: 44px;
+    max-width: 34vw;
     padding: 0.65rem;
     border: 1px solid var(--rule);
     list-style: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .mobile-nav nav {
     position: absolute;

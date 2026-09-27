@@ -9,6 +9,7 @@ test("private connection shows the Actions token and source link", () => {
       connection={{
         repo: "owner/private",
         visibility: "private",
+        runtimeEnabled: true,
         telemetryToken: "private-telemetry-token",
       }}
       serverUrl="https://demo.example"
@@ -23,7 +24,11 @@ test("private connection shows the Actions token and source link", () => {
 test("public connection offers sources without Actions setup", () => {
   const markup = renderToStaticMarkup(
     <ConnectResult
-      connection={{ repo: "owner/public", visibility: "public" }}
+      connection={{
+        repo: "owner/public",
+        visibility: "public",
+        runtimeEnabled: false,
+      }}
       serverUrl="https://demo.example"
     />,
   );
@@ -32,4 +37,36 @@ test("public connection offers sources without Actions setup", () => {
   assert.doesNotMatch(markup, /GROUND_CONTROL_TOKEN/);
   assert.doesNotMatch(markup, /GROUND_CONTROL_URL/);
   assert.doesNotMatch(markup, /telemetry-token/);
+});
+
+test("personal public runtime opt-in shows its one-time Actions token", () => {
+  const markup = renderToStaticMarkup(
+    <ConnectResult
+      connection={{
+        repo: "owner/public",
+        visibility: "public",
+        runtimeEnabled: true,
+        telemetryToken: "public-runtime-telemetry-token",
+      }}
+      serverUrl="https://demo.example"
+    />,
+  );
+  assert.match(markup, /Deep checks enabled/);
+  assert.match(markup, /GROUND_CONTROL_TOKEN/);
+  assert.match(markup, /public-runtime-telemetry-token/);
+});
+
+test("reconnecting an opted-in public repository does not imply a new token", () => {
+  const markup = renderToStaticMarkup(
+    <ConnectResult
+      connection={{
+        repo: "owner/public",
+        visibility: "public",
+        runtimeEnabled: true,
+      }}
+      serverUrl="https://demo.example"
+    />,
+  );
+  assert.match(markup, /already enabled/);
+  assert.doesNotMatch(markup, /GROUND_CONTROL_TOKEN/);
 });

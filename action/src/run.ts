@@ -6,7 +6,7 @@ import {
   flightPlanSchema,
 } from "../../packages/plan/src/schema.ts";
 import type { RuntimeOutcome } from "../../packages/runner/src/runtime-types.ts";
-import { privateRunRepository } from "./git-context.ts";
+import { matchingRunRepository } from "./git-context.ts";
 import type {
   ChangeMetadata,
   FlightRunner,
@@ -76,16 +76,16 @@ export async function loadRunner(root: string): Promise<FlightRunner> {
   return module.runPlan as FlightRunner;
 }
 
-export async function loadPrivateRunner(
+export async function loadConnectedRunner(
   root: string,
   event: unknown,
   repo: string | undefined,
 ): Promise<
   | { ok: true; value: FlightRunner }
-  | { ok: false; error: { code: "private_repository_required" } }
+  | { ok: false; error: { code: "repository_identity_required" } }
 > {
-  if (!repo || !privateRunRepository(event, repo))
-    return { ok: false, error: { code: "private_repository_required" } };
+  if (!repo || !matchingRunRepository(event, repo))
+    return { ok: false, error: { code: "repository_identity_required" } };
   readPlan(root, repo);
   return { ok: true, value: await loadRunner(root) };
 }

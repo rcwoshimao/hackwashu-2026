@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { api } from "../api.ts";
 import type { SkyData } from "../data.ts";
+import { watchEvents } from "../realtime.ts";
 
 export type SkyLoadState = "loading" | "ready" | "stale" | "error";
 
@@ -36,12 +37,14 @@ export function useSky(): {
       }
       const fallback = await api.cachedSky();
       if (fallback.ok) {
+        const satellites = fallback.value.satellites.filter(
+          (satellite) => !satellite.simulated,
+        );
         const snapshot = {
           ...fallback.value,
+          satellites,
           mode:
-            fallback.value.mode === "simulated"
-              ? ("simulated" as const)
-              : ("cached" as const),
+            satellites.length === 0 ? ("empty" as const) : ("cached" as const),
         };
         latest.current = snapshot;
         setData(snapshot);
@@ -59,10 +62,15 @@ export function useSky(): {
       window.clearTimeout(timer);
       timer = window.setTimeout(() => void refresh(), 350);
     };
-    events.onmessage = schedule;
+    const stop = watchEvents(
+      events,
+      ["scan_complete", "run", "trust_changed"],
+      schedule,
+    );
     document.addEventListener("visibilitychange", schedule);
     return () => {
       events.close();
+      stop();
       window.clearTimeout(timer);
       document.removeEventListener("visibilitychange", schedule);
     };

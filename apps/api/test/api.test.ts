@@ -3,7 +3,7 @@ import { createApi, seedLocalDemo } from "../src/index.ts";
 import { json, login, setup } from "./fixture.ts";
 
 describe("local API", () => {
-  test("health and honest simulated sky", async () => {
+  test("normal Sky hides seeded demo data and offers explicit demo mode", async () => {
     const { app, store } = setup();
     seedLocalDemo(store, new Date("2026-09-26T12:00:00Z"));
     seedLocalDemo(store, new Date());
@@ -14,10 +14,77 @@ describe("local API", () => {
       driftingCount: 0,
       medianLagDays: null,
     });
-    expect(sky.satellites).toHaveLength(3);
-    expect(
-      sky.satellites.every((item: { simulated: boolean }) => item.simulated),
-    ).toBe(true);
+    expect(sky.satellites).toHaveLength(0);
+    expect(sky.mode).toBe("empty");
+    const demo = await (await app.request("/api/sky?demo=1")).json();
+    expect(demo.satellites).toHaveLength(3);
+    expect(demo.mode).toBe("simulated");
+    store.putSatellite({
+      repo: "owner/real",
+      stars: 10,
+      topicCluster: "Other",
+      readmeLagDays: 3,
+      label: "On course",
+      driftDegrees: 0,
+      commitSha: "abcdef0",
+      scannedAt: "2026-09-26T12:00:00Z",
+      tiersRun: ["static"],
+      simulated: false,
+    });
+    const real = await (await app.request("/api/sky?demo=1")).json();
+    expect(real.satellites.map((item: { repo: string }) => item.repo)).toEqual([
+      "owner/real",
+    ]);
+  });
+
+  test("connected public repo reports an unscanned state before a README check", async () => {
+    const { app, store } = setup();
+    store.putRepo({
+      repo: "owner/connected",
+      visibility: "public",
+      connected: true,
+      tokenHash: null,
+      label: "No telemetry",
+      driftDegrees: 0,
+      latestRunId: null,
+    });
+    const response = await app.request("/api/repos/owner/connected");
+    expect(response.status).toBe(200);
+    expect((await response.json()).scan).toBeNull();
+  });
+
+  test("repository view shows one README when discovery and scan saved the same path", async () => {
+    const { app, store } = setup();
+    store.putRepo({
+      repo: "owner/project",
+      visibility: "public",
+      connected: true,
+      tokenHash: null,
+      label: "Possible drift",
+      driftDegrees: 8,
+      latestRunId: null,
+    });
+    const url = "https://github.com/owner/project/blob/abcdef0/README.md";
+    store.putSource({
+      id: "discovered-readme",
+      repo: "owner/project",
+      kind: "readme",
+      title: "README.md",
+      url,
+      claimCount: 0,
+    });
+    store.putSource({
+      id: "scanned-readme",
+      repo: "owner/project",
+      kind: "readme",
+      title: "README.md",
+      url,
+      claimCount: 7,
+    });
+    const response = await app.request("/api/repos/owner/project");
+    expect((await response.json()).sources).toMatchObject([
+      { id: "scanned-readme", claimCount: 7 },
+    ]);
   });
 
   test("OAuth session gates private routes and signout", async () => {
@@ -98,6 +165,14 @@ describe("local API", () => {
     );
     expect((await reconnected.json()).telemetryToken).toBeUndefined();
     expect(store.getRepo("owner/project")?.tokenHash).toBeNull();
+    const rejected = await json(
+      app,
+      "/api/connect",
+      { repo: "other/project", runtime: true },
+      { cookie: secondCookie },
+    );
+    expect(rejected.status).toBe(403);
+    expect((await rejected.json()).error).toBe("personal_repo_required");
     const source = await json(
       app,
       "/api/sources",

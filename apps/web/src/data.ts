@@ -14,7 +14,7 @@ export const satelliteSchema = z.object({
 });
 
 export const skySchema = z.object({
-  mode: z.enum(["live", "cached", "simulated"]),
+  mode: z.enum(["live", "cached", "simulated", "empty"]),
   updatedAt: z.string(),
   satellites: z.array(satelliteSchema),
   findings: z.object({
@@ -46,15 +46,24 @@ export const runSummarySchema = z.object({
   commitSha: z.string(),
   createdAt: z.string(),
   verdict: z.string(),
+  origin: z.enum(["public_scan", "ci", "unknown"]),
   failingCount: z.number().nonnegative(),
 });
 
 export const repoSchema = z.object({
   repo: z.string(),
   visibility: z.enum(["public", "private"]),
+  runtimeEnabled: z.boolean(),
   label: z.string(),
   driftDegrees: z.number().min(0).max(90),
   latestRunId: z.string().nullable(),
+  scan: z
+    .object({
+      commitSha: z.string(),
+      scannedAt: z.string(),
+      tiersRun: z.array(z.string()),
+    })
+    .nullable(),
   sources: z.array(sourceSchema),
   runs: z.array(runSummarySchema),
 });
@@ -104,6 +113,27 @@ export const meSchema = z.object({
   connectedRepos: z.array(z.string()),
 });
 
+export const accountRepoSchema = z.object({
+  repo: z.string(),
+  visibility: z.enum(["public", "private"]),
+  canAdmin: z.boolean(),
+  description: z.string().nullable(),
+  language: z.string().nullable(),
+  updatedAt: z.string().nullable(),
+  archived: z.boolean(),
+  fork: z.boolean(),
+  connected: z.boolean(),
+  runtimeEnabled: z.boolean(),
+  checked: z.boolean(),
+  label: z.string().nullable(),
+  scanned: z.boolean(),
+});
+
+export const accountReposSchema = z.object({
+  repos: z.array(accountRepoSchema),
+  truncated: z.boolean(),
+});
+
 export type Satellite = z.infer<typeof satelliteSchema>;
 export type SkyData = z.infer<typeof skySchema>;
 export type RepoData = z.infer<typeof repoSchema>;
@@ -111,6 +141,8 @@ export type RunData = z.infer<typeof runSchema>;
 export type CheckResult = z.infer<typeof checkResultSchema>;
 export type EvidenceGroup = z.infer<typeof evidenceGroupSchema>;
 export type MeData = z.infer<typeof meSchema>;
+export type AccountRepoData = z.infer<typeof accountRepoSchema>;
+export type AccountReposData = z.infer<typeof accountReposSchema>;
 export type SourceData = z.infer<typeof sourceSchema>;
 export type SourceSync = z.infer<typeof sourceSyncSchema>;
 

@@ -2,8 +2,8 @@ import { copy } from "@ground-control/copy";
 
 export function SkyLegend() {
   return (
-    <section className="sky-legend" aria-labelledby="sky-legend-title">
-      <h2 id="sky-legend-title">{copy.skyLegendTitle}</h2>
+    <details className="sky-legend">
+      <summary>{copy.skyLegendSummary}</summary>
       <div className="legend-grid">
         <p>
           <span aria-hidden="true">◴</span>
@@ -25,7 +25,7 @@ export function SkyLegend() {
         </p>
         <p>
           <span aria-hidden="true">◌</span>
-          {copy.skyLegendSimulated}
+          {copy.skyLegendHolding}
         </p>
       </div>
       <div className="topic-key">
@@ -39,6 +39,6 @@ export function SkyLegend() {
           <span key={name}>{name}</span>
         ))}
       </div>
-    </section>
+    </details>
   );
 }

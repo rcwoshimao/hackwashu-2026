@@ -1,7 +1,13 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import type { Satellite } from "../data.ts";
-import { layoutSky, pickSatellite, topicKey } from "./layout.ts";
+import type { AccountRepoData, Satellite } from "../data.ts";
+import {
+  layoutBlimps,
+  layoutSky,
+  pickBlimp,
+  pickSatellite,
+  topicKey,
+} from "./layout.ts";
 
 function satellite(index: number): Satellite {
   return {
@@ -51,4 +57,41 @@ test("pointer picking selects a nearby mark", () => {
   assert.ok(point);
   assert.equal(pickSatellite(layout, point.x, point.y)?.repo, "team/repo-1");
   assert.equal(pickSatellite(layout, 0, 0), null);
+});
+
+test("unscanned account marks stay in the holding orbit without invented scan metrics", () => {
+  const repos: AccountRepoData[] = Array.from({ length: 500 }, (_, index) => ({
+    repo: `owner/unscanned-${index}`,
+    visibility: index % 2 === 0 ? "public" : "private",
+    canAdmin: true,
+    description: null,
+    language: null,
+    updatedAt: null,
+    archived: false,
+    fork: false,
+    connected: false,
+    runtimeEnabled: false,
+    checked: false,
+    label: null,
+    scanned: false,
+  }));
+  const layout = layoutSky([satellite(1)], 320, 340);
+  const points = layoutBlimps(repos, layout);
+  assert.equal(points.length, 500);
+  assert.ok(
+    points.every(
+      (point) =>
+        Math.hypot(point.x - layout.centerX, point.y - layout.centerY) >
+        layout.outerRadius,
+    ),
+  );
+  assert.ok(
+    points.every(
+      (point) =>
+        point.x >= 0 && point.x <= 320 && point.y >= 0 && point.y <= 340,
+    ),
+  );
+  const first = points[0];
+  assert.ok(first);
+  assert.equal(pickBlimp(points, first.x, first.y)?.repo, first.repo.repo);
 });

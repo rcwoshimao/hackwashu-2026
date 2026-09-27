@@ -86,6 +86,7 @@ test("a snapshot round-trips real public scans into a fresh store", () => {
   assert.deepEqual(restored, { satellites: 1, runs: 1 });
   assert.deepEqual(target.getSatellite("acme/api"), satellite("acme/api"));
   assert.equal(target.getRun("run-acme/api")?.results.length, 1);
+  assert.equal(target.getRun("run-acme/api")?.origin, "public_scan");
   assert.equal(target.listSources("acme/api").length, 1);
   assert.equal(target.getTrust("acme/api", "claim-1"), "confirmed");
   assert.equal(target.getSkyMode(), "live");
@@ -94,6 +95,9 @@ test("a snapshot round-trips real public scans into a fresh store", () => {
 test("snapshots leave out simulated, private, and token data", () => {
   const store = new MemoryStore();
   scanned(store, "acme/api");
+  const publicRepo = store.getRepo("acme/api");
+  assert.ok(publicRepo);
+  store.putRepo({ ...publicRepo, runtimeEnabled: true });
   scanned(store, "acme/secret", "private");
   store.putSatellite(satellite("simulated/repo-001", { simulated: true }));
   const snapshot = snapshotSky(store, "2026-09-26T12:00:00Z");
@@ -103,6 +107,7 @@ test("snapshots leave out simulated, private, and token data", () => {
   );
   assert.equal(snapshot.repos[0]?.tokenHash, null);
   assert.equal(snapshot.repos[0]?.connected, false);
+  assert.equal(snapshot.repos[0]?.runtimeEnabled, false);
   assert.ok(!JSON.stringify(snapshot).includes("secret-hash"));
 });
 
@@ -114,6 +119,9 @@ test("restore keeps local connections, private repos, and newer scans", () => {
   const snapshot = snapshotSky(source, "2026-09-26T12:00:00Z");
   const target = new MemoryStore();
   scanned(target, "acme/api");
+  const connected = target.getRepo("acme/api");
+  assert.ok(connected);
+  target.putRepo({ ...connected, runtimeEnabled: true });
   target.putSatellite(
     satellite("acme/web", { scannedAt: "2026-09-27T00:00:00.000Z" }),
   );
@@ -121,6 +129,7 @@ test("restore keeps local connections, private repos, and newer scans", () => {
   const restored = restoreSky(target, snapshot);
   assert.equal(restored.satellites, 1);
   assert.equal(target.getRepo("acme/api")?.tokenHash, "secret-hash");
+  assert.equal(target.getRepo("acme/api")?.runtimeEnabled, true);
   assert.equal(
     target.getSatellite("acme/web")?.scannedAt,
     "2026-09-27T00:00:00.000Z",

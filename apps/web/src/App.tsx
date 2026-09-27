@@ -69,9 +69,7 @@ export function App() {
       <div className="site-header">
         <div className="brand">
           <a href="/sky">
-            <span aria-hidden="true" className="brand-mark">
-              ◎
-            </span>
+            <img className="brand-mark" src="/favicon.svg" alt="" />
             {copy.brand}
           </a>
           <small>{copy.appTagline}</small>
