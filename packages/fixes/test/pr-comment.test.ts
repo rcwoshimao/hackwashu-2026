@@ -1,7 +1,7 @@
 import { expect, test } from "bun:test";
 import type { RunRecord } from "@ground-control/store";
 import { MemoryStore } from "@ground-control/store";
-import { commentOnConfirmedDrift, FakePrComments } from "../src/index.ts";
+import { commentOnRunFindings, FakePrComments } from "../src/index.ts";
 
 const repo = "demo/orbit-app";
 const sha = "a".repeat(40);
@@ -62,11 +62,11 @@ function fixture() {
   return { store, run };
 }
 
-test("one evidence comment includes confirmed failures and updates rather than duplicates", async () => {
+test("one evidence comment separates confirmed drift and disputed review items", async () => {
   const { store, run } = fixture();
   const github = new FakePrComments();
   github.heads.set(`${repo}\n42`, sha);
-  const first = await commentOnConfirmedDrift(
+  const first = await commentOnRunFindings(
     store,
     run,
     42,
@@ -77,10 +77,12 @@ test("one evidence comment includes confirmed failures and updates rather than d
   const body = github.comments.get(`${repo}\n42`);
   expect(body).toContain("README.md");
   expect(body).toContain("Port 3000 \\| default");
-  expect(body).not.toContain("Untrusted check");
+  expect(body).toContain("Untrusted check");
+  expect(body).toContain("needs review");
+  expect(body).toContain("runs/run");
   expect(body).toContain("README.md#L24");
   expect(
-    await commentOnConfirmedDrift(
+    await commentOnRunFindings(
       store,
       run,
       42,
@@ -95,7 +97,7 @@ test("one evidence comment includes confirmed failures and updates rather than d
     ),
   };
   expect(
-    await commentOnConfirmedDrift(
+    await commentOnRunFindings(
       store,
       changed,
       42,
@@ -107,7 +109,7 @@ test("one evidence comment includes confirmed failures and updates rather than d
   expect(github.actions).toEqual(["created", "unchanged", "updated"]);
 });
 
-test("disputed or unconfirmed failures and disconnected repos produce no comment", async () => {
+test("disputed failures create a review comment while disconnected repos do not", async () => {
   const { store, run } = fixture();
   const github = new FakePrComments();
   github.heads.set(`${repo}\n42`, sha);
@@ -119,19 +121,20 @@ test("disputed or unconfirmed failures and disconnected repos produce no comment
     })),
   };
   expect(
-    await commentOnConfirmedDrift(
+    await commentOnRunFindings(
       store,
       disputed,
       42,
       "https://ground.example",
       github,
     ),
-  ).toEqual({ ok: true, value: "skipped" });
+  ).toEqual({ ok: true, value: "created" });
+  expect(github.comments.get(`${repo}\n42`)).toContain("needs review");
   const record = store.getRepo(repo);
   if (!record) throw new Error("Missing repo");
   store.putRepo({ ...record, connected: false });
   expect(
-    await commentOnConfirmedDrift(
+    await commentOnRunFindings(
       store,
       run,
       42,
@@ -139,7 +142,7 @@ test("disputed or unconfirmed failures and disconnected repos produce no comment
       github,
     ),
   ).toEqual({ ok: true, value: "skipped" });
-  expect(github.comments.size).toBe(0);
+  expect(github.comments.size).toBe(1);
 });
 
 test("PR evidence refuses a number whose head differs from the run", async () => {
@@ -147,7 +150,7 @@ test("PR evidence refuses a number whose head differs from the run", async () =>
   const github = new FakePrComments();
   github.heads.set(`${repo}\n42`, "b".repeat(40));
   expect(
-    await commentOnConfirmedDrift(
+    await commentOnRunFindings(
       store,
       run,
       42,

@@ -5,7 +5,7 @@ import { postPrEvidence } from "../src/messaging.ts";
 import { ingestTelemetry, refreshTrust } from "../src/telemetry.ts";
 import { EventHub } from "../src/types.ts";
 
-test("confirming a disputed PR claim posts one comment for its head", async () => {
+test("confirming a disputed PR claim updates its review comment", async () => {
   const repo = "owner/project";
   const sha = "a".repeat(40);
   const store = new MemoryStore();
@@ -48,11 +48,12 @@ test("confirming a disputed PR claim posts one comment for its head", async () =
     prComments,
   };
   await postPrEvidence(config, run);
-  expect(prComments.comments.size).toBe(0);
+  expect(prComments.comments.size).toBe(1);
+  expect(prComments.comments.get(`${repo}\n7`)).toContain("needs review");
   const confirmed = refreshTrust(store, repo, "c_1234567890", "confirmed");
   if (!confirmed) throw new Error("Expected refreshed run");
   await postPrEvidence(config, confirmed);
   await postPrEvidence(config, confirmed);
-  expect(prComments.actions).toEqual(["created", "unchanged"]);
+  expect(prComments.actions).toEqual(["created", "updated", "unchanged"]);
   expect(prComments.comments.get(`${repo}\n7`)).toContain("Install setup.sh");
 });

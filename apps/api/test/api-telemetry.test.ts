@@ -180,7 +180,7 @@ describe("telemetry and messaging API", () => {
     expect(calls).toEqual([{ author: "navi", codeChanged: true }]);
   });
 
-  test("PR evidence comment is sent only for a confirmed failing run", async () => {
+  test("PR review comment updates when a disputed finding is confirmed", async () => {
     const { store, auth, events } = setup();
     const prComments = new FakePrComments();
     const app = createApi({
@@ -226,7 +226,10 @@ describe("telemetry and messaging API", () => {
       );
     const first = await send(firstSha);
     expect(first.status).toBe(201);
-    expect(prComments.actions).toEqual([]);
+    expect(prComments.actions).toEqual(["created"]);
+    expect(prComments.comments.get("owner/project\n7")).toContain(
+      "needs review",
+    );
     const runId = (await first.json()).id as string;
     expect(store.getRun(runId)?.pullRequestNumber).toBe(7);
     const confirmed = await json(
@@ -236,11 +239,11 @@ describe("telemetry and messaging API", () => {
       { cookie },
     );
     expect(confirmed.status).toBe(200);
-    expect(prComments.actions).toEqual(["created"]);
+    expect(prComments.actions).toEqual(["created", "updated"]);
     const secondSha = "b".repeat(40);
     prComments.heads.set("owner/project\n7", secondSha);
     expect((await send(secondSha)).status).toBe(201);
-    expect(prComments.actions).toEqual(["created", "updated"]);
+    expect(prComments.actions).toEqual(["created", "updated", "updated"]);
     expect(prComments.comments.get("owner/project\n7")).toContain(
       "Install setup.sh",
     );

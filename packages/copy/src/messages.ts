@@ -54,6 +54,10 @@ export const messageCopy = {
     "| {source} | {quote} | {expected} | {actual} | [Open evidence]({url}) |",
   prEvidenceFooter:
     "Reply FIX by iMessage to request a correction, or review the cited evidence before changing code or docs.",
+  prReviewLead:
+    "Source: deep scan in the repository's CI. This run needs review: {count} disputed documentation findings on commit {sha}. These checks do not fail the Ground Control verdict.",
+  prReviewFooter:
+    "Review these checks on [the Ground Control run]({url}). Confirm a valid failing check or drop an incorrect one. A confirmed README or docs finding can then offer Draft line edits.",
   scanAlert:
     "Ground Control scanned {repo} at {sha} and found {count} possible README {noun}:\n{findings}\nEvidence: {url}\nReply FIX for an AI-drafted pull request, KEEP to leave the docs as they are, or IGNORE to hide these findings.",
   scanFixStarted: "Drafting a README correction. This takes about a minute.",

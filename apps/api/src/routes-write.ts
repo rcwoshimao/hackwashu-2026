@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { commentOnConfirmedDrift } from "@ground-control/fixes";
+import { commentOnRunFindings } from "@ground-control/fixes";
 import type { RunRecord } from "@ground-control/store";
 import type { Context, Hono } from "hono";
 import { z } from "zod";
@@ -27,7 +27,7 @@ async function publishStatus(
 
 async function publishPrEvidence(deps: ApiDeps, run: RunRecord): Promise<void> {
   if (!run.pullRequestNumber || !deps.prComments) return;
-  const comment = await commentOnConfirmedDrift(
+  const comment = await commentOnRunFindings(
     deps.store,
     run,
     run.pullRequestNumber,

@@ -45,21 +45,14 @@ function safeEvidenceLink(
   }
 }
 
-function evidenceBody(
+function appendRows(
+  lines: string[],
   store: AppStore,
   run: RunRecord,
   claims: readonly RunClaim[],
   publicUrl: string,
-): string {
-  const lines = [
-    prEvidenceMarker,
-    renderMessage("prEvidenceLead", {
-      count: claims.length,
-      sha: run.commitSha.slice(0, 7),
-    }),
-    "",
-    renderMessage("prEvidenceHeading"),
-  ];
+): void {
+  lines.push("", renderMessage("prEvidenceHeading"));
   for (const claim of claims.slice(0, 30))
     lines.push(
       renderMessage("prEvidenceRow", {
@@ -72,11 +65,46 @@ function evidenceBody(
         url: safeEvidenceLink(run, claim, publicUrl),
       }),
     );
-  lines.push("", renderMessage("prEvidenceFooter"));
+}
+
+function evidenceBody(
+  store: AppStore,
+  run: RunRecord,
+  confirmed: readonly RunClaim[],
+  review: readonly RunClaim[],
+  publicUrl: string,
+): string {
+  const lines = [prEvidenceMarker];
+  if (confirmed.length > 0) {
+    lines.push(
+      renderMessage("prEvidenceLead", {
+        count: confirmed.length,
+        sha: run.commitSha.slice(0, 7),
+      }),
+    );
+    appendRows(lines, store, run, confirmed, publicUrl);
+    lines.push("", renderMessage("prEvidenceFooter"));
+  }
+  if (review.length > 0) {
+    if (confirmed.length > 0) lines.push("");
+    lines.push(
+      renderMessage("prReviewLead", {
+        count: review.length,
+        sha: run.commitSha.slice(0, 7),
+      }),
+    );
+    appendRows(lines, store, run, review, publicUrl);
+    lines.push(
+      "",
+      renderMessage("prReviewFooter", {
+        url: `${publicUrl}/runs/${encodeURIComponent(run.id)}`,
+      }),
+    );
+  }
   return lines.join("\n");
 }
 
-export async function commentOnConfirmedDrift(
+export async function commentOnRunFindings(
   store: AppStore,
   run: RunRecord,
   pullRequestNumber: number,
@@ -87,19 +115,24 @@ export async function commentOnConfirmedDrift(
     return { ok: false, error: { code: "invalid_input" } };
   if (store.getRepo(run.repo)?.connected !== true)
     return { ok: true, value: "skipped" };
-  const claims = run.results
-    .filter((claim) => claim.state === "confirmed" && claim.status === "fail")
+  const failing = run.results
+    .filter((claim) => claim.status === "fail")
     .sort(
-      (a, b) =>
-        a.sourceId.localeCompare(b.sourceId) ||
-        a.claimId.localeCompare(b.claimId),
+      (left, right) =>
+        left.sourceId.localeCompare(right.sourceId) ||
+        left.claimId.localeCompare(right.claimId),
     );
-  if (claims.length === 0) return { ok: true, value: "skipped" };
+  const confirmed = failing.filter((claim) => claim.state === "confirmed");
+  const review = failing.filter(
+    (claim) => claim.state === "disputed" || claim.state === "unconfirmed",
+  );
+  if (confirmed.length + review.length === 0)
+    return { ok: true, value: "skipped" };
   return port.upsert(
     run.repo,
     pullRequestNumber,
     run.commitSha,
     prEvidenceMarker,
-    evidenceBody(store, run, claims, publicUrl),
+    evidenceBody(store, run, confirmed, review, publicUrl),
   );
 }

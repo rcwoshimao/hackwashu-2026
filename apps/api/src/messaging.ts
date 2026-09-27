@@ -1,7 +1,7 @@
 import type { PrCommentPort } from "@ground-control/fixes";
 import {
   CompositeCorrection,
-  commentOnConfirmedDrift,
+  commentOnRunFindings,
   OctokitFixes,
   RepoCorrection,
 } from "@ground-control/fixes";
@@ -29,7 +29,7 @@ export async function postPrEvidence(
   run: RunRecord,
 ): Promise<void> {
   if (!run.pullRequestNumber || !config.prComments) return;
-  const comment = await commentOnConfirmedDrift(
+  const comment = await commentOnRunFindings(
     config.store,
     run,
     run.pullRequestNumber,
