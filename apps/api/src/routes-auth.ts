@@ -22,23 +22,10 @@ function redirect(url: string, cookieValue?: string): Response {
 
 export function registerAuthRoutes(app: Hono, deps: ApiDeps): void {
   app.get("/auth/github", (c) => {
-    const result = deps.auth.begin("web");
+    const result = deps.auth.begin();
     return result.ok
       ? redirect(result.value)
       : c.json({ error: result.error.code }, 503);
-  });
-
-  app.get("/auth/extension", (c) => {
-    const result = deps.auth.begin(
-      "extension",
-      c.req.query("extensionId") ?? null,
-    );
-    if (!result.ok)
-      return c.json(
-        { error: result.error.code },
-        result.error.code === "invalid_extension" ? 400 : 503,
-      );
-    return redirect(result.value);
   });
 
   app.get("/auth/github/callback", async (c) => {
@@ -47,10 +34,6 @@ export function registerAuthRoutes(app: Hono, deps: ApiDeps): void {
     if (!code || !state) return c.json({ error: "invalid_callback" }, 400);
     const result = await deps.auth.complete(code, state);
     if (!result.ok) return c.json({ error: result.error.code }, 400);
-    const extension =
-      result.value.redirect.startsWith("https://") &&
-      result.value.redirect.includes(".chromiumapp.org/");
-    if (extension) return redirect(result.value.redirect);
     return redirect(
       result.value.redirect,
       cookie(

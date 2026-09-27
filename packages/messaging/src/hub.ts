@@ -99,13 +99,10 @@ export class MessagingHub {
     message: InboundMessage,
   ): Promise<Result<"handled" | "duplicate" | "ignored">> {
     const { messages, cipher } = this.deps;
-    if (
-      !messages.claimInbound(
-        cipher.hash(
-          `${message.linePhone ?? ""}:${message.chatId}:${message.id}`,
-        ),
-      )
-    ) {
+    const inboundKey = cipher.hash(
+      `${message.linePhone ?? ""}:${message.chatId}:${message.id}`,
+    );
+    if (!messages.claimInbound(inboundKey)) {
       return { ok: true, value: "duplicate" };
     }
     const command = parseCommand(message.text);
@@ -127,7 +124,18 @@ export class MessagingHub {
       messages.deleteLink(link.senderHash);
       return this.reply(message, renderMessage("stop"));
     }
-    return this.dispatch(message, link.senderHash, link.githubLogin, command);
+    const result = await this.dispatch(
+      message,
+      link.senderHash,
+      link.githubLogin,
+      command,
+    );
+    if (
+      !result.ok &&
+      ["help", "status", "run", "unknown"].includes(command.kind)
+    )
+      messages.releaseInbound(inboundKey);
+    return result;
   }
 
   private async link(

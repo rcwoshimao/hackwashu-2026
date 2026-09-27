@@ -10270,7 +10270,7 @@ async function reportTelemetry(root, server, token, identity, transport = fetch)
 }
 
 // action/src/run.ts
-import { mkdirSync, readFileSync as readFileSync3, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync as readFileSync3, writeFileSync } from "node:fs";
 import { join as join3 } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -26013,6 +26013,8 @@ async function loadRunner(root) {
 async function loadConnectedRunner(root, event, repo) {
   if (!repo || !matchingRunRepository(event, repo))
     return { ok: false, error: { code: "repository_identity_required" } };
+  if (!existsSync(join3(root, "flightchecks/flightplan.json")))
+    return { ok: false, error: { code: "flight_plan_missing" } };
   readPlan(root, repo);
   return { ok: true, value: await loadRunner(root) };
 }

@@ -187,6 +187,35 @@ describe("iMessage identity and commands", () => {
     }
   });
 
+  test("SQLite retries failed deliveries while retaining successful dedupe", () => {
+    const store = new SqliteMessagingStore(":memory:");
+    const alert = {
+      id: "retry-alert",
+      githubLogin: "navi",
+      repo: "owner/project",
+      commitSha: "abcdef0",
+      runId: "run-retry",
+      claimIds: ["c_1234567890"],
+      sourceIds: ["readme"],
+      state: "open" as const,
+      delivery: "reserved" as const,
+      createdAt: "2026-09-26T12:00:00Z",
+    };
+    try {
+      expect(store.claimInbound("inbound-retry")).toBe(true);
+      store.releaseInbound("inbound-retry");
+      expect(store.claimInbound("inbound-retry")).toBe(true);
+      expect(store.reserveAlert(alert)).toBe(true);
+      expect(store.reserveAlert(alert)).toBe(false);
+      store.putAlert({ ...alert, delivery: "failed" });
+      expect(store.reserveAlert(alert)).toBe(true);
+      store.putAlert({ ...alert, delivery: "sent" });
+      expect(store.reserveAlert(alert)).toBe(false);
+    } finally {
+      store.close();
+    }
+  });
+
   test("SQLite prefers the exact sender when a presented address belongs to another link", () => {
     const store = new SqliteMessagingStore(":memory:");
     const cipher = new MessagingCipher("secret");

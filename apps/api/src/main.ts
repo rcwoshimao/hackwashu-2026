@@ -31,6 +31,7 @@ import { FlightPlanPublishQueue } from "./publish-schedule.ts";
 import { createScanFix } from "./scan-fix.ts";
 import { sessionSecret } from "./session-secret.ts";
 import { OctokitSmokePr } from "./smoke-pr.ts";
+import { OctokitWorkflowInstall } from "./workflow-install.ts";
 
 const dbPath = process.env.DATABASE_PATH || "data/groundcontrol.db";
 mkdirSync(dirname(dbPath), { recursive: true });
@@ -48,13 +49,7 @@ const secret = sessionSecret(
   process.env.GITHUB_CLIENT_SECRET,
 );
 const sessions = new Sessions(store, secret, Date.now);
-const auth = new AuthService(
-  github,
-  sessions,
-  publicUrl,
-  Date.now,
-  process.env.EXTENSION_ID,
-);
+const auth = new AuthService(github, sessions, publicUrl, Date.now);
 const events = new EventHub();
 const planWriter = process.env.GITHUB_WRITE_TOKEN
   ? new OctokitPlanWriter(process.env.GITHUB_WRITE_TOKEN)
@@ -179,6 +174,9 @@ const scanFix = docFixModel
 const smokePr = process.env.GITHUB_WRITE_TOKEN
   ? new OctokitSmokePr(process.env.GITHUB_WRITE_TOKEN)
   : undefined;
+const workflowInstall = process.env.GITHUB_WRITE_TOKEN
+  ? new OctokitWorkflowInstall(process.env.GITHUB_WRITE_TOKEN)
+  : undefined;
 const messaging = await startMessaging({
   dbPath,
   secret,
@@ -213,6 +211,7 @@ const app = createApi({
   ...(commitAuthor === undefined ? {} : { commitAuthor }),
   ...(scanFix === undefined ? {} : { scanFix }),
   ...(smokePr === undefined ? {} : { smokePr }),
+  ...(workflowInstall === undefined ? {} : { workflowInstall }),
   ...(deepFix === undefined ? {} : { deepFix }),
   now: () => new Date(),
   publicUrl,

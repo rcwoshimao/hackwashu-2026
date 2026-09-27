@@ -1,6 +1,6 @@
 # Ground Control — Full Build Spec
 
-> **Precedence for coding agents.** `docs/CODEX_MASTER_PROMPT.md` overrides this spec wherever they differ: the CI verdict model (commit statuses), doc sources beyond the README (wiki, man page, Confluence, web pages), the browser extension, GitHub sign-in, and the phase order. For any Photon or Confluence API detail, `docs/vendor/` is the source of truth.
+> **Precedence for coding agents.** `docs/CODEX_MASTER_PROMPT.md` overrides this spec wherever they differ: the CI verdict model (commit statuses), doc sources beyond the README (wiki, man page, Confluence, web pages), GitHub sign-in, and the phase order. For any Photon or Confluence API detail, `docs/vendor/` is the source of truth.
 
 
 Sep 26, 2026 · @Bloodborne

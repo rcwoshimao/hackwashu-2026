@@ -15,6 +15,7 @@ export type RepoRecord = {
   label: string;
   driftDegrees: number;
   latestRunId: string | null;
+  recentRunsClearedAt?: string;
 };
 
 export type SourceRecord = {

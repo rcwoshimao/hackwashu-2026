@@ -31,6 +31,18 @@ export class OctokitSmokePr implements SmokePrPort {
     });
     if (Array.isArray(workflow.data) || workflow.data.type !== "file")
       return null;
+    for (const path of [
+      "flightchecks/flightplan.json",
+      "flightchecks/flight.test.mjs",
+      "flightchecks/runner.mjs",
+    ]) {
+      const file = await this.github.rest.repos.getContent({
+        ...target,
+        path,
+        ref: repository.data.default_branch,
+      });
+      if (Array.isArray(file.data) || file.data.type !== "file") return null;
+    }
     const base = repository.data.default_branch;
     const branch = await this.github.rest.repos.getBranch({
       ...target,
@@ -63,7 +75,7 @@ export class OctokitSmokePr implements SmokePrPort {
       head: branch,
       title: renderMessage("smokePrTitle"),
       body: renderMessage("smokePrBody"),
-      draft: true,
+      draft: false,
     });
     return pr.data.html_url;
   }

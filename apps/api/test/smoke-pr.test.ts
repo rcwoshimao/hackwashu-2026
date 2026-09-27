@@ -11,7 +11,7 @@ function response(data: unknown, status = 200): Response {
   });
 }
 
-test("smoke adapter makes a draft PR from an empty commit after finding the workflow", async () => {
+test("smoke adapter makes a regular PR from an empty commit after finding the workflow and checks", async () => {
   const calls: { path: string; body: unknown }[] = [];
   const github = new Octokit({
     request: {
@@ -23,8 +23,7 @@ test("smoke adapter makes a draft PR from an empty commit after finding the work
         calls.push({ path, body });
         if (path === "/repos/owner/repo")
           return response({ default_branch: "main" });
-        if (path.includes("/contents/") && path.endsWith("ground-control.yml"))
-          return response({ type: "file" });
+        if (path.includes("/contents/")) return response({ type: "file" });
         if (path.endsWith("/branches/main"))
           return response({ commit: { sha } });
         if (path.endsWith(`/git/commits/${sha}`))
@@ -53,10 +52,34 @@ test("smoke adapter makes a draft PR from an empty commit after finding the work
   expect(
     calls.find((call) => call.path.endsWith("/pulls"))?.body,
   ).toMatchObject({
-    draft: true,
+    draft: false,
     base: "main",
     title: "Test Ground Control deep scan",
   });
+  expect(calls.filter((call) => call.path.includes("/contents/")).length).toBe(
+    4,
+  );
+});
+
+test("smoke adapter refuses a PR when generated checks are missing", async () => {
+  const calls: string[] = [];
+  const github = new Octokit({
+    request: {
+      fetch: async (input: RequestInfo | URL) => {
+        const path = new URL(String(input)).pathname;
+        calls.push(path);
+        if (path === "/repos/owner/repo")
+          return response({ default_branch: "main" });
+        if (path.endsWith("ground-control.yml"))
+          return response({ type: "file" });
+        return response({ message: "missing" }, 404);
+      },
+    },
+  });
+  const result = await new OctokitSmokePr("token", github).create("owner/repo");
+  expect(result).toEqual({ ok: false, reason: "setup_incomplete" });
+  expect(calls.some((path) => path.endsWith("/git/commits"))).toBe(false);
+  expect(calls.some((path) => path.endsWith("/pulls"))).toBe(false);
 });
 
 test("smoke PR route requires a connected runtime repo and admin session", async () => {

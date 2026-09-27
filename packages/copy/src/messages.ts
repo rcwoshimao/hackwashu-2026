@@ -33,8 +33,9 @@ export const messageCopy = {
   fixPrBody:
     "Source: deep scan in the repository's CI. Ground Control found a confirmed port mismatch. Update only cited wording at {citations} from {oldPort} to {newPort}. The flight plan and generated tests are updated. Review each changed line; this draft awaits the repository's CI.",
   smokePrTitle: "Test Ground Control deep scan",
+  workflowInstallCommit: "Add Ground Control workflow",
   smokePrBody:
-    "Source: deep scan setup test. This draft contains an empty commit and no file edits. It checks that the repository's Ground Control workflow can run and report results. Close the draft after reviewing the Actions jobs; no merge is needed.",
+    "Source: deep scan setup test. This pull request contains an empty commit and no file edits. It checks that the repository's Ground Control workflow can run and report results. Close it after reviewing the Actions jobs; no merge is needed.",
   deepFixPrTitle: "Review {count} deep scan documentation edit(s)",
   deepFixBasePr:
     "This draft targets the source pull request branch so its diff contains only these documentation edits.",
@@ -88,11 +89,4 @@ export const messageCopy = {
   wikiSuggestion: "Suggested wiki change for {source}: {text}",
   confluenceFooter:
     "Ground Control found a confirmed documentation mismatch. Evidence: {url}. Expected: {expected}. Actual: {actual}. Please review the page wording.",
-  claimVerified: "Verified at {sha}. Expected: {expected}. Observed: {actual}.",
-  claimDrifting:
-    "Confirmed drift at {sha}. This page says: {quote}. Expected: {expected}. Observed: {actual}. Open fix: {url}",
-  claimUnconfirmed:
-    "This claim has not passed a verification run yet. Expected: {expected}. Latest result: {actual}.",
-  claimDisputed:
-    "The first check failed, so this claim needs review. This page says: {quote}. Expected: {expected}. Observed: {actual}.",
 } as const;

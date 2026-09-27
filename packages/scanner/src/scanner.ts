@@ -1,6 +1,7 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import {
   extractFlightPlan,
+  HeuristicModel,
   type ModelCache,
   type ModelPort,
 } from "@ground-control/ai";
@@ -22,7 +23,7 @@ import type { PublicGitHubPort, PublicRepo } from "./github.ts";
 import { starRanking } from "./ranking.ts";
 
 export type ScanResult =
-  | { state: "queued"; repo: string }
+  | { state: "queued"; repo: string; requestId: string }
   | { state: "cached"; repo: string; commitSha: string };
 
 function daysBetween(later: string, earlier: string): number {
@@ -77,6 +78,9 @@ function savePublicRecord(
     label: hasCiResult ? prior.label : label,
     driftDegrees: hasCiResult ? prior.driftDegrees : driftDegrees,
     latestRunId: hasCiResult ? prior.latestRunId : latestRunId,
+    ...(prior?.recentRunsClearedAt
+      ? { recentRunsClearedAt: prior.recentRunsClearedAt }
+      : {}),
   });
 }
 
@@ -132,7 +136,7 @@ async function pathFacts(
 }
 
 export class PublicScanner {
-  private readonly active = new Map<string, Promise<void>>();
+  private readonly active = new Map<string, string>();
   constructor(
     private readonly store: AppStore,
     private readonly github: PublicGitHubPort,
@@ -144,25 +148,33 @@ export class PublicScanner {
 
   async scan(repo: string): Promise<ScanResult> {
     requirePublicRecord(this.store, repo);
-    if (this.active.has(repo)) return { state: "queued", repo };
+    const activeRequestId = this.active.get(repo);
+    if (activeRequestId)
+      return { state: "queued", repo, requestId: activeRequestId };
     const fetched = await this.github.getRepo(repo);
     if (!fetched.ok) throw new Error(fetched.error.code);
     requirePublicRecord(this.store, repo);
     if (reusePublicScan(this.store, fetched.value, this.model))
       return { state: "cached", repo, commitSha: fetched.value.sha };
-    const work = this.scanSnapshot(fetched.value).finally(() =>
+    const requestId = randomUUID();
+    const work = this.scanSnapshot(fetched.value, requestId).finally(() =>
       this.active.delete(repo),
     );
-    this.active.set(repo, work);
-    void work.catch(() => {
+    this.active.set(repo, requestId);
+    void work.catch((error: unknown) => {
+      const reason =
+        error instanceof Error &&
+        ["unavailable", "invalid_response"].includes(error.message)
+          ? error.message
+          : "scan_failed";
       const event = this.store.appendEvent(
         "scan_failed",
         this.now().toISOString(),
-        { repo },
+        { repo, requestId, reason },
       );
       this.onEvent?.(event);
     });
-    return { state: "queued", repo };
+    return { state: "queued", repo, requestId };
   }
 
   async scanNow(repo: string): Promise<void> {
@@ -214,7 +226,10 @@ export class PublicScanner {
     return { requested, scanned, failed: requested - scanned };
   }
 
-  private async scanSnapshot(repo: PublicRepo): Promise<void> {
+  private async scanSnapshot(
+    repo: PublicRepo,
+    requestId?: string,
+  ): Promise<void> {
     requirePublicRecord(this.store, repo.repo);
     const source = {
       id: `readme_${createHash("sha256").update(repo.repo).digest("hex").slice(0, 12)}`,
@@ -223,12 +238,22 @@ export class PublicScanner {
       path: repo.readmePath,
     };
     const doc = markdownToDocText(source, repo.readme);
-    const extracted = await extractFlightPlan(
+    let extracted = await extractFlightPlan(
       repo.repo,
       [doc],
       this.model,
       this.cache,
     );
+    let usedAi = this.model.model !== "local-static";
+    if (!extracted.ok && usedAi) {
+      usedAi = false;
+      extracted = await extractFlightPlan(
+        repo.repo,
+        [doc],
+        new HeuristicModel(),
+        this.cache,
+      );
+    }
     if (!extracted.ok) throw new Error(extracted.error.code);
     const paths = await pathFacts(
       this.github,
@@ -282,8 +307,7 @@ export class PublicScanner {
       driftDegrees: driftDegrees(results),
       commitSha: repo.sha,
       scannedAt: this.now().toISOString(),
-      tiersRun:
-        this.model.model === "local-static" ? ["static"] : ["static", "ai"],
+      tiersRun: usedAi ? ["static", "ai"] : ["static"],
       simulated: false,
     };
     this.store.putSatellite(satellite);
@@ -291,7 +315,7 @@ export class PublicScanner {
     const event = this.store.appendEvent(
       "scan_complete",
       this.now().toISOString(),
-      { repo: repo.repo, runId: run.id },
+      { repo: repo.repo, runId: run.id, ...(requestId ? { requestId } : {}) },
     );
     this.onEvent?.(event);
   }

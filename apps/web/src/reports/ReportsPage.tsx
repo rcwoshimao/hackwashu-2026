@@ -4,11 +4,11 @@ import { DeepCheckLink } from "../components/DeepCheckLink.tsx";
 import { StatusBadge } from "../components/StatusBadge.tsx";
 import type { MeData } from "../data.ts";
 import { repoPath } from "../presentation.ts";
-import { RunList } from "../repo/RepoPage.tsx";
+import { RunList } from "../repo/RunList.tsx";
 import { useRepo } from "../repo/useRepo.ts";
 
 function ReportCard({ repo, me }: { repo: string; me: MeData }) {
-  const { data, loading } = useRepo(repo);
+  const { data, loading, refresh } = useRepo(repo);
   return (
     <article className="report-card" aria-labelledby={`report-${repo}`}>
       <div className="report-head">
@@ -36,7 +36,7 @@ function ReportCard({ repo, me }: { repo: string; me: MeData }) {
             </a>
             <a href={repoPath(repo)}>{copy.reportsOpenRepo}</a>
           </p>
-          <RunList data={data} />
+          <RunList data={data} canClear={false} onClear={refresh} />
         </>
       )}
     </article>

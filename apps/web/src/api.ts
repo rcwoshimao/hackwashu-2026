@@ -13,6 +13,7 @@ import {
 export type ApiError = {
   code: "network" | "access" | "invalid" | "server";
   status?: number;
+  reason?: string;
 };
 export type ApiResult<T> =
   | { ok: true; value: T }
@@ -77,6 +78,16 @@ async function postJson<T>(
     return { ok: false, error: { code: "network" } };
   }
   if (!response.ok) {
+    let errorBody: unknown;
+    try {
+      errorBody = await response.json();
+    } catch {
+      return {
+        ok: false,
+        error: { code: "invalid", status: response.status },
+      };
+    }
+    const parsed = z.object({ error: z.string() }).safeParse(errorBody);
     return {
       ok: false,
       error: {
@@ -85,6 +96,7 @@ async function postJson<T>(
             ? "access"
             : "server",
         status: response.status,
+        ...(parsed.success ? { reason: parsed.data.error } : {}),
       },
     };
   }
@@ -105,6 +117,7 @@ const actionSchema = z.object({}).passthrough();
 const scanSchema = z.object({
   state: z.enum(["queued", "cached"]),
   repo: z.string(),
+  requestId: z.string().optional(),
   commitSha: z.string().optional(),
 });
 const connectSchema = z.discriminatedUnion("visibility", [
@@ -130,6 +143,7 @@ const fixSchema = z.object({
 });
 export type FixResult = z.infer<typeof fixSchema>;
 const draftPrSchema = z.object({ url: z.string().url() });
+const workflowInstallSchema = z.object({ created: z.boolean() });
 const deepFixSchema = draftPrSchema.extend({
   fixedClaimIds: z.array(z.string()),
 });
@@ -142,6 +156,12 @@ export const api = {
       `/api/repos/${repo.split("/").map(encodeURIComponent).join("/")}`,
       repoSchema,
       signal,
+    ),
+  clearRunHistory: (repo: string) =>
+    postJson(
+      `/api/repos/${repo.split("/").map(encodeURIComponent).join("/")}/runs/clear`,
+      {},
+      z.object({ clearedAt: z.string() }),
     ),
   run: (id: string, signal?: AbortSignal) =>
     readJson(`/api/runs/${encodeURIComponent(id)}`, runSchema, signal),
@@ -160,6 +180,12 @@ export const api = {
       `/api/repos/${repo.split("/").map(encodeURIComponent).join("/")}/smoke-pr`,
       {},
       draftPrSchema,
+    ),
+  installWorkflow: (repo: string, branch: string) =>
+    postJson(
+      `/api/repos/${repo.split("/").map(encodeURIComponent).join("/")}/workflow`,
+      { branch },
+      workflowInstallSchema,
     ),
   deepFix: (runId: string, claimId: string) =>
     postJson(

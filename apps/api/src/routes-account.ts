@@ -1,8 +1,20 @@
 import type { Hono } from "hono";
-import { sessionToken } from "./access.ts";
+import { accessRepo, sessionToken } from "./access.ts";
 import type { ApiDeps } from "./types.ts";
 
 export function registerAccountRoutes(app: Hono, deps: ApiDeps): void {
+  app.post("/api/repos/:owner/:name/runs/clear", async (c) => {
+    const name = `${c.req.param("owner")}/${c.req.param("name")}`;
+    const repo = deps.store.getRepo(name);
+    if (repo === null) return c.json({ error: "repo_not_found" }, 404);
+    const allowed = await accessRepo(deps, c.req.raw, repo, true);
+    if (!allowed.ok)
+      return c.json({ error: "repo_access_denied" }, allowed.status);
+    const clearedAt = deps.now().toISOString();
+    deps.store.putRepo({ ...repo, recentRunsClearedAt: clearedAt });
+    return c.json({ clearedAt });
+  });
+
   app.get("/api/account/repos", async (c) => {
     c.header("Cache-Control", "private, no-store");
     const session = deps.auth.session(sessionToken(c.req.raw));

@@ -4,6 +4,8 @@ import {
   type SpectrumInstance,
 } from "spectrum-ts";
 import { imessage } from "spectrum-ts/providers/imessage";
+import { imessageReconnectMaxMs, imessageReconnectStartMs } from "./config.ts";
+import { type InboundSession, keepStream } from "./stream.ts";
 import type {
   IMessagePort,
   InboundMessage,
@@ -12,7 +14,10 @@ import type {
 } from "./types.ts";
 
 export type SpectrumIMessage = IMessagePort & {
-  run(onMessage: (message: InboundMessage) => Promise<void>): Promise<void>;
+  run(
+    onMessage: (message: InboundMessage) => Promise<void>,
+    onDisconnect: (error: unknown | null) => void,
+  ): Promise<void>;
   stop(): Promise<void>;
 };
 
@@ -30,6 +35,7 @@ type CloudInstance = {
     get(chatId: string, params?: { phone: string }): Promise<CloudSpace>;
   };
 };
+type CloudConnection = { app: SpectrumInstance; im: CloudInstance };
 
 async function sendTo(
   im: CloudInstance,
@@ -96,6 +102,50 @@ async function receiveFrom(
   }
 }
 
+async function connect(config: {
+  projectId: string;
+  projectSecret: string;
+}): Promise<CloudConnection> {
+  // The published Spectrum overloads erase optional cloud space params.
+  const configure = imessage.config as unknown as (
+    input: Record<string, never>,
+  ) => PlatformProviderConfig;
+  const provider = configure({});
+  const app = await Spectrum({
+    projectId: config.projectId,
+    projectSecret: config.projectSecret,
+    providers: [provider],
+  });
+  return { app, im: imessage(app) as unknown as CloudInstance };
+}
+
+function streamSession(
+  connection: CloudConnection,
+  onMessage: (message: InboundMessage) => Promise<void>,
+): InboundSession {
+  return {
+    read: () => receiveFrom(connection.app, onMessage),
+    close: () => connection.app.stop(),
+  };
+}
+
+function retryWait(signal: AbortSignal, attempt: number): Promise<void> {
+  return new Promise((resolve) => {
+    if (signal.aborted) return resolve();
+    const delayMs = Math.min(
+      imessageReconnectStartMs * 2 ** Math.min(attempt, 10),
+      imessageReconnectMaxMs,
+    );
+    const timer = setTimeout(done, delayMs);
+    function done() {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", done);
+      resolve();
+    }
+    signal.addEventListener("abort", done, { once: true });
+  });
+}
+
 export async function createSpectrumIMessage(config: {
   projectId: string;
   projectSecret: string;
@@ -104,24 +154,28 @@ export async function createSpectrumIMessage(config: {
     return { ok: false, error: { code: "unconfigured" } };
   }
   try {
-    // The published Spectrum overloads erase optional cloud space params.
-    const configure = imessage.config as unknown as (
-      input: Record<string, never>,
-    ) => PlatformProviderConfig;
-    const provider = configure({});
-    const app = await Spectrum({
-      projectId: config.projectId,
-      projectSecret: config.projectSecret,
-      providers: [provider],
-    });
-    const im = imessage(app) as unknown as CloudInstance;
+    let current = await connect(config);
+    const controller = new AbortController();
     return {
       ok: true,
       value: {
-        send: (address, text, line) => sendTo(im, address, text, line),
-        reply: (chatId, text, line) => replyOn(im, chatId, text, line),
-        run: (onMessage) => receiveFrom(app, onMessage),
-        stop: () => app.stop(),
+        send: (address, text, line) => sendTo(current.im, address, text, line),
+        reply: (chatId, text, line) => replyOn(current.im, chatId, text, line),
+        run: (onMessage, onDisconnect) =>
+          keepStream(
+            streamSession(current, onMessage),
+            async () => {
+              current = await connect(config);
+              return streamSession(current, onMessage);
+            },
+            (attempt) => retryWait(controller.signal, attempt),
+            () => controller.signal.aborted,
+            onDisconnect,
+          ),
+        stop: async () => {
+          controller.abort();
+          await current.app.stop();
+        },
       },
     };
   } catch {

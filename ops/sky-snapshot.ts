@@ -122,6 +122,9 @@ export function restoreSky(
       connected: prior?.connected ?? false,
       tokenHash: prior?.tokenHash ?? null,
       runtimeEnabled: prior?.runtimeEnabled ?? false,
+      ...(prior?.recentRunsClearedAt
+        ? { recentRunsClearedAt: prior.recentRunsClearedAt }
+        : {}),
       ...(priorCiRun && prior
         ? {
             label: prior.label,

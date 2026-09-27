@@ -49,7 +49,7 @@ class FakeGitHub implements GitHubPort {
 
 export function setup(
   repositoryFiles = new Map<string, { text: string; version: string }>(),
-  extra: Partial<Pick<ApiDeps, "smokePr" | "deepFix">> = {},
+  extra: Partial<Pick<ApiDeps, "smokePr" | "deepFix" | "workflowInstall">> = {},
 ) {
   const store = new MemoryStore();
   const github = new FakeGitHub();

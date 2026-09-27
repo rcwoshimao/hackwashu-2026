@@ -2,6 +2,8 @@ import { copy } from "@ground-control/copy";
 import { type FormEvent, useState } from "react";
 import { api } from "../api.ts";
 import { repoFromInput, repoPath } from "../presentation.ts";
+import { scanErrorMessage } from "../scanFeedback.ts";
+import { useScanFailure } from "../useScanFailure.ts";
 
 type State =
   | "idle"
@@ -10,12 +12,19 @@ type State =
   | "cached"
   | "invalid"
   | "limited"
+  | "processing_failed"
   | "error";
 
 export function ScanForm() {
   const [repo, setRepo] = useState("");
   const [state, setState] = useState<State>("idle");
   const [checked, setChecked] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<string | null>(null);
+  const [errorFeedback, setErrorFeedback] = useState("");
+  useScanFailure(requestId, () => {
+    setState("processing_failed");
+    setChecked(null);
+  });
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const parsed = repoFromInput(repo);
@@ -27,6 +36,9 @@ export function ScanForm() {
     setChecked(null);
     const result = await api.scan(parsed);
     if (result.ok) setChecked(parsed);
+    setRequestId(result.ok ? (result.value.requestId ?? null) : null);
+    if (!result.ok)
+      setErrorFeedback(scanErrorMessage(result.error, copy.skyScanError));
     setState(
       result.ok
         ? result.value.state === "cached"
@@ -44,7 +56,8 @@ export function ScanForm() {
     cached: copy.skyScanCached,
     invalid: copy.formInvalidRepo,
     limited: copy.skyScanLimit,
-    error: copy.skyScanError,
+    processing_failed: copy.scanProcessingFailed,
+    error: errorFeedback,
   }[state];
   return (
     <form className="scan-form" onSubmit={(event) => void submit(event)}>

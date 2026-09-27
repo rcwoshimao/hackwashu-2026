@@ -22,7 +22,9 @@ test("private connection shows the Actions token and source link", () => {
   assert.match(markup, /GitHub workflow/);
   assert.match(markup, /gh secret set GROUND_CONTROL_TOKEN -R owner\/private/);
   assert.match(markup, /Download workflow/);
-  assert.match(markup, /Create draft test PR/);
+  assert.match(markup, /Add workflow to GitHub/);
+  assert.match(markup, /Existing workflow files are left unchanged/);
+  assert.match(markup, /Create test PR/);
   assert.match(markup, /gh repo clone \$repo \$checkout/);
   assert.match(markup, /git -C \$checkout commit --allow-empty/);
   assert.match(markup, /gh pr create -R \$repo --base \$base --head \$branch/);

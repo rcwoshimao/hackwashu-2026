@@ -8,6 +8,7 @@ import { registerConnectRoute } from "./routes-connect.ts";
 import { registerDeepFixRoute } from "./routes-deep-fix.ts";
 import { registerSmokePrRoute } from "./routes-smoke-pr.ts";
 import { registerSourceWriteRoutes } from "./routes-sources.ts";
+import { registerWorkflowInstallRoute } from "./routes-workflow-install.ts";
 import { openScanFindings } from "./scan-fix.ts";
 import { ingestTelemetry, refreshTrust, telemetrySchema } from "./telemetry.ts";
 import type { ApiDeps, ScanResult } from "./types.ts";
@@ -349,6 +350,7 @@ export function registerWriteRoutes(app: Hono, deps: ApiDeps): void {
   app.post("/api/scan", (c) => scan(c, deps));
   registerConnectRoute(app, deps);
   registerSmokePrRoute(app, deps);
+  registerWorkflowInstallRoute(app, deps);
   registerDeepFixRoute(app, deps);
   registerSourceWriteRoutes(app, deps);
   app.post("/api/runs/:id/claims/:claimId/confirm", (c) =>

@@ -58,7 +58,7 @@ describe("auth", () => {
     expect(sessions.resolve(another)).toBeNull();
   });
 
-  test("OAuth state is single use and extension ID is validated", async () => {
+  test("OAuth state is single use for web sign-in", async () => {
     const store = new MemoryStore();
     const github = new FakeGitHub();
     const sessions = new Sessions(store, "secret", Date.now);
@@ -67,22 +67,15 @@ describe("auth", () => {
       sessions,
       "http://localhost:8787",
       Date.now,
-      "a".repeat(32),
     );
-    expect(auth.begin("extension", "wrong")).toMatchObject({
-      ok: false,
-      error: { code: "invalid_extension" },
-    });
-    const started = auth.begin("extension", "a".repeat(32));
+    const started = auth.begin();
     expect(started.ok).toBe(true);
     if (!started.ok) return;
     const state = new URL(started.value).searchParams.get("state") ?? "";
     const completed = await auth.complete("code", state);
     expect(completed.ok).toBe(true);
     if (completed.ok) {
-      expect(completed.value.redirect).toStartWith(
-        `https://${"a".repeat(32)}.chromiumapp.org/#token=`,
-      );
+      expect(completed.value.redirect).toBe("http://localhost:8787/signin");
       expect(auth.session(completed.value.token)?.login).toBe("navi");
     }
     expect(await auth.complete("code", state)).toMatchObject({

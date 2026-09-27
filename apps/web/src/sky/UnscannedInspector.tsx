@@ -4,6 +4,8 @@ import { api } from "../api.ts";
 import { StatusBadge } from "../components/StatusBadge.tsx";
 import type { AccountRepoData } from "../data.ts";
 import { repoPath } from "../presentation.ts";
+import { scanErrorMessage } from "../scanFeedback.ts";
+import { useScanFailure } from "../useScanFailure.ts";
 
 export function UnscannedInspector({
   repo,
@@ -14,11 +16,20 @@ export function UnscannedInspector({
 }) {
   const [requesting, setRequesting] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [requestId, setRequestId] = useState<string | null>(null);
+  useScanFailure(requestId, () => setFeedback(copy.scanProcessingFailed));
   const canScan = repo.visibility === "public" && !repo.archived && !repo.fork;
   const request = async () => {
     setRequesting(true);
     const result = await api.scan(repo.repo);
-    setFeedback(result.ok ? copy.repoScanQueued : copy.repoScanFailed);
+    setRequestId(result.ok ? (result.value.requestId ?? null) : null);
+    setFeedback(
+      result.ok
+        ? result.value.state === "cached"
+          ? copy.skyScanCached
+          : copy.repoScanQueued
+        : scanErrorMessage(result.error, copy.repoScanFailed),
+    );
     setRequesting(false);
   };
   return (

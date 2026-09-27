@@ -50,12 +50,14 @@ function decodeContent(data: unknown): string | null {
 export class OctokitPublicGitHub implements PublicGitHubPort {
   private readonly octokit: Octokit;
   private nextSearchAtMs = 0;
-  constructor(token?: string) {
-    this.octokit = new Octokit({
-      ...(token ? { auth: token } : {}),
-      request: { timeout: 10_000 },
-      userAgent: "Ground-Control/0.1",
-    });
+  constructor(token?: string, octokit?: Octokit) {
+    this.octokit =
+      octokit ??
+      new Octokit({
+        ...(token ? { auth: token } : {}),
+        request: { timeout: 10_000 },
+        userAgent: "Ground-Control/0.1",
+      });
   }
 
   private async content(
@@ -90,11 +92,15 @@ export class OctokitPublicGitHub implements PublicGitHubPort {
           this.octokit.rest.repos.getCommit({ owner, repo, ref }),
         )
       ).data;
-      const readme = (
-        await retry(() =>
-          this.octokit.rest.repos.getReadme({ owner, repo, ref: commit.sha }),
-        )
-      ).data;
+      const readmeResponse = await retry(() =>
+        this.octokit.rest.repos.getReadme({ owner, repo, ref: commit.sha }),
+      ).catch((error: unknown) => {
+        if (githubStatus(error) === 404) return null;
+        throw error;
+      });
+      if (readmeResponse === null)
+        return { ok: false, error: { code: "no_markdown_readme" } };
+      const readme = readmeResponse.data;
       if (!readme.name.toLowerCase().endsWith(".md"))
         return { ok: false, error: { code: "no_markdown_readme" } };
       const text = decodeContent(readme);

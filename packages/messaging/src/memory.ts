@@ -81,8 +81,12 @@ export class MemoryMessagingStore implements MessagingStore {
     this.inbound.add(messageId);
     return true;
   }
+  releaseInbound(messageId: string): void {
+    this.inbound.delete(messageId);
+  }
   reserveAlert(alert: AlertRecord): boolean {
-    if (this.alerts.has(alert.id)) return false;
+    const previous = this.alerts.get(alert.id);
+    if (previous && previous.delivery !== "failed") return false;
     this.alerts.set(alert.id, alert);
     return true;
   }

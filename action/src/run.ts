@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import {
@@ -82,10 +82,15 @@ export async function loadConnectedRunner(
   repo: string | undefined,
 ): Promise<
   | { ok: true; value: FlightRunner }
-  | { ok: false; error: { code: "repository_identity_required" } }
+  | {
+      ok: false;
+      error: { code: "repository_identity_required" | "flight_plan_missing" };
+    }
 > {
   if (!repo || !matchingRunRepository(event, repo))
     return { ok: false, error: { code: "repository_identity_required" } };
+  if (!existsSync(join(root, "flightchecks/flightplan.json")))
+    return { ok: false, error: { code: "flight_plan_missing" } };
   readPlan(root, repo);
   return { ok: true, value: await loadRunner(root) };
 }

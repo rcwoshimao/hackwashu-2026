@@ -67,7 +67,15 @@ export async function startMessaging(config: {
     projectId: config.projectId,
     projectSecret: config.projectSecret,
   });
-  if (!runtime.ok) return null;
+  if (!runtime.ok) {
+    const event = config.store.appendEvent(
+      "message_start_failed",
+      new Date().toISOString(),
+      { reason: runtime.error.code },
+    );
+    config.events.publish(event);
+    return null;
+  }
   const messages = new SqliteMessagingStore(config.dbPath);
   const confluence =
     config.confluenceSite && config.confluenceEmail && config.confluenceToken
@@ -129,17 +137,27 @@ export async function startMessaging(config: {
     },
   });
   void runtime.value
-    .run(async (message) => {
-      const handled = await hub.handleInbound(message);
-      if (!handled.ok) {
+    .run(
+      async (message) => {
+        const handled = await hub.handleInbound(message);
+        if (!handled.ok) {
+          const event = config.store.appendEvent(
+            "message_failed",
+            new Date().toISOString(),
+            { messageId: message.id },
+          );
+          config.events.publish(event);
+        }
+      },
+      () => {
         const event = config.store.appendEvent(
-          "message_failed",
+          "message_loop_failed",
           new Date().toISOString(),
-          { messageId: message.id },
+          {},
         );
         config.events.publish(event);
-      }
-    })
+      },
+    )
     .catch(() => {
       const event = config.store.appendEvent(
         "message_loop_failed",

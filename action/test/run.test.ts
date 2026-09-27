@@ -242,6 +242,12 @@ test("run mode validates repository identity and plan before importing checkout 
       repository: { full_name: "team/orbit-app", private: true },
     };
     const planPath = join(root, "flightchecks/flightplan.json");
+    expect(
+      await loadConnectedRunner(root, privateEvent, "team/orbit-app"),
+    ).toEqual({
+      ok: false,
+      error: { code: "flight_plan_missing" },
+    });
     writeFileSync(planPath, "{}");
     expect(
       loadConnectedRunner(root, privateEvent, "team/orbit-app"),

@@ -156,17 +156,30 @@ export class SqliteMessagingStore implements MessagingStore {
     );
   }
 
+  releaseInbound(messageId: string): void {
+    this.db
+      .query("DELETE FROM messaging_inbound WHERE message_id = ?")
+      .run(messageId);
+  }
+
   reserveAlert(alert: AlertRecord): boolean {
-    return (
+    return this.db.transaction(() => {
+      const previous = this.getAlert(alert.id);
+      if (previous && previous.delivery !== "failed") return false;
+      if (previous) {
+        this.putAlert(alert);
+        return true;
+      }
       this.db
-        .query("INSERT OR IGNORE INTO messaging_alerts VALUES(?, ?, ?, ?)")
+        .query("INSERT INTO messaging_alerts VALUES(?, ?, ?, ?)")
         .run(
           alert.id,
           alert.githubLogin.toLowerCase(),
           alert.createdAt,
           JSON.stringify(alert),
-        ).changes === 1
-    );
+        );
+      return true;
+    })();
   }
 
   getAlert(id: string): AlertRecord | null {

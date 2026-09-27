@@ -3,6 +3,8 @@ import { type FormEvent, useCallback, useState } from "react";
 import { api, type Connection } from "../api.ts";
 import type { AccountRepoData } from "../data.ts";
 import { validRepo } from "../presentation.ts";
+import { scanErrorMessage } from "../scanFeedback.ts";
+import { useScanFailure } from "../useScanFailure.ts";
 import { ConnectActionSteps } from "./ConnectActionSteps.tsx";
 import { ConnectRepoPicker } from "./ConnectRepoPicker.tsx";
 import { ConnectResult } from "./ConnectResult.tsx";
@@ -18,6 +20,7 @@ type State =
   | "visibility_changed"
   | "queued"
   | "cached"
+  | "processing_failed"
   | "limited";
 type Draft = {
   mode: Mode;
@@ -27,6 +30,8 @@ type Draft = {
   runtime: boolean;
   state: State;
   connection: Connection | null;
+  requestId: string | null;
+  scanError: string;
 };
 type Update = (patch: Partial<Draft>) => void;
 type Fields = { draft: Draft; update: Update };
@@ -41,11 +46,16 @@ function initialDraft(): Draft {
     runtime: params.get("runtime") === "1",
     state: "idle",
     connection: null,
+    requestId: null,
+    scanError: "",
   };
 }
 
 function useConnectDraft() {
   const [draft, setDraft] = useState(initialDraft);
+  useScanFailure(draft.requestId, () =>
+    setDraft((current) => ({ ...current, state: "processing_failed" })),
+  );
   const update: Update = (patch) =>
     setDraft((current) => ({ ...current, ...patch }));
   const selectMine = useCallback((selectedMine: AccountRepoData | null) => {
@@ -56,10 +66,11 @@ function useConnectDraft() {
       runtime: selectedMine?.repo === current.repo ? current.runtime : false,
       connection: null,
       state: "idle",
+      requestId: null,
     }));
   }, []);
   const connectOwn = async (repo: string, runtime: boolean) => {
-    update({ state: "pending", connection: null });
+    update({ state: "pending", connection: null, requestId: null });
     const result = await api.connect(repo, runtime);
     update({
       connection: result.ok ? result.value : null,
@@ -81,9 +92,13 @@ function useConnectDraft() {
       return;
     }
     if (draft.mode === "public") {
-      update({ state: "pending", connection: null });
+      update({ state: "pending", connection: null, requestId: null });
       const scan = await api.scan(chosen);
       update({
+        requestId: scan.ok ? (scan.value.requestId ?? null) : null,
+        scanError: scan.ok
+          ? ""
+          : scanErrorMessage(scan.error, copy.skyScanError),
         state: scan.ok
           ? scan.value.state
           : scan.error.status === 429
@@ -107,7 +122,9 @@ function SourceChoice({ draft, update }: Fields) {
             type="radio"
             name="connect-source"
             checked={draft.mode === mode}
-            onChange={() => update({ mode, state: "idle", connection: null })}
+            onChange={() =>
+              update({ mode, state: "idle", connection: null, requestId: null })
+            }
           />
           {mode === "mine" ? copy.connectMineOption : copy.connectPublicOption}
         </label>
@@ -138,6 +155,7 @@ function PublicFields({ draft, update }: Fields) {
             publicEntry: event.target.value,
             connection: null,
             state: "idle",
+            requestId: null,
           })
         }
         placeholder={copy.connectPublicPlaceholder}
@@ -175,11 +193,15 @@ function ConnectOutcome({ draft, login }: { draft: Draft; login: string }) {
     pending:
       draft.mode === "public" ? copy.skyScanPending : copy.connectPending,
     invalid: copy.formInvalidRepo,
-    error: draft.mode === "public" ? copy.skyScanError : copy.connectFailed,
+    error:
+      draft.mode === "public"
+        ? draft.scanError || copy.skyScanError
+        : copy.connectFailed,
     visibility_changed: copy.connectVisibilityChanged,
     queued: copy.skyScanQueued,
     cached: copy.skyScanCached,
     limited: copy.skyScanLimit,
+    processing_failed: copy.scanProcessingFailed,
   }[draft.state];
   const publicRepo = normalizeGitHubRepo(draft.publicEntry);
   const scope =

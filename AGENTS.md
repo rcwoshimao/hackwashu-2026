@@ -6,7 +6,7 @@
 3. `docs/vendor/photon/` — the only source of truth for `spectrum-ts`.
 4. `docs/vendor/atlassian/` — the only source of truth for the Confluence REST API.
 
-Never guess an external API (spectrum-ts, Octokit, `@google/genai`, Atlassian, Chrome extension APIs). Use the vendored docs and the installed package types, or stop and ask.
+Never guess an external API (spectrum-ts, Octokit, `@google/genai`, Atlassian). Use the vendored docs and the installed package types, or stop and ask.
 
 ## Before you write code
 - Keep `docs/PLAN.md` and `docs/HUMAN_SETUP.md` current.

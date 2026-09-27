@@ -7,10 +7,13 @@ export function useRepo(repo: string): {
   data: RepoData | null;
   loading: boolean;
   denied: boolean;
+  refresh: () => void;
 } {
   const [data, setData] = useState<RepoData | null>(null);
   const [loading, setLoading] = useState(true);
   const [denied, setDenied] = useState(false);
+  const [revision, setRevision] = useState(0);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: A manual refresh reruns this request.
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
@@ -29,6 +32,11 @@ export function useRepo(repo: string): {
       stop();
       events.close();
     };
-  }, [repo]);
-  return { data, loading, denied };
+  }, [repo, revision]);
+  return {
+    data,
+    loading,
+    denied,
+    refresh: () => setRevision((value) => value + 1),
+  };
 }

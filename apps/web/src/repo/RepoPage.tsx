@@ -6,10 +6,11 @@ import {
   DeepCheckLink,
 } from "../components/DeepCheckLink.tsx";
 import type { MeData, RepoData, RunData, SourceData } from "../data.ts";
-import { readableDate, safeExternalUrl } from "../presentation.ts";
+import { safeExternalUrl } from "../presentation.ts";
 import { SourceSync } from "../sources/SourceSync.tsx";
 import { RepoChecklist } from "./RepoChecklist.tsx";
 import { RepoSummary } from "./RepoSummary.tsx";
+import { RunList } from "./RunList.tsx";
 import { Trajectory } from "./Trajectory.tsx";
 import { useLatestRun } from "./useLatestRun.ts";
 import { useRepo } from "./useRepo.ts";
@@ -74,67 +75,26 @@ function SourceList({ data }: { data: RepoData }) {
   );
 }
 
-export function RunList({ data }: { data: RepoData }) {
-  return (
-    <section className="panel repo-runs">
-      <h2>{copy.repoRuns}</h2>
-      {data.runs.length === 0 ? (
-        <p>{copy.repoNoRuns}</p>
-      ) : (
-        <div className="table-scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>{copy.repoCommit}</th>
-                <th>{copy.repoCheckedAt}</th>
-                <th>{copy.repoRunStatus}</th>
-                <th>{copy.repoRunTier}</th>
-                <th>{copy.repoRunFailures}</th>
-                <th>{copy.repoViewRun}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.runs.map((run) => (
-                <tr key={run.id}>
-                  <td className="mono">{run.commitSha.slice(0, 10)}</td>
-                  <td>{readableDate(run.createdAt)}</td>
-                  <td>
-                    {run.verdict === "failure"
-                      ? copy.commonFailure
-                      : run.verdict === "success"
-                        ? copy.repoRunNoConfirmedFailures
-                        : copy.commonPending}
-                  </td>
-                  <td>
-                    {run.origin === "ci"
-                      ? copy.repoRunDeep
-                      : run.origin === "public_scan"
-                        ? copy.repoRunPublic
-                        : copy.repoRunUnknown}
-                  </td>
-                  <td className="mono">{run.failingCount.toLocaleString()}</td>
-                  <td>
-                    <a href={`/runs/${encodeURIComponent(run.id)}`}>
-                      {copy.repoViewRun}
-                    </a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </section>
-  );
-}
-
 const methodNames: Record<string, string> = {
   static: copy.repoMethodStatic,
   ai: copy.repoMethodAi,
   runtime: copy.repoMethodDeep,
 };
 
-function RepoDetails({ data, run }: { data: RepoData; run: RunData | null }) {
+function RepoDetails({
+  data,
+  run,
+  onClear,
+}: {
+  data: RepoData;
+  run: RunData | null;
+  onClear: () => void;
+}) {
+  const { me } = useMe();
+  const canClear =
+    !!me?.signedIn &&
+    (me.connectedRepos.includes(data.repo) ||
+      data.repo.split("/")[0]?.toLowerCase() === me.login?.toLowerCase());
   const tiers = data.scan?.tiersRun ?? [];
   return (
     <details className="repo-details">
@@ -157,7 +117,7 @@ function RepoDetails({ data, run }: { data: RepoData; run: RunData | null }) {
       )}
       <SourceList data={data} />
       {data.runs.length > 1 && <Trajectory repo={data} />}
-      {data.runs.length > 0 && <RunList data={data} />}
+      <RunList data={data} canClear={canClear} onClear={onClear} />
     </details>
   );
 }
@@ -166,7 +126,8 @@ function RepoDetails({ data, run }: { data: RepoData; run: RunData | null }) {
 function OwnerPrompt({ data, me }: { data: RepoData; me: MeData | null }) {
   if (!canOpenDeepChecks(data, me)) return null;
   const needsSetup =
-    !data.runtimeEnabled && !data.runs.some((run) => run.origin === "ci");
+    !data.runtimeEnabled &&
+    !(data.latestCiRun ?? data.runs.find((run) => run.origin === "ci"));
   return (
     <aside className="repo-owner">
       {needsSetup && (
@@ -179,7 +140,13 @@ function OwnerPrompt({ data, me }: { data: RepoData; me: MeData | null }) {
   );
 }
 
-function RepoContent({ data }: { data: RepoData }) {
+function RepoContent({
+  data,
+  onClear,
+}: {
+  data: RepoData;
+  onClear: () => void;
+}) {
   const { me } = useMe();
   const { run, loading, refresh } = useLatestRun(data.latestRunId);
   const github = safeExternalUrl(`https://github.com/${data.repo}`);
@@ -210,13 +177,13 @@ function RepoContent({ data }: { data: RepoData }) {
         </>
       )}
       <OwnerPrompt data={data} me={me} />
-      <RepoDetails data={data} run={run} />
+      <RepoDetails data={data} run={run} onClear={onClear} />
     </>
   );
 }
 
 export function RepoPage({ repo }: { repo: string }) {
-  const { data, loading, denied } = useRepo(repo);
+  const { data, loading, denied, refresh } = useRepo(repo);
   useEffect(() => {
     if (!data || window.location.hash !== "#findings") return;
     window.requestAnimationFrame(() =>
@@ -241,7 +208,7 @@ export function RepoPage({ repo }: { repo: string }) {
           )}
         </div>
       )}
-      {data && <RepoContent data={data} />}
+      {data && <RepoContent data={data} onClear={refresh} />}
     </main>
   );
 }

@@ -76,6 +76,7 @@ export interface MessagingStore {
   ): LinkRecord | null;
   deleteLink(hash: string): void;
   claimInbound(messageId: string): boolean;
+  releaseInbound(messageId: string): void;
   reserveAlert(alert: AlertRecord): boolean;
   getAlert(id: string): AlertRecord | null;
   putAlert(alert: AlertRecord): void;

@@ -5,8 +5,8 @@ import { DeepCorrection, FakeGitHubFixes } from "../src/index.ts";
 
 const sha = "a".repeat(40);
 const repo = "owner/repo";
-const source = "# Install\nLoad canvas_extension_zip.\nKeep this line.\n";
-function run(quote = "Load canvas_extension_zip."): RunRecord {
+const source = "# Install\nLoad legacy_assets_zip.\nKeep this line.\n";
+function run(quote = "Load legacy_assets_zip."): RunRecord {
   return {
     id: "run-1",
     repo,
@@ -21,7 +21,7 @@ function run(quote = "Load canvas_extension_zip."): RunRecord {
         sourceId: "readme",
         quote,
         kind: "file_exists",
-        params: { path: "canvas_extension_zip" },
+        params: { path: "legacy_assets_zip" },
         state: "confirmed",
         status: "fail",
         expected: "path exists",
@@ -38,8 +38,8 @@ test("deep fix drafts only a cited documentation line and labels its CI origin",
   github.putFile(repo, sha, "README.md", source);
   github.putFile(repo, sha, "package.json", "{}");
   const model = new FixtureDocFixer(() => ({
-    replacement: "Load the extension from the repository root.",
-    summary: "Correct the extension folder path.",
+    replacement: "Load assets from the repository root.",
+    summary: "Correct the assets folder path.",
   }));
   const result = await new DeepCorrection(model).fix(github, run(), ["c_one"]);
   expect(result.ok).toBe(true);
@@ -52,7 +52,7 @@ test("deep fix drafts only a cited documentation line and labels its CI origin",
       {
         path: "README.md",
         content:
-          "# Install\nLoad the extension from the repository root.\nKeep this line.\n",
+          "# Install\nLoad assets from the repository root.\nKeep this line.\n",
       },
     ],
   });
@@ -92,7 +92,7 @@ test("deep fix leaves command examples to human review", async () => {
     repo,
     sha,
     "README.md",
-    "```sh\nLoad canvas_extension_zip.\n```\n",
+    "```sh\nLoad legacy_assets_zip.\n```\n",
   );
   const model = new FixtureDocFixer(() => ({
     replacement: "Run npm install",

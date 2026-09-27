@@ -16,7 +16,8 @@ export function DeepCheckLink({
   data: RepoData;
   me: MeData | null;
 }) {
-  const latestCi = data.runs.find((run) => run.origin === "ci");
+  const latestCi =
+    data.latestCiRun ?? data.runs.find((run) => run.origin === "ci");
   const canManage = canOpenDeepChecks(data, me);
   if (latestCi)
     return (

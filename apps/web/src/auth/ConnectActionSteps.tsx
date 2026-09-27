@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ConnectToken } from "./ConnectToken.tsx";
 import { CopyCommand } from "./CopyCommand.tsx";
 import { SmokePrButton } from "./SmokePrButton.tsx";
+import { WorkflowInstallButton } from "./WorkflowInstallButton.tsx";
 import { publicHttpsOrigin, workflowForBranch } from "./workflow.ts";
 
 function downloadWorkflow(branch: string, serverUrl: string) {
@@ -17,7 +18,13 @@ function downloadWorkflow(branch: string, serverUrl: string) {
   setTimeout(() => URL.revokeObjectURL(url), 0);
 }
 
-function WorkflowDownload({ serverUrl }: { serverUrl: string }) {
+function WorkflowDownload({
+  repo,
+  serverUrl,
+}: {
+  repo: string;
+  serverUrl: string;
+}) {
   const [branch, setBranch] = useState("main");
   const publicUrl = publicHttpsOrigin(serverUrl);
   return (
@@ -42,6 +49,7 @@ function WorkflowDownload({ serverUrl }: { serverUrl: string }) {
           >
             {copy.connectWorkflowDownload}
           </button>
+          <WorkflowInstallButton repo={repo} branch={branch} />
         </>
       ) : (
         <p className="form-hint">{copy.connectHostedUrlMissing}</p>
@@ -74,7 +82,7 @@ export function ConnectActionSteps({
         <li>
           <h3>{copy.connectChecksTitle}</h3>
           <p>{copy.connectStepPlan}</p>
-          <WorkflowDownload serverUrl={serverUrl} />
+          <WorkflowDownload repo={repo} serverUrl={serverUrl} />
         </li>
         <li>
           <h3>{copy.connectVerifyTitle}</h3>

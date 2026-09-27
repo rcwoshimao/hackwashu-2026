@@ -33,7 +33,6 @@ With GitHub OAuth configured, sign in and open **My repos** (`/signin`). The hea
 | GitHub commit status, PR comments, and verified iMessage routing | `GITHUB_WRITE_TOKEN` | Server-side GitHub access scoped to connected demo repos; resolves the checked commit's GitHub author before an alert. |
 | iMessage alerts | `SPECTRUM_PROJECT_ID`, `SPECTRUM_PROJECT_SECRET` | Spectrum Cloud iMessage through a line provisioned in that project. No Mac or bot token is needed. |
 | Confluence source comments | `CONFLUENCE_SITE`, `CONFLUENCE_EMAIL`, `CONFLUENCE_API_TOKEN` | Read pages and post footer comments. The page body is never edited. |
-| Extension sign-in | `EXTENSION_ID` | Limits the OAuth redirect to the unpacked extension's exact Chrome ID. |
 
 After changing `.env`, run `docker compose up -d` so Compose recreates the container with the new environment. Keep `.env` out of Git. The API and scanner never need a project repository's runtime secrets.
 
@@ -82,16 +81,6 @@ The fallback command writes `<checkout>/flightchecks/flightplan.json`, `flight.t
 The Connect result page gives a copyable `gh secret set GROUND_CONTROL_TOKEN -R <owner/repo>` command; GitHub CLI prompts for the one-time token, so it is not exposed in command history. Enter the target repository's default branch, then download the short [caller workflow](../demo/orbit-app/.github/workflows/ground-control.yml) and add it at `.github/workflows/ground-control.yml`. The hosted server URL is already filled in. The caller invokes the [maintained reusable workflow](../.github/workflows/ground-control-reusable.yml), which runs on pull requests and default-branch pushes without a duplicate feature-branch push run. Its check job skips fork PRs and runs without the telemetry secret; its report job receives the secret. The Action validates repository identity and the committed plan before importing the runner. Report mode rejects telemetry whose repository, commit SHA, or PR number differs from the workflow context. Because authors can edit a branch's generated runner, treat its status as advisory for untrusted PR authors until trusted attestation is added. The hosted server is `https://ground-control-washu26.azurewebsites.net`; the target project needs no Azure deployment. Fork pull requests do not receive the token.
 
 Add documentation sources through `groundcontrol.yml` or the web app. README and `docs/**/*.md` are discovered during connected source refresh. The web app can add and refresh Confluence or external HTTPS pages and shows their fetch status. On a default-branch source change in an opted-in repository, the server records a snapshot, regenerates the plan, and schedules publication when the write token is configured; the GitHub writer rechecks visibility before committing. Check the resulting commit before the next CI run. A documentation-only public connection does not publish generated flightchecks. Man pages, public GitHub wiki pages, Confluence pages, and external docs pages have distinct source locations. Private GitHub wiki sync is unavailable. A Confluence correction is delivered as a footer comment; wiki and external pages receive suggestions or evidence instead of edits.
-
-## Chrome extension
-
-Build the extension from this root. When `PUBLIC_URL` is blank, it calls `https://ground-control-washu26.azurewebsites.net`. For a local server or an HTTPS tunnel, set `PUBLIC_URL` to that server's origin before building:
-
-```sh
-bun run build:extension
-```
-
-Open Chrome's Extensions page, enable Developer mode, load unpacked `apps/extension/dist`, and copy the assigned extension ID. For a local server, set `EXTENSION_ID` in `.env` and recreate its container with `docker compose up -d`. For the hosted server, configure that same ID as its `EXTENSION_ID` setting. Then sign in from the extension popup. The popup can check an unknown public GitHub README or watch a Confluence or docs page for one of your connected repositories. Watching another docs host asks for that host's permission at the time you choose Watch. If a page does not show marks immediately, reload it.
 
 ## Local tests
 

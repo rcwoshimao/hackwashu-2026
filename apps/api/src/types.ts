@@ -6,7 +6,7 @@ import type { AppStore, EventRecord, RunRecord } from "@ground-control/store";
 import type { ScanFixService } from "./scan-fix.ts";
 
 export type ScanResult =
-  | { state: "queued"; repo: string }
+  | { state: "queued"; repo: string; requestId?: string }
   | { state: "cached"; repo: string; commitSha: string };
 
 export interface PublicScanPort {
@@ -33,6 +33,18 @@ export interface SmokePrPort {
   create(repo: string): Promise<SmokePrResult>;
 }
 
+export type WorkflowInstallResult =
+  | { ok: true; created: boolean }
+  | { ok: false; reason: "setup_incomplete" | "github_unavailable" };
+
+export interface WorkflowInstallPort {
+  install(
+    repo: string,
+    branch: string,
+    serverUrl: string,
+  ): Promise<WorkflowInstallResult>;
+}
+
 export type DeepFixResult =
   | { ok: true; url: string; fixedClaimIds: readonly string[] }
   | { ok: false; reason: "no_fix" | "unavailable" };
@@ -52,6 +64,7 @@ export interface ApiDeps {
   status?: CommitStatusPort;
   commitAuthor?: CommitAuthorPort;
   smokePr?: SmokePrPort;
+  workflowInstall?: WorkflowInstallPort;
   deepFix?: DeepFixPort;
   prComments?: PrCommentPort;
   messaging?: Pick<MessagingHub, "alert"> &

@@ -18,7 +18,6 @@
       "devDependencies": {
         "@biomejs/biome": "2.5.14",
         "@types/bun": "1.2.22",
-        "@types/chrome": "0.3.0",
         "@types/node": "22.18.6",
         "fast-check": "3.23.2",
         "typescript": "5.9.2",
@@ -48,21 +47,6 @@
       "dependencies": {
         "@ground-control/local-git": "workspace:*",
         "@ground-control/plan": "workspace:*",
-      },
-    },
-    "apps/extension": {
-      "name": "@ground-control/extension",
-      "version": "0.1.0",
-      "dependencies": {
-        "@fontsource/ibm-plex-mono": "5.2.6",
-        "@fontsource/ibm-plex-sans": "5.2.6",
-        "@ground-control/copy": "workspace:*",
-        "zod": "4.6.5",
-      },
-      "devDependencies": {
-        "@types/chrome": "0.3.0",
-        "linkedom": "0.18.12",
-        "vite": "7.3.6",
       },
     },
     "apps/web": {
@@ -303,8 +287,6 @@
 
     "@ground-control/copy": ["@ground-control/copy@workspace:packages/copy"],
 
-    "@ground-control/extension": ["@ground-control/extension@workspace:apps/extension"],
-
     "@ground-control/fixes": ["@ground-control/fixes@workspace:packages/fixes"],
 
     "@ground-control/local-git": ["@ground-control/local-git@workspace:packages/local-git"],
@@ -491,8 +473,6 @@
 
     "@types/bun": ["@types/bun@1.2.22", "", { "dependencies": { "bun-types": "1.2.22" } }, "sha512-5A/KrKos2ZcN0c6ljRSOa1fYIyCKhZfIVYeuyb4snnvomnpFqC0tTsEkdqNxbAgExV384OETQ//WAjl3XbYqQA=="],
 
-    "@types/chrome": ["@types/chrome@0.3.0", "", { "dependencies": { "@types/filesystem": "*", "@types/har-format": "*" } }, "sha512-HPAMKyJwUnNJdVsxgypwvIStlwRhhaLnxgEwKIB99oOcffJrC4UMeD5xseVoBwDinSkr690DCBaAtSYdK6M1qw=="],
-
     "@types/d3-scale": ["@types/d3-scale@4.0.9", "", { "dependencies": { "@types/d3-time": "*" } }, "sha512-dLmtwB8zkAeO/juAMfnV+sItKjlsw2lKdZVVy6LRr0cBmegxSABiLEpGVmSJJ8O08i4+sGR6qQtb6WtuwJdvVw=="],
 
     "@types/d3-time": ["@types/d3-time@3.0.4", "", {}, "sha512-yuzZug1nkAAaBlBBikKZTgzCeA+k1uy4ZFwWANOfKw5z5LRhV0gNA7gNkKm7HoK+HRN0wX3EkxGk0fpbWhmB7g=="],
@@ -500,12 +480,6 @@
     "@types/debug": ["@types/debug@4.1.13", "", { "dependencies": { "@types/ms": "*" } }, "sha512-KSVgmQmzMwPlmtljOomayoR89W4FynCAi3E8PPs7vmDVPe84hT+vGPKkJfThkmXs0x0jAaa9U8uW8bbfyS2fWw=="],
 
     "@types/estree": ["@types/estree@1.0.9", "", {}, "sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg=="],
-
-    "@types/filesystem": ["@types/filesystem@0.0.36", "", { "dependencies": { "@types/filewriter": "*" } }, "sha512-vPDXOZuannb9FZdxgHnqSwAG/jvdGM8Wq+6N4D/d80z+D4HWH+bItqsZaVRQykAn6WEVeEkLm2oQigyHtgb0RA=="],
-
-    "@types/filewriter": ["@types/filewriter@0.0.33", "", {}, "sha512-xFU8ZXTw4gd358lb2jw25nxY9QAgqn2+bKKjKOYfNCzN4DKCFetK7sPtrlpg66Ywe3vWY9FNxprZawAh9wfJ3g=="],
-
-    "@types/har-format": ["@types/har-format@1.2.16", "", {}, "sha512-fluxdy7ryD3MV6h8pTfTYpy/xQzCFC7m89nOH9y94cNqJ1mDIDPut7MnRHI3F6qRmh/cT2fUjG1MLdCNb4hE9A=="],
 
     "@types/mdast": ["@types/mdast@4.0.4", "", { "dependencies": { "@types/unist": "*" } }, "sha512-kGaNbPh1k7AFzgpud/gMdvIm5xuECykRR+JnWKQno9TAXVa6WIVCGTPvYGekIDL4uwCZQSYbUxNBSb1aUo79oA=="],
 

@@ -3,6 +3,8 @@ import { useState } from "react";
 import { api } from "../api.ts";
 import type { RepoData, RunData } from "../data.ts";
 import { readableDate } from "../presentation.ts";
+import { scanErrorMessage } from "../scanFeedback.ts";
+import { useScanFailure } from "../useScanFailure.ts";
 import {
   type FindingSummary,
   type RepoHeadline,
@@ -82,15 +84,18 @@ const marks: Record<Tone, string> = {
 function CheckAgain({ repo, checked }: { repo: string; checked: boolean }) {
   const [pending, setPending] = useState(false);
   const [feedback, setFeedback] = useState("");
+  const [requestId, setRequestId] = useState<string | null>(null);
+  useScanFailure(requestId, () => setFeedback(copy.scanProcessingFailed));
   const request = async () => {
     setPending(true);
     const result = await api.scan(repo);
+    setRequestId(result.ok ? (result.value.requestId ?? null) : null);
     setFeedback(
       result.ok
         ? result.value.state === "cached"
           ? copy.skyScanCached
           : copy.repoScanQueued
-        : copy.repoScanFailed,
+        : scanErrorMessage(result.error, copy.repoScanFailed),
     );
     setPending(false);
   };

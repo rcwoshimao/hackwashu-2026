@@ -10,12 +10,8 @@ import type {
 
 const pendingLifetimeMs = 10 * 60 * 1_000;
 const accessCacheMs = 10 * 60 * 1_000;
-const extensionIdPattern = /^[a-p]{32}$/;
-
 type Pending = {
   verifier: string;
-  mode: "web" | "extension";
-  extensionId: string | null;
   expiresAt: number;
 };
 
@@ -31,24 +27,9 @@ export class AuthService {
     readonly sessions: Sessions,
     private readonly publicUrl: string,
     private readonly now: () => number,
-    private readonly allowedExtensionId?: string,
   ) {}
 
-  begin(
-    mode: "web" | "extension",
-    extensionId: string | null = null,
-  ): Result<string> {
-    if (mode === "extension" && !this.allowedExtensionId) {
-      return { ok: false, error: { code: "unconfigured" } };
-    }
-    if (
-      mode === "extension" &&
-      (extensionId === null ||
-        !extensionIdPattern.test(extensionId) ||
-        extensionId !== this.allowedExtensionId)
-    ) {
-      return { ok: false, error: { code: "invalid_extension" } };
-    }
+  begin(): Result<string> {
     const state = randomBytes(32).toString("base64url");
     const verifier = randomBytes(32).toString("base64url");
     const challenge = createHash("sha256").update(verifier).digest("base64url");
@@ -57,8 +38,6 @@ export class AuthService {
     if (!url.ok) return url;
     this.pending.set(state, {
       verifier,
-      mode,
-      extensionId,
       expiresAt: this.now() + pendingLifetimeMs,
     });
     return url;
@@ -83,10 +62,7 @@ export class AuthService {
     const user = await this.github.currentUser(exchanged.value);
     if (!user.ok) return user;
     const token = this.sessions.create(user.value.login, exchanged.value);
-    const redirect =
-      pending.mode === "extension"
-        ? `https://${pending.extensionId}.chromiumapp.org/#token=${encodeURIComponent(token)}`
-        : `${this.publicUrl}/signin`;
+    const redirect = `${this.publicUrl}/signin`;
     return { ok: true, value: { token, login: user.value.login, redirect } };
   }
 

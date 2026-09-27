@@ -179,6 +179,12 @@ export const webCopy = {
   skyScanLimit: "This hour's free checks are used. Try again later or sign in.",
   skyScanError:
     "The scan could not start. Check the repository name and try again.",
+  scanNoReadme:
+    "This repository has no root Markdown README on its default branch. Add one at the repository root, then try again.",
+  scanGithubUnavailable:
+    "GitHub could not be reached. Try the README check again shortly.",
+  scanProcessingFailed:
+    "The README check stopped before it finished. Try again shortly.",
   skyScanPrivacy:
     "Public checks inspect docs and metadata only. They never install dependencies or run repository code.",
   skyBulkScanButton: "Scan unscanned public READMEs",
@@ -305,6 +311,11 @@ export const webCopy = {
   repoNoSources:
     "No sources are watched yet. Add a source to check its claims.",
   repoRuns: "Recent runs",
+  repoClearRuns: "Clear run log",
+  repoClearRunsConfirm:
+    "Clear the recent runs list for this repository? Run details and the current check result will remain available.",
+  repoClearRunsFailed: "Could not clear the run log. Try again.",
+  repoRunsCleared: "The run log is clear. New runs will appear here.",
   repoRunTier: "Tier",
   repoRunPublic: "Static / AI",
   repoRunDeep: "Deep checks",
@@ -450,23 +461,33 @@ export const webCopy = {
     "Ground Control publishes the generated flight checks to your repository. Add one small GitHub workflow to run them on pull requests and default-branch pushes.",
   connectChecksTitle: "Add the workflow",
   connectStepPlan:
-    "Download this short workflow. It calls Ground Control's maintained workflow, which runs the checks and sends the report.",
+    "Add this short workflow to the selected repository. Commit it here or download it to add yourself. It calls Ground Control's maintained workflow, which runs the checks and sends the report.",
   connectDefaultBranchLabel: "Default branch for push checks",
   connectHostedUrl: "Ground Control server URL is already filled in:",
   connectHostedUrlMissing:
-    "Open this page on your hosted HTTPS Ground Control server to download a workflow with its URL filled in.",
-  connectStepWorkflow: "Add the downloaded file to your repository at",
+    "Open this page on your hosted HTTPS Ground Control server to install or download a workflow with its URL filled in.",
+  connectStepWorkflow: "The workflow belongs in your repository at",
   connectWorkflowDownload: "Download workflow",
+  connectWorkflowInstall: "Add workflow to GitHub",
+  connectWorkflowInstalling: "Adding workflow",
+  connectWorkflowInstalled:
+    "Workflow added to the repository's default branch.",
+  connectWorkflowAlreadyExists:
+    "A workflow file already exists on the default branch; no changes were made.",
+  connectWorkflowInstallFailed:
+    "Ground Control could not add the workflow. Check GitHub write access or download the file and push it yourself.",
+  connectWorkflowInstallHint:
+    "This adds a commit to the repository's default branch. Existing workflow files are left unchanged.",
   connectVerifyTitle: "Open a test pull request",
   connectStepRun:
-    "After the workflow and Actions secret are ready, create a draft test PR with one click. It has an empty commit and no file edits. The Ground Control jobs appear in Actions; the first passing run establishes a baseline.",
-  connectSmokeCreate: "Create draft test PR",
-  connectSmokePending: "Creating draft PR",
-  connectSmokeOpen: "Open draft test PR",
+    "After the workflow, generated flight checks, and Actions secret are ready, create a test PR with one click. It has an empty commit and no file edits. The Ground Control jobs appear in Actions; the first passing run establishes a baseline.",
+  connectSmokeCreate: "Create test PR",
+  connectSmokePending: "Creating test PR",
+  connectSmokeOpen: "Open test PR",
   connectSmokeSetupMissing:
-    "Add the workflow to the repository's default branch, then try again.",
+    "Add the workflow and generated flightchecks/ files to the default branch first. If this repo has no README or docs, add a documentation source and refresh it.",
   connectSmokeFailed:
-    "Ground Control could not create the draft PR. Check repository write access, or use the command below.",
+    "Ground Control could not create the test PR. Check repository write access, or use the command below.",
   connectSmokeFallback:
     "Prefer a local command? Copy this PowerShell script. It targets the selected GitHub repository and makes no file edits.",
   runDeepFixIntro:

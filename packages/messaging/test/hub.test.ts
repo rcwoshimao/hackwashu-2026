@@ -1,7 +1,65 @@
 import { describe, expect, test } from "bun:test";
+import { MessagingHub } from "../src/index.ts";
 import { claimIds, fixture, link, repoName, run } from "./fixture.ts";
 
+function failFirstReply(f: ReturnType<typeof fixture>) {
+  let fail = true;
+  return new MessagingHub({
+    appStore: f.appStore,
+    messages: f.messages,
+    cipher: f.cipher,
+    imessage: {
+      send: (address, text, line) => f.imessage.send(address, text, line),
+      reply: (chatId, text, line) => {
+        if (fail) {
+          fail = false;
+          return Promise.resolve({
+            ok: false as const,
+            error: { code: "send_failed" as const },
+          });
+        }
+        return f.imessage.reply(chatId, text, line);
+      },
+    },
+    correction: f.correction,
+    trust: {
+      async set() {
+        return { ok: true, value: { failing: false } };
+      },
+    },
+    publicUrl: "http://localhost:8787",
+    now: () => new Date("2026-09-26T12:00:00Z"),
+  });
+}
+
 describe("message loop", () => {
+  test("failed read-only reply can be retried with the same inbound ID", async () => {
+    const f = fixture();
+    await link(f);
+    const hub = failFirstReply(f);
+    const inbound = f.inbound("status-retry", "status");
+    expect((await hub.handleInbound(inbound)).ok).toBe(false);
+    expect(await hub.handleInbound(inbound)).toEqual({
+      ok: true,
+      value: "handled",
+    });
+    expect(f.imessage.replies.at(-1)?.text).toContain("No linked repositories");
+  });
+
+  test("failed drift alert delivery can be retried once", async () => {
+    const f = fixture();
+    await link(f);
+    const hub = failFirstReply(f);
+    expect((await hub.alert(f.drift, "navi", true)).ok).toBe(false);
+    expect(f.messages.listAlerts("navi")[0]?.delivery).toBe("failed");
+    expect(await hub.alert(f.drift, "navi", true)).toMatchObject({
+      ok: true,
+      value: { sent: true },
+    });
+    expect(f.imessage.replies).toHaveLength(2);
+    expect(f.messages.listAlerts("navi")[0]?.delivery).toBe("sent");
+  });
+
   test("one grouped alert per breaking commit; FIX reports only delivered work", async () => {
     const f = fixture();
     await link(f);

@@ -1,16 +1,13 @@
 import { cliCopy } from "./cli.ts";
-import { extensionCopy } from "./extension.ts";
 import { messageCopy } from "./messages.ts";
 import { webCopy } from "./web.ts";
 
-export { extensionCopy } from "./extension.ts";
 export { messageCopy } from "./messages.ts";
 
 export const copy = {
   ...cliCopy,
   ...webCopy,
   ...messageCopy,
-  ...extensionCopy,
   opsUsage:
     "Usage: bun ops candidates <file>, extract <file>, seed-plan <checkout> <owner/repo>, publish-plan <owner/repo>, ping-github, ping-models, fly, or sky:scan.",
   opsFileRequired: "Provide a Markdown file to inspect.",

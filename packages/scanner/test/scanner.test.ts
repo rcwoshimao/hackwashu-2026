@@ -3,7 +3,9 @@ import {
   FixtureModel,
   HeuristicModel,
   MemoryModelCache,
+  type ModelPort,
 } from "@ground-control/ai";
+import type { EventRecord } from "@ground-control/store";
 import { MemoryStore } from "@ground-control/store";
 import {
   FixturePublicGitHub,
@@ -190,4 +192,62 @@ test("AI scan upgrades a saved static-only satellite", async () => {
   );
   await aiScanner.scanTop(1);
   expect(store.getSatellite(base.repo)?.tiersRun).toEqual(["static", "ai"]);
+});
+
+test("public scan completes with static checks when optional AI is unavailable", async () => {
+  const store = new MemoryStore();
+  const events: string[] = [];
+  const unavailableModel: ModelPort = {
+    model: "unavailable-ai",
+    async extract() {
+      return { ok: false, error: { code: "unavailable" } };
+    },
+  };
+  const scanner = new PublicScanner(
+    store,
+    new FixturePublicGitHub(new Map([[base.repo, base]])),
+    unavailableModel,
+    new MemoryModelCache(),
+    () => new Date(),
+    (event) => events.push(event.kind),
+  );
+
+  await scanner.scanNow(base.repo);
+
+  expect(store.getSatellite(base.repo)?.tiersRun).toEqual(["static"]);
+  expect(store.listRuns(base.repo)).toHaveLength(1);
+  expect(events).toEqual(["scan_complete"]);
+});
+
+test("queued scan failure identifies only its own request", async () => {
+  const store = new MemoryStore();
+  const brokenStaticModel: ModelPort = {
+    model: "local-static",
+    async extract() {
+      return { ok: false, error: { code: "unavailable" } };
+    },
+  };
+  let finish: (event: EventRecord) => void = () => {};
+  const failed = new Promise<EventRecord>((resolve) => {
+    finish = resolve;
+  });
+  const scanner = new PublicScanner(
+    store,
+    new FixturePublicGitHub(new Map([[base.repo, base]])),
+    brokenStaticModel,
+    new MemoryModelCache(),
+    () => new Date(),
+    (event) => {
+      if (event.kind === "scan_failed") finish(event);
+    },
+  );
+
+  const queued = await scanner.scan(base.repo);
+  const event = await failed;
+
+  expect(queued.state).toBe("queued");
+  expect(event.payload).toMatchObject({
+    repo: base.repo,
+    requestId: queued.state === "queued" ? queued.requestId : "",
+  });
 });

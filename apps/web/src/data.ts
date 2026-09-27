@@ -57,6 +57,8 @@ export const repoSchema = z.object({
   label: z.string(),
   driftDegrees: z.number().min(0).max(90),
   latestRunId: z.string().nullable(),
+  recentRunsClearedAt: z.string().optional(),
+  latestCiRun: runSummarySchema.nullable().optional(),
   scan: z
     .object({
       commitSha: z.string(),

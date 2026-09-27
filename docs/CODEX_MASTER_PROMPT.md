@@ -21,7 +21,7 @@ Before writing code, create two files:
 - `docs/PLAN.md` (under 150 lines, kept current): for each phase, the files you will create, the tests you will write, and every assumption you are making.
 - `docs/HUMAN_SETUP.md`: every step only a person can do (accounts, keys, tokens, settings, publishing). Each step gets a numbered action, where its value goes, and how to tell it worked. Start from spec section 16 and add each new item from this prompt. Update it at the end of every phase.
 
-Never guess an external API (spectrum-ts, Octokit, `@google/genai`, Atlassian, Chrome extension APIs). Use only vendored docs and installed type definitions, or stop and ask.
+Never guess an external API (spectrum-ts, Octokit, `@google/genai`, Atlassian). Use only vendored docs and installed type definitions, or stop and ask.
 
 ## 1. What Ground Control is
 
@@ -30,7 +30,6 @@ Ground Control turns documentation into tests: README files, the `docs/` folder,
 - When code changes and a doc no longer matches, a check fails.
 - The author of the breaking commit gets one iMessage listing every doc affected.
 - Replying FIX delivers a correction suited to each source, tested first where possible.
-- A browser extension marks each checked sentence directly on GitHub, the wiki and Confluence.
 - The Sky scans popular public repos with the same engine and draws each as a satellite whose brightness is how true its README is.
 
 A developer could hack a quick version with a workflow that asks an AI to write tests. That version fails in four ways, and **fixing those four is the product**:
@@ -45,7 +44,6 @@ A developer could hack a quick version with a workflow that asks an AI to write 
 | Surface | Covers | Runs project code? | Who sees results |
 | --- | --- | --- | --- |
 | The Sky | The top 500 public JavaScript and TypeScript repos, plus repos people submit | No. Static and AI tiers only | Everyone |
-| Extension on a public repo | Shows saved results; offers a one-click "Check this README" | No, never for visited repos | Everyone |
 | Connected public repos | README, `docs/`, wiki, man page, linked Confluence and web pages | No; documentation inspection only | Everyone |
 | Connected private repos | README, `docs/`, wiki, man page, linked Confluence and web pages | Yes, in that repo's own CI | People with access to that repo |
 | Local command (optional) | Your private checkout on your machine | Yes, when you explicitly run it | You |
@@ -96,7 +94,7 @@ Trust states are stored on the server, not in the repo, to avoid commit loops.
 
 ### G4. Evidence and a fix, not a log
 
-- Build one `Evidence` object per failing fact, and render the pull request comment, the Telegram message, the dashboard and the extension tooltip from it.
+- Build one `Evidence` object per failing fact, and render the pull request comment, the Telegram message and the dashboard from it.
 - **Group by fact.** Claims with the same kind and parameters across sources become one evidence group, for example "port 3000 appears in 3 docs."
 - Each claim in a group records:
   - its source, location and exact quote;
@@ -124,7 +122,7 @@ Trust states are stored on the server, not in the repo, to avoid commit loops.
 | `docs` | `docs/**/*.md` in the repo, automatic | CI on every push | File path and line range |
 | `wiki` | The repo's GitHub wiki (`https://github.com/OWNER/REPO.wiki.git`), when enabled in config | Poll the wiki's HEAD every 10 minutes | Wiki page name, heading path, quote |
 | `man` | A man page file in the repo, such as `man/orbit.1` | CI on every push | File path and rendered line range |
-| `confluence` | Confluence Cloud pages linked in config, the web app or the extension | Poll each page's version number every 10 minutes | Page ID, heading path, quote |
+| `confluence` | Confluence Cloud pages linked in config or the web app | Poll each page's version number every 10 minutes | Page ID, heading path, quote |
 | `url` | A public docs page linked in config or the web app | Poll hourly, using ETag or a content hash | URL, heading path, quote |
 
 - Every source belongs to exactly one connected repo, and its checks run in that repo's CI.
@@ -160,9 +158,7 @@ sources:
 ```
 
 3. **The web app:** "Add a source" accepts a pasted Confluence page link, space link or docs URL, then the repo it describes.
-4. **The extension:** "Watch this page for <repo>" on any Confluence or docs page (signed-in users only).
-
-Sources added in the web app or extension are stored on the server, and the plan records them the same way as config sources.
+Sources added in the web app are stored on the server, and the plan records them the same way as config sources.
 
 ### 5.4 How fixes are delivered, by source
 
@@ -177,33 +173,16 @@ Sources added in the web app or extension are stored on the server, and the plan
 
 ## 6. Sign-in and visibility
 
-- **GitHub sign-in** (an OAuth app the human creates) for the dashboard and the extension. The callback is `PUBLIC_URL/auth/github/callback`.
+- **GitHub sign-in** (an OAuth app the human creates) for the dashboard. The callback is `PUBLIC_URL/auth/github/callback`.
 - **Private results:** show a private repo's results only if the signed-in user's token can read it (the GitHub repo endpoint returns 200). Re-check at most every 10 minutes per user and repo.
 - **Public results:** the Sky and results for public repos need no sign-in.
-- **Extension sign-in:** use `chrome.identity.launchWebAuthFlow` against `PUBLIC_URL/auth/extension`. The server finishes GitHub sign-in and redirects to `https://<extension-id>.chromiumapp.org/#token=<session>`. Sessions last 7 days.
+- Sessions last 7 days.
 - **Confluence credentials:** for the hackathon, one site through environment variables (`CONFLUENCE_SITE`, `CONFLUENCE_EMAIL`, `CONFLUENCE_API_TOKEN`), stored only on the server. Design the source model so per-team credentials can be added later.
 - **The AI tier sends source text to Gemini.** State this plainly in `docs/SELF_HOST.md` and on the web app's "Add a source" screen.
 
-## 7. The browser extension (Chrome, Manifest V3)
+## 7. Web source review
 
-- **Permissions:**
-  - `storage` and `identity`;
-  - host permissions only for `https://github.com/*`, `https://*.atlassian.net/*` and `PUBLIC_URL`;
-  - optional host permissions for other docs domains, requested at runtime when a user adds a `url` source.
-- **Privacy:** the content script sends only the normalized page URL to `GET /api/page-claims?url=`. It never sends page content, and never runs on hosts outside its permissions.
-- **Server response:** claims for that page if it is a registered source or a scanned public README and the user may see it. Otherwise `{ known: false, canCheck }`.
-- **Rendering:** find each quote in the page's text nodes with a TreeWalker, using whitespace-normalized matching. Wrap matches in a highlight element with a `data-state` attribute:
-  - **Verified:** a quiet solid underline.
-  - **Drifting:** the drift color, with a tooltip showing the evidence and "Open fix."
-  - **Unconfirmed or disputed:** a dotted gray underline.
-  - Never alter the page's layout or text.
-- **Re-rendering:** GitHub and Confluence change pages without full reloads, so watch URL changes and DOM changes with a MutationObserver, debounced to 300 ms.
-- **Popup:**
-  - the page's status and degrees of drift;
-  - "Check this README" on an unknown public GitHub repo page;
-  - "Watch this page for <repo>" on Confluence or docs pages when signed in, choosing from the user's connected repos;
-  - sign in and sign out.
-- **Distribution:** loaded unpacked from `apps/extension/dist` for the demo. Web Store publishing is out of scope.
+The web app handles public README scan requests, connected source registration, and review of stored claim evidence.
 
 ## 8. Engineering non-negotiables
 
@@ -227,7 +206,7 @@ Sources added in the web app or extension are stored on the server, and the plan
 ## 9. Stack
 
 - Bun with Hono on port 8787, SQLite through `bun:sqlite`, Server-Sent Events at `/api/events`.
-- Vite, React and TypeScript for the web app. The Sky uses Canvas 2D with d3 scales. The extension is built with Vite and shares design tokens with the web app.
+- Vite, React and TypeScript for the web app. The Sky uses Canvas 2D with d3 scales.
 - `spectrum-ts` 12.10.x (pin it) with `spectrum-ts/providers/telegram`. In cloud mode (project ID and secret set), the Telegram webhook registers itself and inbound messages arrive on the `app.messages` stream, so run one inbound loop in the server process instead of building a webhook route. Proactive messages use `telegram(app).user(id)` and `space.create(user)`, as shown in `docs/vendor/photon/pages/providers_telegram_conversations-and-features.mdx`. Dedupe inbound work on `message.id`.
 - `@google/genai` with `gemini-3.8-flash` and `gemini-3.5-flash-lite` (spec section 15.11). Never use thinking level `minimal` on 3.8 Flash. Use structured output with JSON schemas.
 - The Action: JavaScript, `runs.using: node24`, bundled to `action/dist/index.js` and committed.
@@ -236,7 +215,6 @@ Sources added in the web app or extension are stored on the server, and the plan
 - Monorepo additions to spec section 7.2:
   - `packages/sources`: source adapters and DocText conversion;
   - `packages/auth`: GitHub sign-in, sessions and access checks;
-  - `apps/extension`;
   - `apps/cli` (optional phase);
   - `deploy/`: the systemd unit, Dockerfile and compose file.
 
@@ -292,7 +270,7 @@ Also list `bun ops extract <file>` for the human to run with a real key.
 ### Phase 4: Server, CI, sign-in, local simulator
 
 **Build:**
-- Every endpoint in spec section 15.9, plus `GET /api/page-claims` and the source endpoints.
+- Every endpoint in spec section 15.9, plus the source endpoints.
 - The verdict model and GitHub sign-in with visibility rules.
 - `bun ops register`, `seed-plan`, `ping-github` and `ping-models`.
 - Server-side regeneration, and polling for wiki, Confluence and URL sources.
@@ -348,17 +326,7 @@ Also list `bun ops extract <file>` for the human to run with a real key.
 - Playwright smoke tests render the Sky from a simulated fixture (legend, simulated label, evidence panel) and the repo view from the phase 4 fixture.
 - Your report describes or screenshots each screen.
 
-### Phase 7: The browser extension
-
-**Build:** everything in section 7, sharing tokens and evidence rendering with the web app.
-
-**Done when:** Playwright launches Chromium with the unpacked extension against local fixture pages (a saved GitHub README page and a Confluence-like page) and a fake server, and verifies:
-- verified, drifting and unconfirmed highlights render without changing page text;
-- the tooltip shows evidence and "Open fix";
-- "Check this README" calls the scan endpoint;
-- no request ever contains page content.
-
-### Phase 8: Proof and polish
+### Phase 7: Proof and polish
 
 **Build:**
 - **Evaluations** from spec section 8.4. Commands needing real keys go in your report.
@@ -377,7 +345,7 @@ Also list `bun ops extract <file>` for the human to run with a real key.
 - The dogfood run passes.
 - Twenty consecutive runs of the phase 5 end-to-end test pass.
 
-### Phase 9 (optional, only after phase 8): the private local command
+### Phase 8 (optional, only after phase 7): the private local command
 
 - **`apps/cli`**, exposing `ground-control check [--path .]`:
   - It runs the same checks on the local checkout.

@@ -105,10 +105,9 @@
   padding: clamp(1rem, 2vw, 1.6rem);
 }
 .report-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: start;
   gap: 0.5rem 1.5rem;
 }
 .report-head h2 {
@@ -124,6 +123,18 @@
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+}
+.report-head-actions .deep-check-state {
+  display: grid;
+  justify-items: end;
+  max-width: 100%;
+  min-width: 0;
+  text-align: right;
+}
+.report-head-actions .deep-check-state p {
+  width: auto;
 }
 .deep-check-link {
   background: transparent;
@@ -155,5 +166,8 @@
   }
   .account-login {
     display: none;
+  }
+  .report-head {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

@@ -6,7 +6,6 @@ export type AuthError = {
   code:
     | "unconfigured"
     | "invalid_state"
-    | "invalid_extension"
     | "invalid_code"
     | "github_unavailable"
     | "invalid_response";
