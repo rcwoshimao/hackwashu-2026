@@ -50,14 +50,17 @@ export const webCopy = {
   skyLegendTopic: "Angle groups repositories by topic.",
   skyLegendLag:
     "Farther from center means more days since the README changed relative to code. Distance uses a compressed scale.",
-  skyLegendStars: "Larger marks mean more GitHub stars, on a log scale.",
+  skyLegendStars:
+    "Larger dots mean more GitHub stars. Crowded dots shrink to make room for every repo.",
   skyLegendDrift:
     "An amber outline means a possible mismatch to review; a broken amber ring means confirmed drift.",
   skyLegendSimulated: "Dashed hollow marks are simulated.",
   skyLegendHolding:
     "Outlined ovals in the outer orbit are your unscanned repos. Their position has no measured meaning.",
+  skyLegendNoChecks:
+    "Hollow circles are scanned READMEs with no checkable results yet. The scan did not fail.",
   skyCanvasAlt:
-    "Representative star chart of repositories by topic, README lag, stars, and check status, with unscanned account repositories in an outer holding orbit. The list below contains every repository for keyboard access.",
+    "Star chart showing every filtered repository by topic, README lag, stars, and check status, with unscanned account repositories in an outer holding orbit. The list below provides keyboard access.",
   skyTopicFrameworks: "Frameworks",
   skyTopicUi: "UI libraries",
   skyTopicBuild: "Build tools",
@@ -67,6 +70,8 @@ export const webCopy = {
   skyOf: "of",
   skyMapShown: "repositories on the map",
   skyMapBrowse: "Browse every repository in the list below",
+  skyMapGuide:
+    "Bigger dot: more stars · Hollow circle: no checkable result · Outer oval: unscanned repo",
   skyFindingsTitle: "Measured findings",
   skyRealCount: "Real repos scanned",
   skyDriftingCount: "Repos with drift",
@@ -168,7 +173,7 @@ export const webCopy = {
   statusDrifting: "Drifting",
   statusCorrected: "Corrected",
   statusLostSignal: "Lost signal",
-  statusNoTelemetry: "No telemetry",
+  statusNoTelemetry: "No verified checks",
   statusPossibleDrift: "Possible drift",
   statusUnknown: "Status unavailable",
   statusSymbolOnCourse: "●",
@@ -222,7 +227,7 @@ export const webCopy = {
   repoDeepAvailable:
     "Own this public repo? Enable deep checks from My repos after signing in.",
   repoScanLimited:
-    "The README was scanned, but there are not enough confirmed checks for a status verdict.",
+    "The README was scanned, but no claim could be checked with the available tiers. This is not a scan failure.",
   repoScanQueued: "Scan requested. This page updates when the check finishes.",
   repoScanFailed: "The README check could not start. Try again.",
   repoPrivatePending:

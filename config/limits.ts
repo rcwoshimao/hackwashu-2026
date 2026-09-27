@@ -16,7 +16,3 @@ export const githubSecondaryLimitWaitMs = 60_000;
 export const githubRateLimitMaxWaitMs = 90_000;
 export const minCheckableClaims = 1;
 export const skyMobileWidthPx = 540;
-export const skyDesktopMarksPerTopic = 4;
-export const skyMobileMarksPerTopic = 2;
-export const skyDesktopHoldingMarks = 12;
-export const skyMobileHoldingMarks = 6;

@@ -124,7 +124,30 @@ test("four marks with the same topic and lag have separate positions", () => {
       );
 });
 
-test("changing representative marks does not change the lag scale", () => {
+test("54 measured repos remain distinct even when several share low lag", () => {
+  const inputs = Array.from({ length: 54 }, (_, index) => ({
+    ...satellite(index),
+    topicCluster: ["UI libraries", "TypeScript", "Other"][index % 3] ?? "Other",
+    readmeLagDays: index < 12 ? 0 : Math.floor((index - 12) ** 1.7),
+    stars: 10 ** (index % 6),
+  }));
+  for (const [width, height] of [
+    [960, 720],
+    [320, 340],
+  ] as const) {
+    const points = layoutSky(inputs, width, height).points;
+    assert.equal(points.length, 54);
+    for (const [index, point] of points.entries())
+      for (const other of points.slice(index + 1))
+        assert.ok(
+          Math.hypot(point.x - other.x, point.y - other.y) >=
+            point.radius + other.radius + 1,
+          `${point.satellite.repo} overlaps ${other.satellite.repo} at ${width}px`,
+        );
+  }
+});
+
+test("changing displayed marks does not change the lag scale", () => {
   const near = { ...satellite(1), readmeLagDays: 30 };
   const zero = { ...satellite(2), readmeLagDays: 0 };
   const far = { ...satellite(3), readmeLagDays: 2_918 };

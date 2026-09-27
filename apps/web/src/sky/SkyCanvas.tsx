@@ -1,12 +1,5 @@
 import { copy } from "@ground-control/copy";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  skyDesktopHoldingMarks,
-  skyDesktopMarksPerTopic,
-  skyMobileHoldingMarks,
-  skyMobileMarksPerTopic,
-  skyMobileWidthPx,
-} from "../../../../config/limits.ts";
 import type { AccountRepoData, Satellite } from "../data.ts";
 import { useArrivals, useCanvasRender, useVisibility } from "./canvasHooks.ts";
 import { layoutBlimps, layoutSky, pickBlimp, pickSatellite } from "./layout.ts";
@@ -68,26 +61,12 @@ export function SkyCanvas({
   const reducedMotion = useReducedMotion();
   const { width, height } = useCanvasSize(containerRef);
   const visibleSatellites = useMemo(
-    () =>
-      selectMapSatellites(
-        satellites,
-        selectedRepo,
-        width < skyMobileWidthPx
-          ? skyMobileMarksPerTopic
-          : skyDesktopMarksPerTopic,
-      ),
-    [satellites, selectedRepo, width],
+    () => selectMapSatellites(satellites),
+    [satellites],
   );
   const visibleUnscanned = useMemo(
-    () =>
-      selectMapBlimps(
-        unscanned,
-        selectedRepo,
-        width < skyMobileWidthPx
-          ? skyMobileHoldingMarks
-          : skyDesktopHoldingMarks,
-      ),
-    [unscanned, selectedRepo, width],
+    () => selectMapBlimps(unscanned),
+    [unscanned],
   );
   const layout = useMemo(
     () => layoutSky(visibleSatellites, width, height, satellites),
@@ -135,8 +114,9 @@ export function SkyCanvas({
         aria-label={copy.skyCanvasAlt}
       />
       <p className="sky-map-count">
-        {`${copy.skyShowing} ${visibleSatellites.length + visibleUnscanned.length} ${copy.skyOf} ${satellites.length + unscanned.length} ${copy.skyMapShown}. ${copy.skyMapBrowse}.`}
+        {`${copy.skyShowing} ${visibleSatellites.length + visibleUnscanned.length} ${copy.skyMapShown}. ${copy.skyMapBrowse}.`}
       </p>
+      <p className="sky-map-guide">{copy.skyMapGuide}</p>
     </div>
   );
 }

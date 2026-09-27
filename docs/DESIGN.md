@@ -26,7 +26,7 @@ Sky · desktop / stage (1920×1080)
 ┌ brand · Sky / Repos / Add source / Connect · account ───────────────┐
 │ title · live/cached/simulated provenance · last scan · scan input   │
 │ ┌ topic/lag star chart, legend and scale ┐ ┌ findings / inspector ┐ │
-│ │ representative measured marks          │ │ selected commit      │ │
+│ │ all measured repository marks          │ │ selected commit      │ │
 │ │ keyboard list directly below chart     │ │ tiers and evidence   │ │
 │ └─────────────────────────────────────────┘ └──────────────────────┘ │
 └──────────────────────────────────────────────────────────────────────┘
@@ -50,9 +50,9 @@ At stage size, headline values and the chart key use at least 24 px. At phone wi
 
 ## Visualization contract
 
-- **Job:** monitor documentation drift across public repos and inspect one repo's evidence. One Sky Canvas2D instance draws up to four representative scans per topic on desktop or two on phone, plus up to twelve or six holding-orbit marks. A repo view has one small SVG trajectory. React owns fetched data, filters, semantic controls, and inspector; the Canvas owns geometry and hit testing.
-- **Encoding:** topic cluster selects one of five angular sectors; README lag days set a monotonic compressed radius; stars set log-scaled dot radius; status sets symbol and brightness. Marks have distinct angular slots within each topic, with a small bounded glide that cannot swap their order. The legend states each mapping. Drift flicker speed follows degrees; reduced-motion users see a static mark. Simulated marks are hollow and dashed.
-- **Interaction:** pointer click selects the nearest displayed mark. The paged searchable list below the chart contains every filtered repository and lets keyboard and screen-reader users select any one; a selected repo enters the representative map. The selected repo is mirrored in `?repo=owner/name`; browser Back restores it. The inspector links to exact run evidence when available. A tap/focus replaces hover on touch and keyboard.
+- **Job:** monitor documentation drift across public repos and inspect one repo's evidence. One Sky Canvas2D instance draws every repository in the active filter, including unscanned holding-orbit marks. A repo view has one small SVG trajectory. React owns fetched data, filters, semantic controls, and inspector; the Canvas owns geometry and hit testing.
+- **Encoding:** topic cluster selects one of five angular sectors; README lag days set a monotonic compressed radius; stars set log-scaled dot radius; status sets symbol and brightness. Repositories in each radial band receive angular slots, and crowded marks shrink to avoid overlap. The visible guide and expandable legend state each mapping. Drift flicker speed follows degrees; reduced-motion users see a static mark. Simulated marks are hollow and dashed.
+- **Interaction:** pointer click selects the nearest mark. The paged searchable list below the chart contains every filtered repository and lets keyboard and screen-reader users select any one. The selected repo is mirrored in `?repo=owner/name`; browser Back restores it. The inspector links to exact run evidence when available. A tap/focus replaces hover on touch and keyboard.
 - **Data state:** `/api/sky` is the source of truth. `live`, `cached`, and `simulated` are shown by name with `updatedAt`. Findings are derived from non-simulated entries only. A failed refresh keeps the previous snapshot with an offline message; no snapshot gets an actionable empty state. Server-Sent Events trigger bounded refreshes while visible.
 - **Performance:** layout is computed once per data/size change with d3 scales, using the full filtered set for stable scale extents. Canvas DPR is capped at 2. The chart turns once every five minutes and each mark glides within its own topic slot, with inner marks faster (period ∝ radius^1.5); radius never animates, so README lag stays exact. Animation runs only while visible; reduced motion is static. Pointer picking uses the displayed point array. The list offers a non-Canvas fallback. No WebGL context is needed.
 - **Trajectory:** each run's confirmed check results define its drift angle; the chart never infers an angle from `failingCount` alone. If run detail is unavailable, the telemetry list remains and the trajectory says why it is absent.

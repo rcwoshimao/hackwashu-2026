@@ -39,24 +39,24 @@ function blimp(index: number): AccountRepoData {
   };
 }
 
-test("the map limits five topics while retaining the selected scanned repo", () => {
+test("the map keeps every scanned repo at desktop and phone sizes", () => {
   const all = Array.from({ length: 500 }, (_, index) => satellite(index));
-  const desktop = selectMapSatellites(all, "team/repo-249", 4);
-  const mobile = selectMapSatellites(all, "team/repo-249", 2);
-  assert.equal(desktop.length, 20);
-  assert.equal(mobile.length, 10);
+  const desktop = selectMapSatellites(all);
+  const mobile = selectMapSatellites(all);
+  assert.equal(desktop.length, 500);
+  assert.equal(mobile.length, 500);
   assert.ok(desktop.some((item) => item.repo === "team/repo-249"));
   assert.ok(mobile.some((item) => item.repo === "team/repo-249"));
   assert.equal(new Set(desktop.map((item) => item.repo)).size, desktop.length);
-  assert.deepEqual(selectMapSatellites(all, "team/repo-249", 4), desktop);
+  assert.deepEqual(selectMapSatellites(all), desktop);
 });
 
-test("the holding orbit samples many repos and keeps the selected one", () => {
+test("the holding orbit keeps every unscanned repo at desktop and phone sizes", () => {
   const all = Array.from({ length: 500 }, (_, index) => blimp(index));
-  const desktop = selectMapBlimps(all, "owner/unscanned-249", 12);
-  const mobile = selectMapBlimps(all, "owner/unscanned-249", 6);
-  assert.equal(desktop.length, 12);
-  assert.equal(mobile.length, 6);
+  const desktop = selectMapBlimps(all);
+  const mobile = selectMapBlimps(all);
+  assert.equal(desktop.length, 500);
+  assert.equal(mobile.length, 500);
   assert.ok(desktop.some((item) => item.repo === "owner/unscanned-249"));
   assert.ok(mobile.some((item) => item.repo === "owner/unscanned-249"));
 });
