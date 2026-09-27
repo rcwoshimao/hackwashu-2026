@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api.ts";
 import type { RepoData } from "../data.ts";
+import { repoEventNames, watchEvents } from "../realtime.ts";
 
 export function useRepo(repo: string): {
   data: RepoData | null;
@@ -21,7 +22,13 @@ export function useRepo(repo: string): {
       setLoading(false);
     };
     void load();
-    return () => controller.abort();
+    const events = new EventSource("/api/events");
+    const stop = watchEvents(events, repoEventNames, () => void load());
+    return () => {
+      controller.abort();
+      stop();
+      events.close();
+    };
   }, [repo]);
   return { data, loading, denied };
 }

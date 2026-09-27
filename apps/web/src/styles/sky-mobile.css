@@ -1,4 +1,7 @@
 @media (max-width: 760px) {
+  .sky-catalog-controls {
+    grid-template-columns: 1fr;
+  }
   .sky-heading {
     align-items: start;
     gap: 0.9rem;

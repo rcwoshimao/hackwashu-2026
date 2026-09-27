@@ -1,7 +1,7 @@
 import { type RefObject, useEffect, useRef, useState } from "react";
 import type { Satellite } from "../data.ts";
 import { drawSky } from "./draw.ts";
-import type { SkyLayout } from "./layout.ts";
+import type { BlimpPoint, SkyLayout } from "./layout.ts";
 
 export function useArrivals(
   satellites: Satellite[],
@@ -55,6 +55,7 @@ type DrawInput = {
   reducedMotion: boolean;
   arrivals: ReadonlyMap<string, number>;
   drifting: boolean;
+  blimps: BlimpPoint[];
 };
 
 function startDrawing(input: DrawInput): () => void {
@@ -75,6 +76,7 @@ function startDrawing(input: DrawInput): () => void {
       input.selectedRepo,
       input.reducedMotion,
       input.arrivals,
+      input.blimps,
     );
     const arriving = [...input.arrivals.values()].some(
       (start) => timeMs - start < 850,
@@ -94,6 +96,7 @@ export function useCanvasRender(
   reducedMotion: boolean,
   arrivals: RefObject<Map<string, number>>,
   visible: boolean,
+  blimps: BlimpPoint[],
 ): void {
   useEffect(() => {
     if (!ref.current || !visible) return;
@@ -110,6 +113,16 @@ export function useCanvasRender(
       reducedMotion,
       arrivals: arrivals.current,
       drifting,
+      blimps,
     });
-  }, [ref, layout, satellites, selectedRepo, reducedMotion, arrivals, visible]);
+  }, [
+    ref,
+    layout,
+    satellites,
+    selectedRepo,
+    reducedMotion,
+    arrivals,
+    visible,
+    blimps,
+  ]);
 }

@@ -1,5 +1,5 @@
 import { scaleLinear, scaleLog } from "d3-scale";
-import type { Satellite } from "../data.ts";
+import type { AccountRepoData, Satellite } from "../data.ts";
 
 export const topicKeys = [
   "frameworks",
@@ -26,6 +26,12 @@ export type SkyLayout = {
   outerRadius: number;
   maxLagDays: number;
   maxStars: number;
+};
+export type BlimpPoint = {
+  repo: AccountRepoData;
+  x: number;
+  y: number;
+  radius: number;
 };
 
 function stableFraction(value: string): number {
@@ -121,4 +127,44 @@ export function pickSatellite(
     }
   }
   return picked?.satellite ?? null;
+}
+
+export function layoutBlimps(
+  repos: AccountRepoData[],
+  layout: SkyLayout,
+): BlimpPoint[] {
+  const sorted = [...repos].sort((left, right) =>
+    left.repo.localeCompare(right.repo),
+  );
+  const ringCount = 3;
+  return sorted.map((repo, index) => {
+    const ring = index % ringCount;
+    const position = Math.floor(index / ringCount);
+    const count = Math.ceil((sorted.length - ring) / ringCount);
+    const angle = -Math.PI / 2 + (position * Math.PI * 2) / Math.max(1, count);
+    const distance = layout.outerRadius + 9 + ring * 10;
+    return {
+      repo,
+      x: layout.centerX + Math.cos(angle) * distance,
+      y: layout.centerY + Math.sin(angle) * distance,
+      radius: 3.5,
+    };
+  });
+}
+
+export function pickBlimp(
+  points: BlimpPoint[],
+  x: number,
+  y: number,
+): AccountRepoData | null {
+  let nearest: BlimpPoint | null = null;
+  let distance = Number.POSITIVE_INFINITY;
+  for (const point of points) {
+    const next = Math.hypot(point.x - x, point.y - y);
+    if (next < distance && next <= 10) {
+      nearest = point;
+      distance = next;
+    }
+  }
+  return nearest?.repo ?? null;
 }

@@ -5,6 +5,21 @@
   gap: 2rem;
   margin: 0.8rem 0 2rem;
 }
+.repo-scan-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.4rem;
+}
+.repo-scan-status h2 {
+  margin-bottom: 0.4rem;
+}
+.repo-scan-status p {
+  color: var(--mist);
+  margin-bottom: 0.3rem;
+}
 .repo-heading h1 {
   overflow-wrap: anywhere;
   margin-bottom: 0.7rem;

@@ -12,13 +12,16 @@ export function registerAccountRoutes(app: Hono, deps: ApiDeps): void {
     return c.json({
       repos: listed.value.repos.map((item) => {
         const stored = deps.store.getRepo(item.repo);
+        const current = stored?.visibility === item.visibility ? stored : null;
         return {
           ...item,
-          connected:
-            stored?.connected === true && stored.visibility === item.visibility,
+          connected: current?.connected === true,
+          checked:
+            current?.latestRunId !== null && current?.latestRunId !== undefined,
+          label: current?.latestRunId ? current.label : null,
           scanned:
             item.visibility === "public" &&
-            stored?.visibility === "public" &&
+            current !== null &&
             deps.store.getSatellite(item.repo) !== null,
         };
       }),

@@ -4,6 +4,7 @@ import { StatusBadge } from "../components/StatusBadge.tsx";
 import type { RepoData, SourceData } from "../data.ts";
 import { readableDate, safeExternalUrl } from "../presentation.ts";
 import { SourceSync } from "../sources/SourceSync.tsx";
+import { RepoScanStatus } from "./RepoScanStatus.tsx";
 import { Trajectory } from "./Trajectory.tsx";
 import { useRepo } from "./useRepo.ts";
 
@@ -146,10 +147,17 @@ function RepoContent({ data }: { data: RepoData }) {
             {data.visibility === "private" ? copy.repoPrivate : copy.repoPublic}
           </p>
           <h1>{data.repo}</h1>
-          <StatusBadge label={data.label} />
+          {data.visibility === "public" && data.scan === null ? (
+            <span className="status-badge no-telemetry">
+              {copy.repoNotScanned}
+            </span>
+          ) : (
+            <StatusBadge label={data.label} />
+          )}
         </div>
         {data.runs.length > 0 && <DegreesDial degrees={data.driftDegrees} />}
       </header>
+      <RepoScanStatus data={data} />
       <Trajectory repo={data} />
       <div className="repo-panels">
         <SourceList data={data} />

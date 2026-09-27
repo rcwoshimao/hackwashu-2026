@@ -3,7 +3,7 @@ import { createApi, seedLocalDemo } from "../src/index.ts";
 import { json, login, setup } from "./fixture.ts";
 
 describe("local API", () => {
-  test("health, honest simulated sky, and unknown page", async () => {
+  test("normal Sky hides seeded demo data and offers explicit demo mode", async () => {
     const { app, store } = setup();
     seedLocalDemo(store, new Date("2026-09-26T12:00:00Z"));
     seedLocalDemo(store, new Date());
@@ -14,10 +14,27 @@ describe("local API", () => {
       driftingCount: 0,
       medianLagDays: null,
     });
-    expect(sky.satellites).toHaveLength(3);
-    expect(
-      sky.satellites.every((item: { simulated: boolean }) => item.simulated),
-    ).toBe(true);
+    expect(sky.satellites).toHaveLength(0);
+    expect(sky.mode).toBe("empty");
+    const demo = await (await app.request("/api/sky?demo=1")).json();
+    expect(demo.satellites).toHaveLength(3);
+    expect(demo.mode).toBe("simulated");
+    store.putSatellite({
+      repo: "owner/real",
+      stars: 10,
+      topicCluster: "Other",
+      readmeLagDays: 3,
+      label: "On course",
+      driftDegrees: 0,
+      commitSha: "abcdef0",
+      scannedAt: "2026-09-26T12:00:00Z",
+      tiersRun: ["static"],
+      simulated: false,
+    });
+    const real = await (await app.request("/api/sky?demo=1")).json();
+    expect(real.satellites.map((item: { repo: string }) => item.repo)).toEqual([
+      "owner/real",
+    ]);
     const page = await (
       await app.request("/api/page-claims?url=https%3A%2F%2Fexample.com")
     ).json();
@@ -90,6 +107,22 @@ describe("local API", () => {
       expect(result.claims[0].tooltip).toContain("Verified at abcdef0");
       expect(result.claims[0].tooltip).toContain("Expected: exists");
     }
+  });
+
+  test("connected public repo reports an unscanned state before a README check", async () => {
+    const { app, store } = setup();
+    store.putRepo({
+      repo: "owner/connected",
+      visibility: "public",
+      connected: true,
+      tokenHash: null,
+      label: "No telemetry",
+      driftDegrees: 0,
+      latestRunId: null,
+    });
+    const response = await app.request("/api/repos/owner/connected");
+    expect(response.status).toBe(200);
+    expect((await response.json()).scan).toBeNull();
   });
 
   test("OAuth session gates private routes and signout", async () => {

@@ -1,11 +1,12 @@
 import { copy } from "@ground-control/copy";
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Satellite } from "../data.ts";
+import type { AccountRepoData, Satellite } from "../data.ts";
 import { useArrivals, useCanvasRender, useVisibility } from "./canvasHooks.ts";
-import { layoutSky, pickSatellite } from "./layout.ts";
+import { layoutBlimps, layoutSky, pickBlimp, pickSatellite } from "./layout.ts";
 
 type Props = {
   satellites: Satellite[];
+  unscanned: AccountRepoData[];
   selectedRepo: string | null;
   onSelect: (repo: string) => void;
 };
@@ -47,7 +48,12 @@ function useCanvasSize(ref: React.RefObject<HTMLDivElement | null>): {
   return size;
 }
 
-export function SkyCanvas({ satellites, selectedRepo, onSelect }: Props) {
+export function SkyCanvas({
+  satellites,
+  unscanned,
+  selectedRepo,
+  onSelect,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const reducedMotion = useReducedMotion();
@@ -55,6 +61,10 @@ export function SkyCanvas({ satellites, selectedRepo, onSelect }: Props) {
   const layout = useMemo(
     () => layoutSky(satellites, width, height),
     [satellites, width, height],
+  );
+  const blimps = useMemo(
+    () => layoutBlimps(unscanned, layout),
+    [unscanned, layout],
   );
   const arrivals = useArrivals(satellites);
   const visible = useVisibility(containerRef);
@@ -66,16 +76,19 @@ export function SkyCanvas({ satellites, selectedRepo, onSelect }: Props) {
     reducedMotion,
     arrivals,
     visible,
+    blimps,
   );
 
   const onPointerSelect = (event: React.PointerEvent<HTMLCanvasElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
-    const picked = pickSatellite(
-      layout,
-      ((event.clientX - bounds.left) * width) / bounds.width,
-      ((event.clientY - bounds.top) * height) / bounds.height,
-    );
-    if (picked) onSelect(picked.repo);
+    const x = ((event.clientX - bounds.left) * width) / bounds.width;
+    const y = ((event.clientY - bounds.top) * height) / bounds.height;
+    const blimp = pickBlimp(blimps, x, y);
+    if (blimp) onSelect(blimp.repo);
+    else {
+      const picked = pickSatellite(layout, x, y);
+      if (picked) onSelect(picked.repo);
+    }
   };
 
   return (

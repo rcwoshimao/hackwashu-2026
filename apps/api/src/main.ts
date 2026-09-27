@@ -23,19 +23,13 @@ import { ConfluenceCloud } from "@ground-control/sources";
 import { SqliteStore } from "@ground-control/store";
 import { planPublishDebounceMs } from "../../../config/limits.ts";
 import { OctokitCommitAuthor } from "./commit-author.ts";
-import {
-  createApi,
-  EventHub,
-  GitHubCommitStatus,
-  seedLocalDemo,
-} from "./index.ts";
+import { createApi, EventHub, GitHubCommitStatus } from "./index.ts";
 import { startMessaging } from "./messaging.ts";
 import { FlightPlanPublishQueue } from "./publish-schedule.ts";
 
 const dbPath = process.env.DATABASE_PATH || "data/groundcontrol.db";
 mkdirSync(dirname(dbPath), { recursive: true });
 const store = new SqliteStore(dbPath);
-seedLocalDemo(store, new Date());
 const publicUrl = (process.env.PUBLIC_URL || "http://localhost:8787").replace(
   /\/$/,
   "",

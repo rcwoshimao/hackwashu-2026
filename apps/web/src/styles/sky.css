@@ -6,6 +6,36 @@
   flex-wrap: wrap;
   margin-bottom: 1.5rem;
 }
+.sky-catalog-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+}
+.sky-catalog-controls label {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+.sky-catalog-pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 0.8rem;
+}
+.sky-holding-note {
+  margin: 1.2rem 0;
+}
+.sky-bulk-scan {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin: 0 0 1.2rem;
+}
+.sky-bulk-scan p {
+  margin: 0;
+}
 .sky-heading h1 {
   margin-bottom: 0.35rem;
 }

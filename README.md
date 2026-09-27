@@ -9,16 +9,16 @@ Ground Control checks whether repository documentation still agrees with the cod
 3. From this directory, run `docker compose up --build -d`.
 4. Open `http://localhost:8877` in this workspace, or `http://localhost:8787` when using the example's default port. `docker compose ps` should show a healthy container; `/healthz` returns `ok`.
 
-With no keys, the Sky starts with three clearly simulated satellites and zero measured findings. You can still check an individual public repo through the web app, subject to GitHub's anonymous API limit; the result is a real static scan saved by commit. Add `GITHUB_SCAN_TOKEN` and `GEMINI_API_KEY` to `.env`, then run `docker compose up -d` to enable a larger real scan and AI extraction. For example:
+With no keys or scans, the Sky starts empty and reports zero measured findings. You can still check an individual public repo through the web app, subject to GitHub's anonymous API limit; the result is a real static scan saved by commit. Add `GITHUB_SCAN_TOKEN` and `GEMINI_API_KEY` to `.env`, then run `docker compose up -d` to enable a larger real scan and AI extraction. For example:
 
 ```sh
 docker compose exec groundcontrol bun ops sky:scan --top 20 --tiers static,ai
 docker compose exec groundcontrol bun ops sky:scan --top 500 --tiers static,ai
 ```
 
-The first command is a useful key check before starting all 500. `bun ops sky:simulate --fill-to 500` adds visibly simulated layout filler; simulated records never count toward findings. The server stores scan results in a Docker volume and serves the web app from the same container.
+The first command is a useful key check before starting all 500. `bun ops sky:simulate --fill-to 500` adds labeled layout filler only for an explicit demo; the normal Sky hides it. The server stores scan results in a Docker volume and serves the web app from the same container.
 
-After signing in with GitHub, open **My repos**. Ground Control lists up to 500 recently updated repositories your OAuth account can access, including private repositories, without scanning or connecting them. Search the list, choose **Check README** on one public repository, or choose **Scan all public READMEs** to request checks for the eligible public repositories shown. The scan results are saved and join the Sky. For a private repository you administer, choose **Connect** to get the one-time Actions token and opt in to runtime checks. Private repositories are never included in the public bulk scan. The header shows your GitHub login while signed in.
+After signing in with GitHub, open **My repos**. Ground Control lists up to 500 recently updated repositories your OAuth account can access, including private repositories, without scanning or connecting them. Search or filter the list, browse 12 at a time, choose **Check README** on one public repository, or choose **Scan all public READMEs**. The signed-in Sky shows unscanned account repositories in a separate holding orbit, with scope and scan-state filters, quick search, and a 20-row list. Scanned public repos use measured positions; saved private CI results appear as distinct checked marks. For a private repository you administer, choose **Connect** to opt in to runtime checks. Private repositories are never included in the public bulk scan.
 
 ## Test the drift loop locally
 
@@ -49,6 +49,6 @@ Create a Photon Spectrum project with a cloud iMessage line, then set `SPECTRUM_
 - Every public repository receives static and optional AI checks only. A connected public repo can sync documentation sources but receives no Actions token or generated flightcheck commits. Public scans never install dependencies, run package scripts, run generated tests, or execute repository code, even if a user submits a URL or connects the repo.
 - Runtime checks require an explicitly connected private repository. They run in its secret-free GitHub Actions job or when its owner opts in from a local checkout. The bundled Orbit fixture has a separate explicit rehearsal command.
 - Source text sent through the AI tier goes to Gemini. A self-hosted company can leave `GEMINI_API_KEY` unset and use only local static checks.
-- The initial Sky data is labeled simulated until you run a real scan. Every real result records its commit SHA and tiers run.
+- The normal Sky shows actual saved scans and signed-in account inventory. Demo marks require an explicit `?demo=1` API request and never count toward findings. Every real result records its commit SHA and tiers run.
 
 Azure deployment is intentionally deferred.

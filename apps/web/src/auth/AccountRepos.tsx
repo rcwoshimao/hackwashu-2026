@@ -1,129 +1,10 @@
 import { copy } from "@ground-control/copy";
 import { useEffect, useMemo, useState } from "react";
 import { api, type Connection } from "../api.ts";
+import { accountRepoRowsPerPage } from "../config.ts";
 import type { AccountRepoData } from "../data.ts";
-import { ConnectResult } from "./ConnectResult.tsx";
-
-type ScanState = "pending" | "queued" | "cached" | "failed";
-
-function canScan(repo: AccountRepoData): boolean {
-  return repo.visibility === "public" && !repo.archived && !repo.fork;
-}
-
-function RepoActions({
-  repo,
-  busy,
-  connecting,
-  scanState,
-  onScan,
-  onConnect,
-}: {
-  repo: AccountRepoData;
-  busy: boolean;
-  connecting: boolean;
-  scanState: ScanState | undefined;
-  onScan: () => void;
-  onConnect: () => void;
-}) {
-  return (
-    <div className="account-repo-actions">
-      {canScan(repo) && (
-        <button type="button" disabled={busy} onClick={onScan}>
-          {scanState === "pending"
-            ? copy.accountReposScanning
-            : copy.accountReposScan}
-        </button>
-      )}
-      {repo.canAdmin && !repo.connected && (
-        <button
-          type="button"
-          className="button-secondary"
-          disabled={busy}
-          onClick={onConnect}
-        >
-          {connecting ? copy.accountReposConnecting : copy.accountReposConnect}
-        </button>
-      )}
-      {(repo.scanned || repo.connected) && (
-        <a
-          href={`/repos/${repo.repo.split("/").map(encodeURIComponent).join("/")}`}
-        >
-          {copy.accountReposOpenResult}
-        </a>
-      )}
-    </div>
-  );
-}
-
-function RepoRow({
-  repo,
-  busy,
-  connecting,
-  scanState,
-  connection,
-  connectError,
-  onScan,
-  onConnect,
-}: {
-  repo: AccountRepoData;
-  busy: boolean;
-  connecting: boolean;
-  scanState: ScanState | undefined;
-  connection: Connection | undefined;
-  connectError: boolean;
-  onScan: () => void;
-  onConnect: () => void;
-}) {
-  const scanText = {
-    pending: copy.accountReposScanning,
-    queued: copy.accountReposScanQueued,
-    cached: copy.accountReposScanCached,
-    failed: copy.accountReposScanFailed,
-  };
-  return (
-    <li className="account-repo-item">
-      <div className="account-repo-topline">
-        <strong>{repo.repo}</strong>
-        <span className="account-repo-tags">
-          <span>
-            {repo.visibility === "private"
-              ? copy.accountReposPrivate
-              : copy.accountReposPublic}
-          </span>
-          {repo.archived && <span>{copy.accountReposArchived}</span>}
-          {repo.fork && <span>{copy.accountReposFork}</span>}
-          {repo.connected && <span>{copy.accountReposConnected}</span>}
-          {repo.scanned && <span>{copy.accountReposScanned}</span>}
-        </span>
-      </div>
-      {repo.description && <p>{repo.description}</p>}
-      {repo.language && <small>{repo.language}</small>}
-      <RepoActions
-        repo={repo}
-        busy={busy}
-        connecting={connecting}
-        scanState={scanState}
-        onScan={onScan}
-        onConnect={onConnect}
-      />
-      {!repo.canAdmin && repo.visibility === "private" && (
-        <p className="form-hint">{copy.accountReposNotAdmin}</p>
-      )}
-      {scanState && (
-        <p className="form-hint" role="status">
-          {scanText[scanState]}
-        </p>
-      )}
-      {connection && (
-        <ConnectResult
-          connection={connection}
-          serverUrl={window.location.origin}
-        />
-      )}
-      {connectError && <p role="alert">{copy.accountReposConnectFailed}</p>}
-    </li>
-  );
-}
+import { accountEventNames, watchEvents } from "../realtime.ts";
+import { canScan, RepoRow, type ScanState } from "./AccountRepoRow.tsx";
 
 export function AccountRepos() {
   const [repos, setRepos] = useState<AccountRepoData[]>([]);
@@ -131,6 +12,8 @@ export function AccountRepos() {
   const [failed, setFailed] = useState(false);
   const [truncated, setTruncated] = useState(false);
   const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
   const [busyRepo, setBusyRepo] = useState<string | null>(null);
   const [connectingRepo, setConnectingRepo] = useState<string | null>(null);
   const [bulkProgress, setBulkProgress] = useState<{
@@ -148,23 +31,53 @@ export function AccountRepos() {
 
   useEffect(() => {
     const controller = new AbortController();
-    void api.accountRepos(controller.signal).then((result) => {
+    const refresh = async () => {
+      const result = await api.accountRepos(controller.signal);
       if (controller.signal.aborted) return;
       if (result.ok) {
         setRepos(result.value.repos);
         setTruncated(result.value.truncated);
       } else setFailed(true);
       setLoading(false);
-    });
-    return () => controller.abort();
+    };
+    void refresh();
+    const events = new EventSource("/api/events");
+    let timer = 0;
+    const schedule = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => void refresh(), 500);
+    };
+    const stop = watchEvents(events, accountEventNames, schedule);
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+      stop();
+      events.close();
+    };
   }, []);
 
   const shown = useMemo(() => {
     const term = query.trim().toLowerCase();
-    return repos.filter((repo) =>
-      `${repo.repo} ${repo.description ?? ""}`.toLowerCase().includes(term),
-    );
-  }, [repos, query]);
+    return repos.filter((repo) => {
+      const matches = `${repo.repo} ${repo.description ?? ""}`
+        .toLowerCase()
+        .includes(term);
+      return (
+        matches &&
+        (filter === "all" ||
+          (filter === "unscanned"
+            ? !repo.scanned && !repo.checked
+            : repo.visibility === filter))
+      );
+    });
+  }, [repos, query, filter]);
+  const pageCount = Math.max(
+    1,
+    Math.ceil(shown.length / accountRepoRowsPerPage),
+  );
+  const currentPage = Math.min(page, pageCount);
+  const pageStart = (currentPage - 1) * accountRepoRowsPerPage;
+  const visible = shown.slice(pageStart, pageStart + accountRepoRowsPerPage);
   const scannable = repos.filter(canScan);
   const bulkActive =
     bulkProgress !== null && bulkProgress.done < bulkProgress.total;
@@ -246,9 +159,32 @@ export function AccountRepos() {
               <input
                 id="account-repo-search"
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setQuery(event.target.value);
+                  setPage(1);
+                }}
                 placeholder={copy.accountReposSearchPlaceholder}
               />
+            </div>
+            <div>
+              <label htmlFor="account-repo-filter">
+                {copy.accountReposFilter}
+              </label>
+              <select
+                id="account-repo-filter"
+                value={filter}
+                onChange={(event) => {
+                  setFilter(event.target.value);
+                  setPage(1);
+                }}
+              >
+                <option value="all">{copy.accountReposFilterAll}</option>
+                <option value="public">{copy.accountReposPublic}</option>
+                <option value="private">{copy.accountReposPrivate}</option>
+                <option value="unscanned">
+                  {copy.accountReposFilterUnscanned}
+                </option>
+              </select>
             </div>
             <button
               type="button"
@@ -274,7 +210,7 @@ export function AccountRepos() {
             <p>{copy.accountReposNoMatches}</p>
           ) : (
             <ul className="account-repo-list">
-              {shown.map((repo) => (
+              {visible.map((repo) => (
                 <RepoRow
                   key={repo.repo}
                   repo={repo}
@@ -288,6 +224,30 @@ export function AccountRepos() {
                 />
               ))}
             </ul>
+          )}
+          {shown.length > accountRepoRowsPerPage && (
+            <nav
+              className="account-repo-pages"
+              aria-label={copy.accountReposTitle}
+            >
+              <button
+                type="button"
+                disabled={currentPage <= 1}
+                onClick={() => setPage(currentPage - 1)}
+              >
+                {copy.accountReposPagePrevious}
+              </button>
+              <span className="mono">
+                {currentPage} {copy.accountReposPageOf} {pageCount}
+              </span>
+              <button
+                type="button"
+                disabled={currentPage >= pageCount}
+                onClick={() => setPage(currentPage + 1)}
+              >
+                {copy.accountReposPageNext}
+              </button>
+            </nav>
           )}
         </>
       )}

@@ -13,7 +13,7 @@ This setup uses one Bun server, a built React web app, and a SQLite file in a Do
 
 The container serves only on `127.0.0.1` by default. To test from another machine, set up an HTTPS reverse proxy or tunnel, set `PUBLIC_URL` to that HTTPS origin, and configure the matching GitHub OAuth callback.
 
-With GitHub OAuth configured, sign in and open **My repos** (`/signin`). The header displays your GitHub login. The account page automatically lists up to 500 recently updated repositories GitHub says you can access. Listing them does not connect or scan them. Choose **Check README** beside one eligible public repo, or **Scan all public READMEs** to request checks for all eligible public repos in the displayed list. Private repos require an explicit **Connect** action before CI checks; they are not part of the bulk public scan. If `SESSION_SECRET` is blank, the server generates a new signing secret on restart, so you must sign in again after rebuilding the container.
+With GitHub OAuth configured, sign in and open **My repos** (`/signin`). The header displays your GitHub login. The account page automatically lists up to 500 recently updated repositories GitHub says you can access, with search, filters, and 12-row pages. Listing them does not connect or scan them. Choose **Check README** beside one eligible public repo, or **Scan all public READMEs** to request checks for all eligible public repos in the inventory. The signed-in Sky also shows unscanned account repositories in a holding orbit and offers a bulk public scan. Private repos require an explicit **Connect** action before CI checks; they are not part of the bulk public scan. If `SESSION_SECRET` is blank, the server generates a new signing secret on restart, so you must sign in again after rebuilding the container.
 
 ## Add keys in `.env`
 
@@ -55,7 +55,7 @@ docker compose exec groundcontrol bun ops sky:scan --top 20 --tiers static,ai
 docker compose exec groundcontrol bun ops sky:scan --top 500 --tiers static,ai
 ```
 
-The larger scan makes many GitHub and Gemini calls, may take a while, and uses your account quota. It selects popular JavaScript and TypeScript repos with a Markdown README and root `package.json`. Results are stored in SQLite; rerunning an unchanged repo reuses its commit result. `sky:simulate --fill-to 500` adds labeled filler only when you need to inspect the layout before a full scan. `sky:export` writes the current snapshot to `/app/data/sky.json` in the Docker volume, including any visibly simulated records; the live Sky uses SQLite.
+The larger scan makes many GitHub and Gemini calls, may take a while, and uses your account quota. It selects popular JavaScript and TypeScript repos with a Markdown README and root `package.json`. Results are stored in SQLite; rerunning an unchanged repo reuses its commit result. `sky:simulate --fill-to 500` adds labeled filler only when you need to inspect the layout before a full scan. `sky:export` writes the current snapshot to `/app/data/sky.json` in the Docker volume, including any simulated records; the normal live Sky hides them.
 
 ## Connected repositories
 

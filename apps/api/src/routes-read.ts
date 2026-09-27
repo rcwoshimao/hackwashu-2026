@@ -28,16 +28,24 @@ function median(values: number[]): number | null {
   return ((sorted[middle - 1] ?? 0) + (sorted[middle] ?? 0)) / 2;
 }
 
-function sky(store: AppStore, now: Date) {
-  const satellites = store
+function sky(store: AppStore, now: Date, demo: boolean) {
+  const available = store
     .listSatellites()
     .filter(
       (item) =>
         item.simulated || store.getRepo(item.repo)?.visibility !== "private",
     );
-  const real = satellites.filter((item) => !item.simulated);
+  const real = available.filter((item) => !item.simulated);
+  const satellites = demo && real.length === 0 ? available : real;
   return {
-    mode: store.getSkyMode(),
+    mode:
+      satellites.length === 0
+        ? "empty"
+        : real.length === 0
+          ? "simulated"
+          : store.getSkyMode() === "cached"
+            ? "cached"
+            : "live",
     updatedAt: now.toISOString(),
     satellites,
     findings: {
@@ -45,6 +53,17 @@ function sky(store: AppStore, now: Date) {
       driftingCount: real.filter((item) => item.label === "Drifting").length,
       medianLagDays: median(real.map((item) => item.readmeLagDays)),
     },
+  };
+}
+
+function publicScan(store: AppStore, repo: RepoRecord) {
+  if (repo.visibility !== "public") return null;
+  const satellite = store.getSatellite(repo.repo);
+  if (!satellite || satellite.simulated) return null;
+  return {
+    commitSha: satellite.commitSha,
+    scannedAt: satellite.scannedAt,
+    tiersRun: satellite.tiersRun,
   };
 }
 
@@ -60,6 +79,7 @@ function repoView(
     label: repo.label,
     driftDegrees: repo.driftDegrees,
     latestRunId: repo.latestRunId,
+    scan: publicScan(store, repo),
     sources: sources.map(({ id, kind, title, url, claimCount }) => ({
       id,
       kind,
@@ -244,7 +264,9 @@ function registerOtherReadRoutes(app: Hono, deps: ApiDeps): void {
 
 export function registerReadRoutes(app: Hono, deps: ApiDeps): void {
   app.get("/healthz", (c) => c.text("ok"));
-  app.get("/api/sky", (c) => c.json(sky(deps.store, deps.now())));
+  app.get("/api/sky", (c) =>
+    c.json(sky(deps.store, deps.now(), c.req.query("demo") === "1")),
+  );
   app.get("/api/events", (c) => eventStream(deps, c.req.raw));
   registerRepoReadRoutes(app, deps);
   registerOtherReadRoutes(app, deps);

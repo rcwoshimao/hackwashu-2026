@@ -25,7 +25,7 @@ export function SkyLegend() {
         </p>
         <p>
           <span aria-hidden="true">◌</span>
-          {copy.skyLegendSimulated}
+          {copy.skyLegendHolding}
         </p>
       </div>
       <div className="topic-key">

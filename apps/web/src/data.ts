@@ -14,7 +14,7 @@ export const satelliteSchema = z.object({
 });
 
 export const skySchema = z.object({
-  mode: z.enum(["live", "cached", "simulated"]),
+  mode: z.enum(["live", "cached", "simulated", "empty"]),
   updatedAt: z.string(),
   satellites: z.array(satelliteSchema),
   findings: z.object({
@@ -55,6 +55,13 @@ export const repoSchema = z.object({
   label: z.string(),
   driftDegrees: z.number().min(0).max(90),
   latestRunId: z.string().nullable(),
+  scan: z
+    .object({
+      commitSha: z.string(),
+      scannedAt: z.string(),
+      tiersRun: z.array(z.string()),
+    })
+    .nullable(),
   sources: z.array(sourceSchema),
   runs: z.array(runSummarySchema),
 });
@@ -114,6 +121,8 @@ export const accountRepoSchema = z.object({
   archived: z.boolean(),
   fork: z.boolean(),
   connected: z.boolean(),
+  checked: z.boolean(),
+  label: z.string().nullable(),
   scanned: z.boolean(),
 });
 

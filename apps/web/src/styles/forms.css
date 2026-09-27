@@ -124,6 +124,16 @@
 .account-repo-actions .button-secondary:hover {
   background: var(--hull);
 }
+.account-repo-pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.3rem;
+}
+.account-repo-pages button {
+  margin: 0;
+}
 
 .imessage-link p {
   color: var(--mist);
