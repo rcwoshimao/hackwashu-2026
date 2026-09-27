@@ -212,6 +212,24 @@ export const webCopy = {
   repoFindingOpenRun: "View all check evidence",
   repoFindingsMore: "More findings are in the full check evidence.",
   repoFindingLoading: "Loading saved check results…",
+  findingFix: "Fix with a pull request",
+  findingFixAll: "Fix all in one pull request",
+  findingFixPending: "Drafting a correction…",
+  findingFixWorking:
+    "An AI model is drafting a README edit from your repository's files. This can take a minute.",
+  findingFixOpened: "Review the draft pull request",
+  findingFixNone:
+    "The model couldn't find a safe correction from the repository files. Edit the README line directly or ignore this finding.",
+  findingFixAccess:
+    "Sign in again with an account that can push to this repository.",
+  findingFixFailed:
+    "The draft pull request could not be opened. Check the repository's write access and try again.",
+  findingFixSkipped:
+    "findings had no safe correction and were left out of the pull request.",
+  findingIgnore: "Ignore",
+  findingIgnorePending: "Ignoring…",
+  findingIgnoreFailed:
+    "The finding could not be ignored. Check your access and try again.",
   repoTechnicalDetails: "History and technical details",
   repoSourceDetails: "Source sync details",
   repoSourceOpen: "View source",

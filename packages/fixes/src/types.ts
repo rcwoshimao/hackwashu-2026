@@ -53,6 +53,7 @@ export type DraftResult = {
 export interface GitHubFixPort {
   readFile(repo: string, path: string, ref: string): Promise<FixResult<string>>;
   createDraft(input: DraftInput): Promise<FixResult<DraftResult>>;
+  listFiles?(repo: string, ref: string): Promise<FixResult<readonly string[]>>;
   groundControlStatus(
     repo: string,
     commitSha: string,

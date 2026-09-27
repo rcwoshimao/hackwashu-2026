@@ -1,7 +1,9 @@
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import {
+  ClaudeDocFixer,
   ClaudeModel,
+  GeminiDocFixer,
   GeminiModel,
   HeuristicModel,
   SqliteModelCache,
@@ -25,6 +27,7 @@ import { OctokitCommitAuthor } from "./commit-author.ts";
 import { createApi, EventHub, GitHubCommitStatus } from "./index.ts";
 import { startMessaging } from "./messaging.ts";
 import { FlightPlanPublishQueue } from "./publish-schedule.ts";
+import { createScanFix } from "./scan-fix.ts";
 import { sessionSecret } from "./session-secret.ts";
 
 const dbPath = process.env.DATABASE_PATH || "data/groundcontrol.db";
@@ -157,6 +160,19 @@ const prComments = process.env.GITHUB_WRITE_TOKEN
 const commitAuthor = process.env.GITHUB_WRITE_TOKEN
   ? new OctokitCommitAuthor(process.env.GITHUB_WRITE_TOKEN)
   : undefined;
+const docFixModel = process.env.ANTHROPIC_API_KEY
+  ? new ClaudeDocFixer(process.env.ANTHROPIC_API_KEY)
+  : process.env.GEMINI_API_KEY
+    ? new GeminiDocFixer(process.env.GEMINI_API_KEY)
+    : null;
+const scanFix = docFixModel
+  ? createScanFix({
+      store,
+      events,
+      model: docFixModel,
+      serviceToken: process.env.GITHUB_WRITE_TOKEN,
+    })
+  : undefined;
 const messaging = await startMessaging({
   dbPath,
   secret,
@@ -169,6 +185,7 @@ const messaging = await startMessaging({
   projectId: process.env.SPECTRUM_PROJECT_ID,
   projectSecret: process.env.SPECTRUM_PROJECT_SECRET,
   githubWriteToken: process.env.GITHUB_WRITE_TOKEN,
+  scanFix,
   confluenceSite: process.env.CONFLUENCE_SITE,
   confluenceEmail: process.env.CONFLUENCE_EMAIL,
   confluenceToken: process.env.CONFLUENCE_API_TOKEN,
@@ -188,6 +205,7 @@ const app = createApi({
   ...(status === undefined ? {} : { status }),
   ...(prComments === undefined ? {} : { prComments }),
   ...(commitAuthor === undefined ? {} : { commitAuthor }),
+  ...(scanFix === undefined ? {} : { scanFix }),
   now: () => new Date(),
   publicUrl,
   webDist: resolve(process.cwd(), "apps/web/dist"),

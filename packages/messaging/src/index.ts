@@ -1,4 +1,4 @@
-export { sendDriftAlert } from "./alerts.ts";
+export { sendDriftAlert, sendScanAlert } from "./alerts.ts";
 export {
   ConfluenceCorrection,
   RecordingCorrection,
@@ -32,5 +32,6 @@ export type {
   PublicScanPort,
   ReplyRoute,
   Result,
+  ScanFixPort,
   TrustPort,
 } from "./types.ts";

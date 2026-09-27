@@ -7,6 +7,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@ground-control/ai": "workspace:*",
     "@ground-control/messaging": "workspace:*",
     "@ground-control/plan": "workspace:*",
     "@ground-control/store": "workspace:*",

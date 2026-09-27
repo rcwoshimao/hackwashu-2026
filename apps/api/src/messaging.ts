@@ -15,6 +15,7 @@ import {
 } from "@ground-control/messaging";
 import { ConfluenceCloud } from "@ground-control/sources";
 import type { AppStore, RunRecord } from "@ground-control/store";
+import type { ScanFixService } from "./scan-fix.ts";
 import { refreshTrust } from "./telemetry.ts";
 import type { CommitStatusPort, EventHub } from "./types.ts";
 
@@ -59,6 +60,7 @@ export async function startMessaging(config: {
   confluenceToken?: string | undefined;
   githubWriteToken?: string | undefined;
   prComments?: PrCommentPort | undefined;
+  scanFix?: ScanFixService | undefined;
 }): Promise<MessagingHub | null> {
   if (!config.projectId || !config.projectSecret) return null;
   const runtime = await createSpectrumIMessage({
@@ -91,14 +93,31 @@ export async function startMessaging(config: {
     imessage: runtime.value,
     correction,
     scanner: config.scanner,
+    ...(config.scanFix
+      ? {
+          scanFix: {
+            fix: async (run, claimIds) => {
+              const fixed = await config.scanFix?.fix(run, claimIds);
+              return fixed?.ok
+                ? { ok: true as const, value: fixed.value }
+                : {
+                    ok: false as const,
+                    error: { code: "unavailable" as const },
+                  };
+            },
+          },
+        }
+      : {}),
     publicUrl: config.publicUrl,
     now: () => new Date(),
     trust: {
       async set(repo, claimId, state) {
         const latest = refreshTrust(config.store, repo, claimId, state);
         if (latest === null) return { ok: false, error: { code: "not_found" } };
-        if (config.status) await config.status.post(latest);
-        if (state === "confirmed") await postPrEvidence(config, latest);
+        if (config.status && latest.origin !== "public_scan")
+          await config.status.post(latest);
+        if (state === "confirmed" && latest.origin !== "public_scan")
+          await postPrEvidence(config, latest);
         const failing = latest.results.some(
           (item) =>
             item.claimId === claimId &&

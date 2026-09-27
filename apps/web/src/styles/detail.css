@@ -79,6 +79,34 @@
 .finding-review-tag {
   color: var(--drift);
 }
+.finding-actions,
+.finding-fix-all {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+}
+.finding-fix-all {
+  margin: 0.4rem 0 1rem;
+}
+.finding-actions .form-feedback,
+.finding-fix-all .form-feedback {
+  flex-basis: 100%;
+  margin: 0;
+}
+.finding-actions button.finding-ignore {
+  background: transparent;
+  color: var(--paper);
+  border-color: var(--rule);
+}
+.finding-actions button.finding-ignore:hover {
+  background: var(--paper);
+  color: var(--night);
+}
+.finding-pr-link {
+  font-weight: 600;
+}
 .repo-sources {
   margin-bottom: 1.4rem;
 }

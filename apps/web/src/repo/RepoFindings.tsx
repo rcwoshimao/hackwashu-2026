@@ -1,32 +1,51 @@
 import { copy } from "@ground-control/copy";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "../api.ts";
+import { useMe } from "../auth/useMe.ts";
 import type { CheckResult, RepoData, RunData } from "../data.ts";
 import { safeExternalUrl } from "../presentation.ts";
+import { canTriage, FindingActions, FixAllButton } from "./FindingActions.tsx";
 import { type FindingSummary, summarizeRun } from "./findingSummary.ts";
 
-function useLatestRun(id: string | null) {
+function useLatestRun(id: string | null, version: unknown) {
   const [run, setRun] = useState<RunData | null>(null);
   const [loading, setLoading] = useState(id !== null);
+  const refresh = useCallback(async () => {
+    if (!id) return;
+    const result = await api.run(id);
+    if (result.ok) setRun(result.value);
+  }, [id]);
+  // `version` changes whenever the repo payload reloads (trust or fix events),
+  // so the saved findings stay in step with the repo label.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: version is a reload signal
   useEffect(() => {
-    setRun(null);
     if (!id) {
+      setRun(null);
       setLoading(false);
       return;
     }
     const controller = new AbortController();
-    setLoading(true);
     void api.run(id, controller.signal).then((result) => {
       if (controller.signal.aborted) return;
       setRun(result.ok ? result.value : null);
       setLoading(false);
     });
     return () => controller.abort();
-  }, [id]);
-  return { run, loading };
+  }, [id, version]);
+  return { run, loading, refresh };
 }
 
-function FindingCard({ result }: { result: CheckResult }) {
+function FindingCard({
+  run,
+  result,
+  canAct,
+  onChange,
+}: {
+  run: RunData;
+  result: CheckResult;
+  canAct: boolean;
+  onChange: () => Promise<void>;
+}) {
   const confirmed = result.state === "confirmed";
   const link = result.deepLink ? safeExternalUrl(result.deepLink) : null;
   return (
@@ -45,6 +64,12 @@ function FindingCard({ result }: { result: CheckResult }) {
           {copy.repoFindingOpenSource}
         </a>
       )}
+      <FindingActions
+        run={run}
+        result={result}
+        canAct={canAct}
+        onChange={onChange}
+      />
     </li>
   );
 }
@@ -82,7 +107,15 @@ function ResultCounts({ summary }: { summary: FindingSummary }) {
   );
 }
 
-function ResultBody({ run }: { run: RunData }) {
+function ResultBody({
+  run,
+  onChange,
+}: {
+  run: RunData;
+  onChange: () => Promise<void>;
+}) {
+  const { me } = useMe();
+  const canAct = canTriage(run, me);
   const summary = summarizeRun(run);
   const findings = [...summary.confirmedItems, ...summary.reviewItems];
   const explanation = {
@@ -96,10 +129,22 @@ function ResultBody({ run }: { run: RunData }) {
       <h2>{resultTitle(summary)}</h2>
       <p>{explanation}</p>
       <ResultCounts summary={summary} />
+      <FixAllButton
+        run={run}
+        findings={findings}
+        canAct={canAct}
+        onChange={onChange}
+      />
       {findings.length > 0 && (
         <ul className="repo-finding-list">
           {findings.slice(0, 5).map((item) => (
-            <FindingCard key={item.claimId} result={item} />
+            <FindingCard
+              key={item.claimId}
+              run={run}
+              result={item}
+              canAct={canAct}
+              onChange={onChange}
+            />
           ))}
         </ul>
       )}
@@ -112,7 +157,7 @@ function ResultBody({ run }: { run: RunData }) {
 }
 
 export function RepoFindings({ data }: { data: RepoData }) {
-  const { run, loading } = useLatestRun(data.latestRunId);
+  const { run, loading, refresh } = useLatestRun(data.latestRunId, data);
   return (
     <section
       className="panel repo-result"
@@ -123,7 +168,7 @@ export function RepoFindings({ data }: { data: RepoData }) {
       {loading ? (
         <p role="status">{copy.repoFindingLoading}</p>
       ) : run ? (
-        <ResultBody run={run} />
+        <ResultBody run={run} onChange={refresh} />
       ) : (
         <h2>{copy.repoNoVerdict}</h2>
       )}

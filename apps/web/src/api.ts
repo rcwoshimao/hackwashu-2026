@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { apiTimeoutMs } from "./config.ts";
+import { apiTimeoutMs, fixTimeoutMs } from "./config.ts";
 import {
   accountReposSchema,
   meSchema,
@@ -62,6 +62,7 @@ async function postJson<T>(
   url: string,
   body: unknown,
   schema: z.ZodType<T>,
+  timeoutMs = apiTimeoutMs,
 ): Promise<ApiResult<T>> {
   let response: Response;
   try {
@@ -70,7 +71,7 @@ async function postJson<T>(
       headers: { "content-type": "application/json" },
       credentials: "include",
       body: JSON.stringify(body),
-      signal: AbortSignal.timeout(apiTimeoutMs),
+      signal: AbortSignal.timeout(timeoutMs),
     });
   } catch {
     return { ok: false, error: { code: "network" } };
@@ -122,6 +123,12 @@ const connectSchema = z.discriminatedUnion("visibility", [
 ]);
 export type Connection = z.infer<typeof connectSchema>;
 const imessageLinkSchema = z.object({ status: z.literal("sent") });
+const fixSchema = z.object({
+  pullRequestUrl: z.string(),
+  fixedClaimIds: z.array(z.string()),
+  skippedClaimIds: z.array(z.string()),
+});
+export type FixResult = z.infer<typeof fixSchema>;
 
 export const api = {
   sky: (signal?: AbortSignal) => readJson("/api/sky", skySchema, signal),
@@ -167,6 +174,13 @@ export const api = {
       `/api/runs/${encodeURIComponent(runId)}/claims/${encodeURIComponent(claimId)}/drop`,
       {},
       actionSchema,
+    ),
+  fix: (runId: string, claimIds?: readonly string[]) =>
+    postJson(
+      `/api/runs/${encodeURIComponent(runId)}/fix`,
+      claimIds ? { claimIds } : {},
+      fixSchema,
+      fixTimeoutMs,
     ),
   signout: () => postJson("/auth/signout", {}, actionSchema),
 };
