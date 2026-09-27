@@ -1,0 +1,8 @@
+diff --git a/src/catalog.js b/src/catalog.js
+--- a/src/catalog.js
++++ b/src/catalog.js
+@@ -1,3 +1,3 @@
+-export function listPlanets() {
++export function listWorlds() {
+   return ["Mercury", "Venus", "Earth", "Mars"];
+ }

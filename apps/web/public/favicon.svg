@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" role="img" aria-label="Ground Control radar">
+  <rect width="48" height="48" rx="9" fill="#0d171b"/>
+  <circle cx="24" cy="24" r="17" fill="none" stroke="#f2f3ed" stroke-width="2.5"/>
+  <circle cx="24" cy="24" r="9" fill="none" stroke="#f2f3ed" stroke-width="2.5"/>
+  <circle cx="24" cy="24" r="2.8" fill="#f2b84b"/>
+</svg>

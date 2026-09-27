@@ -1,0 +1,58 @@
+[
+  {
+    "signal": "version",
+    "quote": "Node >=20",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 37,
+    "endOffset": 46
+  },
+  {
+    "signal": "env_var",
+    "quote": "COMPASS_CONFIG",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 56,
+    "endOffset": 70
+  },
+  {
+    "signal": "inline_code",
+    "quote": "COMPASS_CONFIG",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 56,
+    "endOffset": 70
+  },
+  {
+    "signal": "shell_command",
+    "quote": "npm run build",
+    "lineStart": 6,
+    "lineEnd": 6,
+    "startOffset": 98,
+    "endOffset": 111
+  },
+  {
+    "signal": "shell_command",
+    "quote": "npx compass --format json",
+    "lineStart": 7,
+    "lineEnd": 7,
+    "startOffset": 112,
+    "endOffset": 137
+  },
+  {
+    "signal": "inline_code",
+    "quote": "--format",
+    "lineStart": 10,
+    "lineEnd": 10,
+    "startOffset": 148,
+    "endOffset": 156
+  },
+  {
+    "signal": "inline_code",
+    "quote": "createCompass()",
+    "lineStart": 10,
+    "lineEnd": 10,
+    "startOffset": 209,
+    "endOffset": 224
+  }
+]

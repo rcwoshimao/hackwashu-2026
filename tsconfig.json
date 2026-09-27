@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "types": ["bun", "node", "chrome"]
+  },
+  "include": [
+    "ops.ts",
+    "ops/**/*.ts",
+    "config/**/*.ts",
+    "packages/**/*.ts",
+    "apps/**/*.ts",
+    "apps/**/*.tsx"
+  ],
+  "exclude": ["node_modules", "files", "docs/vendor"]
+}

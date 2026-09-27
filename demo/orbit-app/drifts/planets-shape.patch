@@ -1,0 +1,12 @@
+diff --git a/src/server.js b/src/server.js
+--- a/src/server.js
++++ b/src/server.js
+@@ -11,7 +11,7 @@
+     response.json({ status: "ok", version: "1.0.0" }),
+   );
+   app.get("/api/planets", (_request, response) =>
+-    response.json({ planets: listPlanets() }),
++    response.json({ worlds: listPlanets() }),
+   );
+   return app;
+ }

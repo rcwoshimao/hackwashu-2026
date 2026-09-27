@@ -1,0 +1,16 @@
+{
+  "name": "@ground-control/runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ground-control/plan": "workspace:*",
+    "semver": "7.7.2"
+  },
+  "devDependencies": {
+    "@types/semver": "7.7.0"
+  }
+}

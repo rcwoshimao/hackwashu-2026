@@ -1,0 +1,13 @@
+{
+  "name": "@ground-control/store",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ground-control/plan": "workspace:*",
+    "@ground-control/sources": "workspace:*"
+  }
+}

@@ -1,0 +1,35 @@
+:root mark[data-gc-claim][data-state] {
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  cursor: help;
+}
+
+mark[data-gc-claim][data-state="verified"] {
+  text-decoration-color: #c2cfca;
+  text-decoration-style: solid;
+}
+
+mark[data-gc-claim][data-state="drifting"] {
+  text-decoration-color: #f2b84b;
+  text-decoration-style: solid;
+}
+
+mark[data-gc-claim][data-state="unconfirmed"],
+mark[data-gc-claim][data-state="disputed"] {
+  text-decoration-color: #627982;
+  text-decoration-style: dotted;
+}
+
+mark[data-gc-claim]:focus-visible {
+  outline: 2px solid #f2f3ed;
+  outline-offset: 2px;
+}

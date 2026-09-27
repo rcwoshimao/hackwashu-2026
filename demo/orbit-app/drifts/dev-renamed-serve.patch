@@ -1,0 +1,12 @@
+diff --git a/package.json b/package.json
+--- a/package.json
++++ b/package.json
+@@ -10,7 +10,7 @@
+     "orbit": "bin/orbit.js"
+   },
+   "scripts": {
+-    "dev": "node src/server.js",
++    "serve": "node src/server.js",
+     "start": "node src/server.js",
+     "test": "node --test test/app.test.js"
+   },

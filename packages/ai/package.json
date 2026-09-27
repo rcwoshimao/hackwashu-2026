@@ -1,0 +1,16 @@
+{
+  "name": "@ground-control/ai",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@google/genai": "2.24.0",
+    "@ground-control/claims": "workspace:*",
+    "@ground-control/plan": "workspace:*",
+    "@ground-control/sources": "workspace:*",
+    "zod": "4.6.5"
+  }
+}

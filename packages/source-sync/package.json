@@ -1,0 +1,15 @@
+{
+  "name": "@ground-control/source-sync",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ground-control/ai": "workspace:*",
+    "@ground-control/sources": "workspace:*",
+    "@ground-control/store": "workspace:*",
+    "@octokit/rest": "22.0.1"
+  }
+}

@@ -1,0 +1,98 @@
+[
+  {
+    "signal": "env_var",
+    "quote": "PORT",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 25,
+    "endOffset": 29
+  },
+  {
+    "signal": "inline_code",
+    "quote": "PORT",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 25,
+    "endOffset": 29
+  },
+  {
+    "signal": "env_var",
+    "quote": "PUBLIC_URL",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 36,
+    "endOffset": 46
+  },
+  {
+    "signal": "inline_code",
+    "quote": "PUBLIC_URL",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 36,
+    "endOffset": 46
+  },
+  {
+    "signal": "inline_code",
+    "quote": ".env.example",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 52,
+    "endOffset": 64
+  },
+  {
+    "signal": "version",
+    "quote": "Bun 1.2 or newer",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 98,
+    "endOffset": 114
+  },
+  {
+    "signal": "shell_command",
+    "quote": "bun install",
+    "lineStart": 6,
+    "lineEnd": 6,
+    "startOffset": 126,
+    "endOffset": 137
+  },
+  {
+    "signal": "shell_command",
+    "quote": "bun run dev",
+    "lineStart": 7,
+    "lineEnd": 7,
+    "startOffset": 138,
+    "endOffset": 149
+  },
+  {
+    "signal": "localhost_url",
+    "quote": "https://localhost:8787/dashboard",
+    "lineStart": 10,
+    "lineEnd": 10,
+    "startOffset": 161,
+    "endOffset": 193
+  },
+  {
+    "signal": "http_example",
+    "quote": "curl -i http://localhost:8787/api/health",
+    "lineStart": 13,
+    "lineEnd": 13,
+    "startOffset": 223,
+    "endOffset": 263
+  },
+  {
+    "signal": "shell_command",
+    "quote": "curl -i http://localhost:8787/api/health",
+    "lineStart": 13,
+    "lineEnd": 13,
+    "startOffset": 223,
+    "endOffset": 263
+  },
+  {
+    "signal": "localhost_url",
+    "quote": "http://localhost:8787/api/health",
+    "lineStart": 13,
+    "lineEnd": 13,
+    "startOffset": 231,
+    "endOffset": 263
+  }
+]

@@ -1,0 +1,23 @@
+{
+  "name": "@ground-control/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ground-control/auth": "workspace:*",
+    "@ground-control/fixes": "workspace:*",
+    "@ground-control/ai": "workspace:*",
+    "@ground-control/messaging": "workspace:*",
+    "@ground-control/plan": "workspace:*",
+    "@ground-control/publisher": "workspace:*",
+    "@ground-control/scanner": "workspace:*",
+    "@ground-control/source-sync": "workspace:*",
+    "@ground-control/sources": "workspace:*",
+    "@ground-control/store": "workspace:*",
+    "hono": "4.13.9",
+    "zod": "4.6.5"
+  }
+}

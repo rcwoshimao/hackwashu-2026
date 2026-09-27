@@ -1,0 +1,12 @@
+diff --git a/src/server.js b/src/server.js
+--- a/src/server.js
++++ b/src/server.js
+@@ -3,7 +3,7 @@
+ import express from "express";
+ import { listPlanets } from "./catalog.js";
+ 
+-export function createApp() {
++export function buildApp() {
+   const app = express();
+   const greeting = process.env.ORBIT_GREETING ?? "Welcome aboard";
+   app.get("/", (_request, response) => response.status(200).send(greeting));

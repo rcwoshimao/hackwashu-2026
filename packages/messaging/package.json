@@ -1,0 +1,15 @@
+{
+  "name": "@ground-control/messaging",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ground-control/copy": "workspace:*",
+    "@ground-control/sources": "workspace:*",
+    "@ground-control/store": "workspace:*",
+    "spectrum-ts": "12.10.1"
+  }
+}
