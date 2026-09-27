@@ -110,12 +110,14 @@ const connectSchema = z.discriminatedUnion("visibility", [
   z.object({
     repo: z.string(),
     visibility: z.literal("private"),
+    runtimeEnabled: z.literal(true),
     telemetryToken: z.string().min(20),
   }),
   z.object({
     repo: z.string(),
     visibility: z.literal("public"),
-    telemetryToken: z.never().optional(),
+    runtimeEnabled: z.boolean(),
+    telemetryToken: z.string().min(20).optional(),
   }),
 ]);
 export type Connection = z.infer<typeof connectSchema>;
@@ -136,7 +138,12 @@ export const api = {
   accountRepos: (signal?: AbortSignal) =>
     readJson("/api/account/repos", accountReposSchema, signal),
   scan: (repo: string) => postJson("/api/scan", { repo }, scanSchema),
-  connect: (repo: string) => postJson("/api/connect", { repo }, connectSchema),
+  connect: (repo: string, runtime = false) =>
+    postJson(
+      "/api/connect",
+      runtime ? { repo, runtime: true } : { repo },
+      connectSchema,
+    ),
   source: (repo: string, kind: string, url: string) =>
     postJson("/api/sources", { repo, kind, url }, sourceSchema),
   sourceStatus: (id: string) =>

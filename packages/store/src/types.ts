@@ -11,6 +11,7 @@ export type RepoRecord = {
   visibility: Visibility;
   connected: boolean;
   tokenHash: string | null;
+  runtimeEnabled?: boolean;
   label: string;
   driftDegrees: number;
   latestRunId: string | null;
@@ -67,6 +68,7 @@ export type RunRecord = {
   commitSha: string;
   createdAt: string;
   verdict: Verdict;
+  origin?: "public_scan" | "ci";
   pullRequestNumber?: number;
   results: readonly RunClaim[];
   evidence: readonly FactEvidence[];

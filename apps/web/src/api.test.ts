@@ -12,11 +12,24 @@ const sync = {
 
 function fakeResponse(path: string, body?: string): Response {
   if (path === "/api/connect")
+    if (body === JSON.stringify({ repo: "owner/public", runtime: true }))
+      return Response.json({
+        repo: "owner/public",
+        visibility: "public",
+        runtimeEnabled: true,
+        telemetryToken: "public-runtime-telemetry-token",
+      });
+  if (path === "/api/connect")
     return body === JSON.stringify({ repo: "owner/public" })
-      ? Response.json({ repo: "owner/public", visibility: "public" })
+      ? Response.json({
+          repo: "owner/public",
+          visibility: "public",
+          runtimeEnabled: false,
+        })
       : Response.json({
           repo: "owner/repo",
           visibility: "private",
+          runtimeEnabled: true,
           telemetryToken: "token-to-save-in-actions-secret",
         });
   if (path === "/api/sources")
@@ -73,6 +86,11 @@ test("web actions send an iMessage phone and accept the sent status", async () =
       assert.equal(publicConnection.value.visibility, "public");
       assert.equal("telemetryToken" in publicConnection.value, false);
     }
+    const runtimeConnection = await api.connect("owner/public", true);
+    assert.equal(
+      runtimeConnection.ok && runtimeConnection.value.telemetryToken,
+      "public-runtime-telemetry-token",
+    );
     const created = await api.source(
       "owner/repo",
       "url",
@@ -86,6 +104,7 @@ test("web actions send an iMessage phone and accept the sent status", async () =
     const link = await api.imessageLink("+15551234567");
     assert.equal(link.ok && link.value.status, "sent");
     assert.deepEqual(requests, [
+      { path: "/api/connect", method: "POST" },
       { path: "/api/connect", method: "POST" },
       { path: "/api/connect", method: "POST" },
       { path: "/api/sources", method: "POST" },

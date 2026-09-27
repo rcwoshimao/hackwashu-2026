@@ -58,7 +58,7 @@ test("PR report identity uses GitHub's head SHA rather than its merge SHA", () =
         repository: { full_name: repo, private: false },
       },
     }),
-  ).toBeNull();
+  ).toEqual({ repo, commitSha: head, pullRequestNumber: 7 });
 });
 
 test("push and dispatch identity use GitHub's workflow SHA and fail closed", () => {

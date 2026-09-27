@@ -17,6 +17,7 @@ import {
   type SkyScope,
 } from "./catalog.ts";
 import { ScanForm } from "./ScanForm.tsx";
+import { ScanTiers } from "./ScanTiers.tsx";
 import { SkyBulkScan } from "./SkyBulkScan.tsx";
 import { SkyCanvas } from "./SkyCanvas.tsx";
 import { SkyCatalog, SkyFilters } from "./SkyCatalog.tsx";
@@ -220,6 +221,7 @@ export function SkyPage() {
             onStatus={setScanFilter}
             onSearch={setSearch}
           />
+          <ScanTiers />
           {me?.signedIn && (
             <SkyBulkScan
               repos={entries.flatMap((entry) =>
@@ -245,6 +247,9 @@ export function SkyPage() {
                 <SkyInspector
                   satellite={
                     selected?.kind === "scanned" ? selected.satellite : null
+                  }
+                  account={
+                    selected?.kind === "scanned" ? selected.account : null
                   }
                 />
               )}

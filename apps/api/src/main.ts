@@ -131,7 +131,8 @@ const sourceSync = new SourceSync({
     if (
       claimCount !== null &&
       connectedRepo?.connected === true &&
-      connectedRepo.visibility === "private"
+      (connectedRepo.visibility === "private" ||
+        connectedRepo.runtimeEnabled === true)
     )
       publishQueue?.schedule(repo);
   },
@@ -176,6 +177,9 @@ const app = createApi({
   events,
   scanner,
   sourceSync,
+  ...(publishQueue === null
+    ? {}
+    : { schedulePlan: (repo: string) => publishQueue.schedule(repo) }),
   confluenceSite: process.env.CONFLUENCE_SITE,
   ...(messaging === null ? {} : { messaging }),
   ...(status === undefined ? {} : { status }),

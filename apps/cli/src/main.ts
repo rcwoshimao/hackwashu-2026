@@ -30,8 +30,12 @@ function argumentsFor(args: string[]): {
 } | null {
   const [command, ...rest] = args;
   if (command !== "scan" && command !== "check") return null;
-  const flags = rest.filter((item) => item === "--private");
-  const paths = rest.filter((item) => item !== "--private");
+  const flags = rest.filter(
+    (item) => item === "--private" || item === "--owned",
+  );
+  const paths = rest.filter(
+    (item) => item !== "--private" && item !== "--owned",
+  );
   if (
     flags.length > 1 ||
     paths.length > 1 ||

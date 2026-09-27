@@ -16,6 +16,7 @@ export function registerAccountRoutes(app: Hono, deps: ApiDeps): void {
         return {
           ...item,
           connected: current?.connected === true,
+          runtimeEnabled: current?.runtimeEnabled === true,
           checked:
             current?.latestRunId !== null && current?.latestRunId !== undefined,
           label: current?.latestRunId ? current.label : null,

@@ -16,6 +16,8 @@ function RepoActions({
   scanState,
   onScan,
   onConnect,
+  onEnableRuntime,
+  personal,
 }: {
   repo: AccountRepoData;
   busy: boolean;
@@ -23,6 +25,8 @@ function RepoActions({
   scanState: ScanState | undefined;
   onScan: () => void;
   onConnect: () => void;
+  onEnableRuntime: () => void;
+  personal: boolean;
 }) {
   return (
     <div className="account-repo-actions">
@@ -41,6 +45,16 @@ function RepoActions({
           onClick={onConnect}
         >
           {connecting ? copy.accountReposConnecting : copy.accountReposConnect}
+        </button>
+      )}
+      {personal && !repo.archived && !repo.fork && !repo.runtimeEnabled && (
+        <button
+          type="button"
+          className="button-secondary"
+          disabled={busy}
+          onClick={onEnableRuntime}
+        >
+          {copy.accountReposEnableRuntime}
         </button>
       )}
       {(repo.scanned || repo.connected) && (
@@ -63,6 +77,8 @@ export function RepoRow({
   connectError,
   onScan,
   onConnect,
+  onEnableRuntime,
+  login,
 }: {
   repo: AccountRepoData;
   busy: boolean;
@@ -72,7 +88,13 @@ export function RepoRow({
   connectError: boolean;
   onScan: () => void;
   onConnect: () => void;
+  onEnableRuntime: () => void;
+  login: string;
 }) {
+  const personal =
+    repo.visibility === "public" &&
+    repo.canAdmin &&
+    repo.repo.split("/")[0]?.toLowerCase() === login.toLowerCase();
   const scanText = {
     pending: copy.accountReposScanning,
     queued: copy.accountReposScanQueued,
@@ -92,6 +114,9 @@ export function RepoRow({
           {repo.archived && <span>{copy.accountReposArchived}</span>}
           {repo.fork && <span>{copy.accountReposFork}</span>}
           {repo.connected && <span>{copy.accountReposConnected}</span>}
+          {repo.runtimeEnabled && (
+            <span>{copy.accountReposRuntimeEnabled}</span>
+          )}
           {repo.checked && !repo.scanned && (
             <span>{copy.accountReposChecked}</span>
           )}
@@ -107,6 +132,8 @@ export function RepoRow({
         scanState={scanState}
         onScan={onScan}
         onConnect={onConnect}
+        onEnableRuntime={onEnableRuntime}
+        personal={personal}
       />
       {!repo.canAdmin && repo.visibility === "private" && (
         <p className="form-hint">{copy.accountReposNotAdmin}</p>

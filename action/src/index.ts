@@ -5,7 +5,7 @@ import {
 } from "./git-context.ts";
 import { reportTelemetry } from "./report.ts";
 import { trustedReportIdentity } from "./report-context.ts";
-import { loadPrivateRunner, runFlightChecks } from "./run.ts";
+import { loadConnectedRunner, runFlightChecks } from "./run.ts";
 
 async function main(): Promise<void> {
   const root = process.env.GITHUB_WORKSPACE ?? process.cwd();
@@ -39,7 +39,7 @@ async function main(): Promise<void> {
   if (mode !== "run") throw new TypeError("Action mode must be run or report");
   const repo = process.env.GITHUB_REPOSITORY ?? "";
   const event = readActionEvent(process.env.GITHUB_EVENT_PATH);
-  const runner = await loadPrivateRunner(root, event, repo);
+  const runner = await loadConnectedRunner(root, event, repo);
   if (!runner.ok) {
     process.stderr.write(`${runner.error.code}\n`);
     process.exitCode = 1;

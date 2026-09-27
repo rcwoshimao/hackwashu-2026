@@ -1,10 +1,10 @@
 export const cliCopy = {
   localUsage:
-    "Usage: bun run gc scan --private [checkout] or bun run gc check --private [checkout].",
+    "Usage: bun run gc scan --owned [checkout] or bun run gc check --owned [checkout]. --private remains available for private checkouts.",
   localPrivateRequired:
-    "Add --private only for a private checkout you chose to run locally.",
+    "Add --owned only for a checkout you own and chose to run locally. --private also works for private checkouts.",
   localCheckoutInvalid: "The selected checkout is not a readable directory.",
-  localPlanMissing: "No saved flight plan was found. Run scan --private first.",
+  localPlanMissing: "No saved flight plan was found. Run scan --owned first.",
   localPlanTooLarge: "The saved flight plan exceeds the inspection limit.",
   localPlanInvalid: "The saved flight plan did not pass validation.",
   localPlanUnreadable: "The saved flight plan could not be read.",

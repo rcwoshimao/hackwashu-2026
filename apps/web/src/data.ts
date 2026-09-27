@@ -46,12 +46,14 @@ export const runSummarySchema = z.object({
   commitSha: z.string(),
   createdAt: z.string(),
   verdict: z.string(),
+  origin: z.enum(["public_scan", "ci", "unknown"]),
   failingCount: z.number().nonnegative(),
 });
 
 export const repoSchema = z.object({
   repo: z.string(),
   visibility: z.enum(["public", "private"]),
+  runtimeEnabled: z.boolean(),
   label: z.string(),
   driftDegrees: z.number().min(0).max(90),
   latestRunId: z.string().nullable(),
@@ -121,6 +123,7 @@ export const accountRepoSchema = z.object({
   archived: z.boolean(),
   fork: z.boolean(),
   connected: z.boolean(),
+  runtimeEnabled: z.boolean(),
   checked: z.boolean(),
   label: z.string().nullable(),
   scanned: z.boolean(),

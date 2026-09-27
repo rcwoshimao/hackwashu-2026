@@ -67,6 +67,21 @@ function publicScan(store: AppStore, repo: RepoRecord) {
   };
 }
 
+function uniqueSources(sources: readonly SourceRecord[]): SourceRecord[] {
+  const chosen = new Map<string, SourceRecord>();
+  for (const source of sources) {
+    const key =
+      source.kind === "readme" ||
+      source.kind === "docs" ||
+      source.kind === "man"
+        ? `${source.kind}:${source.title}`
+        : `${source.kind}:${source.url}`;
+    const prior = chosen.get(key);
+    if (!prior || source.claimCount > prior.claimCount) chosen.set(key, source);
+  }
+  return [...chosen.values()];
+}
+
 function repoView(
   store: AppStore,
   repo: RepoRecord,
@@ -76,23 +91,28 @@ function repoView(
   return {
     repo: repo.repo,
     visibility: repo.visibility,
+    runtimeEnabled:
+      repo.visibility === "private" || repo.runtimeEnabled === true,
     label: repo.label,
     driftDegrees: repo.driftDegrees,
     latestRunId: repo.latestRunId,
     scan: publicScan(store, repo),
-    sources: sources.map(({ id, kind, title, url, claimCount }) => ({
-      id,
-      kind,
-      title,
-      url,
-      claimCount,
-      sync: sourceStatus(store.getSourceSnapshot(id)),
-    })),
+    sources: uniqueSources(sources).map(
+      ({ id, kind, title, url, claimCount }) => ({
+        id,
+        kind,
+        title,
+        url,
+        claimCount,
+        sync: sourceStatus(store.getSourceSnapshot(id)),
+      }),
+    ),
     runs: runs.map((run) => ({
       id: run.id,
       commitSha: run.commitSha,
       createdAt: run.createdAt,
       verdict: run.verdict,
+      origin: run.origin ?? "unknown",
       failingCount: run.results.filter(
         (item) => item.state === "confirmed" && item.status === "fail",
       ).length,

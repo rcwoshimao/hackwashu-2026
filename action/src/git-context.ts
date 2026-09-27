@@ -24,14 +24,14 @@ function stringField(value: unknown, path: readonly string[]): string | null {
   return typeof found === "string" && found.length > 0 ? found : null;
 }
 
-export function privateRunRepository(
+export function matchingRunRepository(
   event: unknown,
   expectedRepo: string | undefined,
 ): boolean {
   return (
     typeof expectedRepo === "string" &&
     expectedRepo.length > 0 &&
-    field(event, ["repository", "private"]) === true &&
+    typeof field(event, ["repository", "private"]) === "boolean" &&
     stringField(event, ["repository", "full_name"]) === expectedRepo
   );
 }

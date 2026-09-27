@@ -57,6 +57,13 @@ test("signed-in inventory lists accessible repos without connecting or scanning"
     headers: { cookie },
   });
   expect((await again.json()).repos[0].connected).toBe(true);
+  expect(
+    (
+      await (
+        await app.request("/api/account/repos", { headers: { cookie } })
+      ).json()
+    ).repos[0].runtimeEnabled,
+  ).toBe(true);
   store.putRun({
     id: "run_private_1",
     repo: "owner/private",

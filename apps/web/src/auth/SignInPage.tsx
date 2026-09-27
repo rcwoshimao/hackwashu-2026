@@ -40,7 +40,7 @@ export function SignInPage() {
               {copy.navSignOut}
             </button>
             {signoutFailed && <p role="alert">{copy.signInUnavailable}</p>}
-            <AccountRepos />
+            <AccountRepos login={me.login ?? ""} />
             <IMessageLink />
           </div>
         ) : (

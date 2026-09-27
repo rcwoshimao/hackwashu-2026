@@ -5,7 +5,7 @@ import { createApi } from "../src/index.ts";
 import { json, login, setup } from "./fixture.ts";
 
 describe("telemetry and messaging API", () => {
-  test("connected public repositories cannot submit runtime telemetry", async () => {
+  test("public runtime telemetry requires explicit personal-repo opt-in", async () => {
     const { app, github, store } = setup();
     github.permission = {
       visibility: "public",
@@ -16,15 +16,15 @@ describe("telemetry and messaging API", () => {
     const connected = await json(
       app,
       "/api/connect",
-      { repo: "owner/public" },
+      { repo: "maintainer/public" },
       { cookie },
     );
     expect(connected.status).toBe(201);
     const details = await connected.json();
     expect(details.visibility).toBe("public");
     expect(details).not.toHaveProperty("telemetryToken");
-    expect(store.getRepo("owner/public")?.tokenHash).toBeNull();
-    const repo = store.getRepo("owner/public");
+    expect(store.getRepo("maintainer/public")?.tokenHash).toBeNull();
+    const repo = store.getRepo("maintainer/public");
     if (repo === null) throw new Error("missing connected public repo");
     const token = "legacy-public-token";
     store.putRepo({
@@ -34,14 +34,32 @@ describe("telemetry and messaging API", () => {
     const response = await json(
       app,
       "/api/telemetry",
-      { repo: "owner/public", commitSha: "abcdef0", results: [] },
+      { repo: "maintainer/public", commitSha: "abcdef0", results: [] },
       { authorization: `Bearer ${token}` },
     );
     expect(response.status).toBe(403);
     expect(await response.json()).toEqual({
-      error: "private_repository_required",
+      error: "runtime_not_enabled",
     });
-    expect(store.listRuns("owner/public")).toEqual([]);
+    expect(store.listRuns("maintainer/public")).toEqual([]);
+    const enabled = await json(
+      app,
+      "/api/connect",
+      { repo: "maintainer/public", runtime: true },
+      { cookie },
+    );
+    expect(enabled.status).toBe(201);
+    const enabledToken = (await enabled.json()).telemetryToken as string;
+    expect(enabledToken.length).toBeGreaterThan(20);
+    expect(store.getRepo("maintainer/public")?.runtimeEnabled).toBe(true);
+    const report = await json(
+      app,
+      "/api/telemetry",
+      { repo: "maintainer/public", commitSha: "abcdef0", results: [] },
+      { authorization: `Bearer ${enabledToken}` },
+    );
+    expect(report.status).toBe(201);
+    expect(store.listRuns("maintainer/public")).toHaveLength(1);
   });
 
   test("scoped telemetry and confirmation determine verdict", async () => {

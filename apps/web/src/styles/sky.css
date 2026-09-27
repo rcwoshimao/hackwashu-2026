@@ -217,6 +217,32 @@
 .sky-grid + .satellite-browser {
   margin-top: 1.4rem;
 }
+.scan-tiers {
+  margin: 1rem 0 1.4rem;
+}
+.scan-tiers ol {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+.scan-tiers li {
+  border: 1px solid var(--rule);
+  border-radius: 0.6rem;
+  padding: 0.85rem;
+}
+.scan-tiers p {
+  color: var(--mist);
+  margin: 0.35rem 0 0;
+}
+.sky-deep-status {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
 .satellite-list {
   list-style: none;
   padding: 0;
@@ -282,5 +308,10 @@
   }
   .sky-side {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .scan-tiers ol {
+    grid-template-columns: 1fr;
   }
 }

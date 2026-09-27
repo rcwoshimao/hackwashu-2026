@@ -11,6 +11,7 @@ import {
   type SatelliteRecord,
   SqliteStore,
 } from "@ground-control/store";
+import { skySnapshotCommand } from "./sky-snapshot.ts";
 
 function option(
   args: readonly string[],
@@ -117,6 +118,8 @@ export async function skyCommand(
     writeFileSync(path, `${JSON.stringify(snapshot(store), null, 2)}\n`);
     return { path, satellites: store.listSatellites().length };
   }
+  if (command === "sky:save" || command === "sky:load")
+    return skySnapshotCommand(store, command, args[0]);
   if (command === "sky:simulate") {
     const target = countOption(
       args,

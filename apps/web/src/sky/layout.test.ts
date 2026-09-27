@@ -70,6 +70,7 @@ test("unscanned account marks stay in the holding orbit without invented scan me
     archived: false,
     fork: false,
     connected: false,
+    runtimeEnabled: false,
     checked: false,
     label: null,
     scanned: false,

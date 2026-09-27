@@ -1,6 +1,6 @@
 # Ground Control
 
-Ground Control checks whether repository documentation still agrees with the code. An explicitly connected private repository can run deterministic flight checks in its own CI. The local web app shows those results, and the Sky tracks public JavaScript and TypeScript repositories using static and AI checks. Ground Control never executes code from a public repository, including one that someone visits or submits for a scan.
+Ground Control checks whether repository documentation still agrees with the code. The Sky tracks public JavaScript and TypeScript repositories using static and AI checks. A repository you own can also run deeper flight checks in its own GitHub Action or an owner-approved local checkout, whether it is public or private. Visiting or requesting a normal public scan never executes repository code.
 
 ## Run with Docker Desktop
 
@@ -18,7 +18,13 @@ docker compose exec groundcontrol bun ops sky:scan --top 500 --tiers static,ai
 
 The first command is a useful key check before starting all 500. `bun ops sky:simulate --fill-to 500` adds labeled layout filler only for an explicit demo; the normal Sky hides it. The server stores scan results in a Docker volume and serves the web app from the same container.
 
-After signing in with GitHub, open **My repos**. Ground Control lists up to 500 recently updated repositories your OAuth account can access, including private repositories, without scanning or connecting them. Search or filter the list, browse 12 at a time, choose **Check README** on one public repository, or choose **Scan all public READMEs**. The signed-in Sky shows unscanned account repositories in a separate holding orbit, with scope and scan-state filters, quick search, and a 20-row list. Scanned public repos use measured positions; saved private CI results appear as distinct checked marks. For a private repository you administer, choose **Connect** to opt in to runtime checks. Private repositories are never included in the public bulk scan.
+Rebecca's branch includes a checked-in snapshot of 51 measured public scans. Load it into the local database without replacing newer local results or connections:
+
+```sh
+docker compose exec -T groundcontrol bun ops sky:load snapshots/sky-snapshot.json
+```
+
+After signing in with GitHub, open **My repos**. Ground Control lists up to 500 recently updated repositories your OAuth account can access, including private repositories, without scanning or connecting them. Search or filter the list, browse 12 at a time, choose **Check README** on one public repository, or choose **Scan all public READMEs**. The signed-in Sky shows unscanned account repositories in a separate holding orbit, with scope and scan-state filters, quick search, and a 20-row list. Scanned public repos use measured positions; saved CI results appear as checked marks. The Sky explains the static, AI, and deep tiers. For a private repo, choose **Connect** to opt in to CI checks. For a public repo owned by your signed-in account, choose **Enable deep checks** to receive Actions setup. Private repositories are never included in the public bulk scan.
 
 ## Test the drift loop locally
 
@@ -26,17 +32,17 @@ After the container is running, use `docker compose exec -T groundcontrol bun op
 
 Use `bun run check` for TypeScript, lint, unit tests, copy checks, and golden tests. See [SELF_HOST.md](docs/SELF_HOST.md) for keys, private repositories, the extension, and troubleshooting.
 
-For an owner-selected private checkout, `bun run gc scan --private <checkout>` generates and runs its flight checks; `bun run gc check --private <checkout>` reruns the saved plan. The commands work without a Git repository. `--private` records your explicit choice to execute that local checkout; it does not look up GitHub visibility. This CLI is available from this workspace and has not been published to npm. See [HUSSEIN_HANDOFF.md](docs/HUSSEIN_HANDOFF.md) for the engine and teammate integration contract.
+For an owner-selected checkout, `bun run gc scan --owned <checkout>` generates and runs its flight checks; `bun run gc check --owned <checkout>` reruns the saved plan. The commands work without a Git repository. `--owned` records your explicit choice to execute that local checkout; it does not look up GitHub visibility. The earlier `--private` flag still works. This CLI is available from this workspace and has not been published to npm. See [HUSSEIN_HANDOFF.md](docs/HUSSEIN_HANDOFF.md) for the engine and teammate integration contract.
 
 ## Connect a repository to CI
 
-Sign in through the web app, open **My repos**, and choose **Connect** on a **private repository you administer**. Save the one-time telemetry token shown there as that repository's Actions secret `GROUND_CONTROL_TOKEN`. From the Ground Control root, generate the first committed flight checks against a separate checkout of that private repository:
+Sign in through the web app and open **My repos**. Choose **Connect** on a private repo or **Enable deep checks** on a public repo owned by your signed-in account. Save the one-time telemetry token as that repository's Actions secret `GROUND_CONTROL_TOKEN`. From the Ground Control root, generate the first committed flight checks against a separate checkout of that repository:
 
 ```sh
 bun ops seed-plan <checkout> <owner/repo>
 ```
 
-Review and commit the three generated files in `<checkout>/flightchecks/` before enabling the [sample two-job workflow](demo/orbit-app/.github/workflows/ground-control.yml). On your own private checkout, you may explicitly install its dependencies and run `node --test flightchecks` after reviewing the plan. The workflow checks GitHub's private-repository flag before checkout, dependency installation, or tests. Replace its `YOUR_GITHUB_USER` Action reference with a published, accessible copy of this repository. GitHub-hosted Actions need an HTTPS tunnel to this local Docker server; use that origin for `PUBLIC_URL`, the OAuth callback, and the repository Actions variable `GROUND_CONTROL_URL`. With a `GITHUB_WRITE_TOKEN` that has Contents write access, default-branch source changes schedule a flightchecks commit. Verify that commit before relying on it; if publication fails or a PR branch changes documentation, run `seed-plan` against that branch, review the generated files, and commit them there. Report mode checks the repository, commit SHA, and PR number against the workflow context. Treat its status as advisory for branches whose authors can edit the runner until trusted attestation is added. Private GitHub wiki sync is unavailable. [SELF_HOST.md](docs/SELF_HOST.md) has the full sequence.
+Review and commit the three generated files in `<checkout>/flightchecks/` before enabling the [sample two-job workflow](demo/orbit-app/.github/workflows/ground-control.yml). In a checkout you own, you may explicitly install its dependencies and run `node --test flightchecks` after reviewing the plan. The workflow skips fork PRs, runs code in a job without the telemetry secret, and sends results from a separate report job. Replace its `YOUR_GITHUB_USER` Action reference with a published, accessible copy of this repository. GitHub-hosted Actions need an HTTPS tunnel to this local Docker server; use that origin for `PUBLIC_URL`, the OAuth callback, and the repository Actions variable `GROUND_CONTROL_URL`. With a `GITHUB_WRITE_TOKEN` that has Contents write access, default-branch source changes in an opted-in repo schedule a flightchecks commit. Verify that commit before relying on it; if publication fails or a PR branch changes documentation, run `seed-plan` against that branch, review the generated files, and commit them there. Report mode checks the repository, commit SHA, and PR number against the workflow context. Treat its status as advisory for branches whose authors can edit the runner until trusted attestation is added. Private GitHub wiki sync is unavailable. [SELF_HOST.md](docs/SELF_HOST.md) has the full sequence.
 
 To use Claude for connected-source and local seed/scan claim extraction, set `EXTRACTION_MODEL=claude` and `ANTHROPIC_API_KEY` in `.env`. Gemini remains the default AI path and the public Sky continues to use Gemini or static checks. Without either model key, local heuristic extraction works.
 
@@ -46,8 +52,8 @@ Create a Photon Spectrum project with a cloud iMessage line, then set `SPECTRUM_
 
 ## Safety and scope
 
-- Every public repository receives static and optional AI checks only. A connected public repo can sync documentation sources but receives no Actions token or generated flightcheck commits. Public scans never install dependencies, run package scripts, run generated tests, or execute repository code, even if a user submits a URL or connects the repo.
-- Runtime checks require an explicitly connected private repository. They run in its secret-free GitHub Actions job or when its owner opts in from a local checkout. The bundled Orbit fixture has a separate explicit rehearsal command.
+- Ordinary public scans never install dependencies, run package scripts, run generated tests, or execute repository code. This stays true for visited repositories and public README buttons.
+- Deep checks require an explicit connection and Actions setup for private repos, or an explicit personal-repo opt-in for public repos. The code runs in the repo's own job without the telemetry secret, or in an owner-approved local checkout. The bundled Orbit fixture has a separate explicit rehearsal command.
 - Source text sent through the AI tier goes to Gemini. A self-hosted company can leave `GEMINI_API_KEY` unset and use only local static checks.
 - The normal Sky shows actual saved scans and signed-in account inventory. Demo marks require an explicit `?demo=1` API request and never count toward findings. Every real result records its commit SHA and tiers run.
 

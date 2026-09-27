@@ -30,16 +30,29 @@ export function RepoScanStatus({ data }: { data: RepoData }) {
       <div>
         <h2>{copy.repoScanTitle}</h2>
         {data.scan ? (
-          <p>
-            {copy.repoScanReady}: {readableDate(data.scan.scannedAt)} ·{" "}
-            <span className="mono">{data.scan.commitSha.slice(0, 10)}</span>
-          </p>
+          <>
+            <p>
+              {copy.repoScanReady}: {readableDate(data.scan.scannedAt)} ·{" "}
+              <span className="mono">{data.scan.commitSha.slice(0, 10)}</span>
+            </p>
+            <p>
+              {copy.repoScanTiers}:{" "}
+              {data.scan.tiersRun
+                .map((tier) =>
+                  tier === "ai" ? "AI" : tier === "static" ? "Static" : tier,
+                )
+                .join(" + ")}
+            </p>
+          </>
         ) : (
           <p>{copy.repoScanIntro}</p>
         )}
         {data.scan && data.label.toLowerCase() === "no telemetry" && (
           <p>{copy.repoScanLimited}</p>
         )}
+        <p>
+          {data.runtimeEnabled ? copy.repoDeepReady : copy.repoDeepAvailable}
+        </p>
       </div>
       <button
         type="button"

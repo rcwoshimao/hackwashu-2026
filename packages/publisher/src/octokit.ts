@@ -57,14 +57,15 @@ export class OctokitPlanWriter implements PlanWritePort {
   async publish(
     repo: string,
     files: readonly FileUpdate[],
+    visibility: "public" | "private",
   ): Promise<PublishResult> {
     const names = parts(repo);
     if (!names || !allowed(files))
       return { ok: false, error: { code: "github_failed" } };
     try {
       const metadata = await this.client.rest.repos.get(names);
-      if (metadata.data.private !== true)
-        return { ok: false, error: { code: "private_repository_required" } };
+      if (metadata.data.private !== (visibility === "private"))
+        return { ok: false, error: { code: "repository_visibility_changed" } };
       if (metadata.data.permissions?.push === false)
         return { ok: false, error: { code: "github_failed" } };
       const branch = metadata.data.default_branch;
@@ -117,6 +118,7 @@ export class FakePlanWriter implements PlanWritePort {
   async publish(
     repo: string,
     files: readonly FileUpdate[],
+    _visibility: "public" | "private",
   ): Promise<PublishResult> {
     if (!allowed(files)) return { ok: false, error: { code: "github_failed" } };
     const previous = this.files.get(repo);

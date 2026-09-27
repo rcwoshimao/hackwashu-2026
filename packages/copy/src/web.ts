@@ -64,6 +64,18 @@ export const webCopy = {
   skyScanFilterAll: "All states",
   skyScanFilterScanned: "Scanned",
   skyScanFilterUnscanned: "Unscanned",
+  scanTiersTitle: "What each scan tier checks",
+  scanTiersIntro:
+    "The tier shown on a result tells you which evidence was actually collected.",
+  scanTierStatic: "1 · Static",
+  scanTierStaticBody:
+    "Reads the README, repository files, and metadata. It does not install or run repository code.",
+  scanTierAi: "2 · AI",
+  scanTierAiBody:
+    "Extracts cited documentation claims for static checks. It still does not execute repository code.",
+  scanTierDeep: "3 · Deep",
+  scanTierDeepBody:
+    "Runs the reviewed flight checks in your own repository's GitHub Action or an owner-approved local checkout. Public repos need an explicit personal-repo opt-in.",
   skyUnscannedTag: "Unscanned",
   skyHoldingTitle: "Unscanned repository",
   skyHoldingPublic:
@@ -84,6 +96,7 @@ export const webCopy = {
   skySimulatedNotice: "Simulated for layout; not a real scan.",
   skyPossibleDriftNotice:
     "First-scan findings are unconfirmed. They do not fail CI or notify an author.",
+  skyDeepStatus: "Latest deep CI result",
   skyNoEvidence: "No detailed check evidence is available for this snapshot.",
   skyEvidenceLoading: "Loading check evidence",
   skyEvidenceTitle: "Failing facts",
@@ -132,6 +145,11 @@ export const webCopy = {
   repoScanIntro:
     "This repository is connected, but a public README scan has not run yet.",
   repoScanReady: "Last public scan",
+  repoScanTiers: "Tiers completed",
+  repoDeepReady:
+    "Deep checks enabled. Add the Ground Control Action to send CI results.",
+  repoDeepAvailable:
+    "Own this public repo? Enable deep checks from My repos after signing in.",
   repoScanLimited:
     "The README was scanned, but there are not enough confirmed checks for a status verdict.",
   repoScanQueued: "Scan requested. This page updates when the check finishes.",
@@ -147,6 +165,10 @@ export const webCopy = {
   repoNoSources:
     "No sources are watched yet. Add a source to check its claims.",
   repoRuns: "Recent runs",
+  repoRunTier: "Tier",
+  repoRunPublic: "Static / AI",
+  repoRunDeep: "Deep CI",
+  repoRunUnknown: "Earlier run",
   repoNoRuns: "No runs yet. Push a commit or request a check.",
   repoTrajectory: "Documentation trajectory",
   repoTrajectoryEmpty:
@@ -233,14 +255,21 @@ export const webCopy = {
     "Repository admin access is needed to refresh this source.",
   connectTitle: "Connect a repository",
   connectIntro:
-    "Connected private repositories can run code checks in their own CI. Connected public repositories receive static and optional AI checks only.",
+    "Any public repo can receive static and optional AI checks. Repositories you own can also run deep checks after an explicit Actions setup.",
+  connectRuntimeOption: "Enable deep checks for a public repository I own",
+  connectRuntimeHint:
+    "Deep checks run repository code only in the repo's GitHub Action or an owner-approved local checkout.",
   connectRepoLabel: "GitHub repository",
   connectAction: "Connect repository",
   connectPending: "Connecting repository",
   connectDonePrivate:
     "Private repository connected. Save its CI token now; it will not be shown again.",
   connectDonePublic:
-    "Public repository connected for documentation checks. It gets no code checks, Actions token, or generated flightcheck commits.",
+    "Public repository connected for documentation checks. Enable deep checks separately if you own it.",
+  connectDonePublicRuntime:
+    "Deep checks enabled for your public repository. Save its Actions token now; it will not be shown again.",
+  connectDonePublicRuntimeExisting:
+    "Deep checks are already enabled for your public repository. Keep using its existing Actions token; reconnecting does not show it again.",
   connectTokenTitle: "Set up GitHub Actions",
   connectTokenOnce:
     "This telemetry token is shown only once. Store it as an Actions secret before leaving this page.",
@@ -306,11 +335,13 @@ export const webCopy = {
   accountReposArchived: "Archived",
   accountReposFork: "Fork",
   accountReposConnected: "Connected",
+  accountReposRuntimeEnabled: "Deep checks enabled",
   accountReposChecked: "Checked",
   accountReposScanned: "Scanned",
   accountReposOpenResult: "Open result",
   accountReposNotAdmin: "Admin access is needed to connect this repository.",
   accountReposConnect: "Connect",
+  accountReposEnableRuntime: "Enable deep checks",
   accountReposConnecting: "Connecting",
   accountReposScan: "Check README",
   accountReposScanning: "Requesting scan",
@@ -325,7 +356,7 @@ export const webCopy = {
   accountReposPrivateHint:
     "Private repositories need an explicit connection and GitHub Action for runtime checks.",
   accountReposPublicHint:
-    "Public scans inspect documentation and metadata only. They never run repository code.",
+    "Ordinary public scans inspect documentation and metadata only. Your own public repositories can opt into deep checks in their GitHub Action.",
   accountReposManual: "Add a repository by name",
   formRepoHint: "Use owner/repo from GitHub.",
   formUrlHint: "Paste an https page address.",

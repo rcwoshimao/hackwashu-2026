@@ -14,11 +14,15 @@ import { flightPlanSchema } from "../../packages/plan/src/schema.ts";
 import {
   actionMetadata,
   checkedOutCommit,
+  matchingRunRepository,
   metadataForCheckout,
-  privateRunRepository,
   readActionEvent,
 } from "../src/git-context.ts";
-import { loadPrivateRunner, loadRunner, runFlightChecks } from "../src/run.ts";
+import {
+  loadConnectedRunner,
+  loadRunner,
+  runFlightChecks,
+} from "../src/run.ts";
 import type { FlightRunner } from "../src/types.ts";
 
 const orbitPlan = join(
@@ -182,7 +186,7 @@ test("the committed Orbit bundle exports a runner and absent events are empty", 
   expect(readActionEvent(undefined)).toEqual({});
 });
 
-test("runtime permission requires matching private repository metadata for every event", () => {
+test("runtime permission requires matching repository metadata for every event", () => {
   const repo = { full_name: "team/orbit-app", private: true };
   const events = [
     { repository: repo, after: "a".repeat(40) },
@@ -190,26 +194,26 @@ test("runtime permission requires matching private repository metadata for every
     { repository: repo },
   ];
   for (const event of events)
-    expect(privateRunRepository(event, "team/orbit-app")).toBe(true);
+    expect(matchingRunRepository(event, "team/orbit-app")).toBe(true);
   expect(
-    privateRunRepository(
+    matchingRunRepository(
       { repository: { full_name: "team/orbit-app", private: false } },
       "team/orbit-app",
     ),
-  ).toBe(false);
-  expect(privateRunRepository({ repository: repo }, "other/orbit-app")).toBe(
+  ).toBe(true);
+  expect(matchingRunRepository({ repository: repo }, "other/orbit-app")).toBe(
     false,
   );
   expect(
-    privateRunRepository(
+    matchingRunRepository(
       { repository: { full_name: repo.full_name } },
       repo.full_name,
     ),
   ).toBe(false);
-  expect(privateRunRepository({}, repo.full_name)).toBe(false);
+  expect(matchingRunRepository({}, repo.full_name)).toBe(false);
 });
 
-test("run mode validates privacy and plan before importing checkout code", async () => {
+test("run mode validates repository identity and plan before importing checkout code", async () => {
   const root = mkdtempSync(join(tmpdir(), "groundcontrol-action-gate-"));
   if (!realpathSync(root).startsWith(`${realpathSync(tmpdir())}${sep}`))
     throw new Error("Action fixture escaped temp directory");
@@ -220,18 +224,17 @@ test("run mode validates privacy and plan before importing checkout code", async
       'import { writeFileSync } from "node:fs"; writeFileSync(new URL("../runner-imported", import.meta.url), "yes"); export async function runPlan() { return {}; }',
     );
     for (const repository of [
-      { full_name: "team/orbit-app", private: false },
       { full_name: "team/orbit-app" },
       { full_name: "other/orbit-app", private: true },
     ]) {
-      const denied = await loadPrivateRunner(
+      const denied = await loadConnectedRunner(
         root,
         { repository },
         "team/orbit-app",
       );
       expect(denied).toEqual({
         ok: false,
-        error: { code: "private_repository_required" },
+        error: { code: "repository_identity_required" },
       });
       expect(existsSync(join(root, "runner-imported"))).toBe(false);
     }
@@ -241,12 +244,12 @@ test("run mode validates privacy and plan before importing checkout code", async
     const planPath = join(root, "flightchecks/flightplan.json");
     writeFileSync(planPath, "{}");
     expect(
-      loadPrivateRunner(root, privateEvent, "team/orbit-app"),
+      loadConnectedRunner(root, privateEvent, "team/orbit-app"),
     ).rejects.toThrow("Flight plan is invalid");
     expect(existsSync(join(root, "runner-imported"))).toBe(false);
     writeFileSync(planPath, readFileSync(orbitPlan));
     expect(
-      loadPrivateRunner(root, privateEvent, "team/orbit-app"),
+      loadConnectedRunner(root, privateEvent, "team/orbit-app"),
     ).rejects.toThrow("Flight plan repository does not match checkout");
     expect(existsSync(join(root, "runner-imported"))).toBe(false);
     const plan = flightPlanSchema.parse(
@@ -256,13 +259,19 @@ test("run mode validates privacy and plan before importing checkout code", async
       planPath,
       JSON.stringify({ ...plan, repo: "team/orbit-app" }),
     );
-    const allowed = await loadPrivateRunner(
+    const allowed = await loadConnectedRunner(
       root,
       privateEvent,
       "team/orbit-app",
     );
     expect(allowed.ok).toBe(true);
     expect(readFileSync(join(root, "runner-imported"), "utf8")).toBe("yes");
+    const publicEvent = {
+      repository: { full_name: "team/orbit-app", private: false },
+    };
+    expect(
+      (await loadConnectedRunner(root, publicEvent, "team/orbit-app")).ok,
+    ).toBe(true);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

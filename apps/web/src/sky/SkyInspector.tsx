@@ -2,7 +2,7 @@ import { copy } from "@ground-control/copy";
 import { useEffect, useState } from "react";
 import { api } from "../api.ts";
 import { StatusBadge } from "../components/StatusBadge.tsx";
-import type { RunData, Satellite } from "../data.ts";
+import type { AccountRepoData, RunData, Satellite } from "../data.ts";
 import {
   githubReadmeUrl,
   readableDate,
@@ -141,7 +141,13 @@ function RealActions({ satellite }: { satellite: Satellite }) {
   );
 }
 
-export function SkyInspector({ satellite }: { satellite: Satellite | null }) {
+export function SkyInspector({
+  satellite,
+  account,
+}: {
+  satellite: Satellite | null;
+  account: AccountRepoData | null;
+}) {
   const { run, loading } = useLatestRun(satellite);
   if (!satellite)
     return (
@@ -171,6 +177,12 @@ export function SkyInspector({ satellite }: { satellite: Satellite | null }) {
           <p className="simulation-note">{copy.skyPossibleDriftNotice}</p>
         )}
       {!satellite.simulated && <RealMetrics satellite={satellite} />}
+      {account?.runtimeEnabled && account.checked && (
+        <p className="sky-deep-status">
+          {copy.skyDeepStatus}:{" "}
+          <StatusBadge label={account.label ?? copy.statusNoTelemetry} />
+        </p>
+      )}
       {!satellite.simulated && <RealActions satellite={satellite} />}
       {loading ? (
         <p>{copy.skyEvidenceLoading}</p>

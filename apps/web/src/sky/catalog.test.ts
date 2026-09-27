@@ -28,6 +28,7 @@ const account = (
   archived: false,
   fork: false,
   connected: false,
+  runtimeEnabled: false,
   checked: false,
   label: null,
   scanned: false,

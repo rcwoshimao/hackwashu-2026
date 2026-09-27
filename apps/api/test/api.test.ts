@@ -125,6 +125,40 @@ describe("local API", () => {
     expect((await response.json()).scan).toBeNull();
   });
 
+  test("repository view shows one README when discovery and scan saved the same path", async () => {
+    const { app, store } = setup();
+    store.putRepo({
+      repo: "owner/project",
+      visibility: "public",
+      connected: true,
+      tokenHash: null,
+      label: "Possible drift",
+      driftDegrees: 8,
+      latestRunId: null,
+    });
+    const url = "https://github.com/owner/project/blob/abcdef0/README.md";
+    store.putSource({
+      id: "discovered-readme",
+      repo: "owner/project",
+      kind: "readme",
+      title: "README.md",
+      url,
+      claimCount: 0,
+    });
+    store.putSource({
+      id: "scanned-readme",
+      repo: "owner/project",
+      kind: "readme",
+      title: "README.md",
+      url,
+      claimCount: 7,
+    });
+    const response = await app.request("/api/repos/owner/project");
+    expect((await response.json()).sources).toMatchObject([
+      { id: "scanned-readme", claimCount: 7 },
+    ]);
+  });
+
   test("OAuth session gates private routes and signout", async () => {
     const { app, store, github } = setup();
     store.putRepo({
@@ -203,6 +237,14 @@ describe("local API", () => {
     );
     expect((await reconnected.json()).telemetryToken).toBeUndefined();
     expect(store.getRepo("owner/project")?.tokenHash).toBeNull();
+    const rejected = await json(
+      app,
+      "/api/connect",
+      { repo: "other/project", runtime: true },
+      { cookie: secondCookie },
+    );
+    expect(rejected.status).toBe(403);
+    expect((await rejected.json()).error).toBe("personal_repo_required");
     const source = await json(
       app,
       "/api/sources",

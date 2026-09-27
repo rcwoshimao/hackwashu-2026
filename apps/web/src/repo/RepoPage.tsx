@@ -106,6 +106,7 @@ function RunList({ data }: { data: RepoData }) {
                 <th>{copy.repoCommit}</th>
                 <th>{copy.repoCheckedAt}</th>
                 <th>{copy.repoRunStatus}</th>
+                <th>{copy.repoRunTier}</th>
                 <th>{copy.repoRunFailures}</th>
                 <th>{copy.repoViewRun}</th>
               </tr>
@@ -121,6 +122,13 @@ function RunList({ data }: { data: RepoData }) {
                       : run.verdict === "success"
                         ? copy.commonSuccess
                         : copy.commonPending}
+                  </td>
+                  <td>
+                    {run.origin === "ci"
+                      ? copy.repoRunDeep
+                      : run.origin === "public_scan"
+                        ? copy.repoRunPublic
+                        : copy.repoRunUnknown}
                   </td>
                   <td className="mono">{run.failingCount.toLocaleString()}</td>
                   <td>
@@ -147,7 +155,9 @@ function RepoContent({ data }: { data: RepoData }) {
             {data.visibility === "private" ? copy.repoPrivate : copy.repoPublic}
           </p>
           <h1>{data.repo}</h1>
-          {data.visibility === "public" && data.scan === null ? (
+          {data.visibility === "public" &&
+          data.scan === null &&
+          data.runs.length === 0 ? (
             <span className="status-badge no-telemetry">
               {copy.repoNotScanned}
             </span>

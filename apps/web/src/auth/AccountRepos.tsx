@@ -6,7 +6,7 @@ import type { AccountRepoData } from "../data.ts";
 import { accountEventNames, watchEvents } from "../realtime.ts";
 import { canScan, RepoRow, type ScanState } from "./AccountRepoRow.tsx";
 
-export function AccountRepos() {
+export function AccountRepos({ login }: { login: string }) {
   const [repos, setRepos] = useState<AccountRepoData[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -114,15 +114,24 @@ export function AccountRepos() {
     }
   };
 
-  const connectOne = async (repo: string) => {
+  const connectOne = async (repo: string, runtime = false) => {
     setBusyRepo(repo);
     setConnectingRepo(repo);
-    const result = await api.connect(repo);
+    const result = await api.connect(repo, runtime);
     if (result.ok) {
       setConnections((current) => ({ ...current, [repo]: result.value }));
       setRepos((current) =>
         current.map((item) =>
-          item.repo === repo ? { ...item, connected: true } : item,
+          item.repo === repo
+            ? {
+                ...item,
+                connected: true,
+                runtimeEnabled:
+                  item.runtimeEnabled ||
+                  runtime ||
+                  item.visibility === "private",
+              }
+            : item,
         ),
       );
     } else setConnectErrors((current) => ({ ...current, [repo]: true }));
@@ -221,6 +230,8 @@ export function AccountRepos() {
                   connectError={connectErrors[repo.repo] === true}
                   onScan={() => void scanOne(repo.repo)}
                   onConnect={() => void connectOne(repo.repo)}
+                  onEnableRuntime={() => void connectOne(repo.repo, true)}
+                  login={login}
                 />
               ))}
             </ul>
