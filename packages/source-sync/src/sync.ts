@@ -43,6 +43,16 @@ function intervalMs(kind: SourceRecord["kind"]): number {
   return kind === "wiki" || kind === "confluence" ? 10 * 60_000 : 60 * 60_000;
 }
 
+function planSourceKey(source: SourceRecord, site?: string): string {
+  const resolved = resolveSource(source, site);
+  if (!resolved.ok) return source.id;
+  const value = resolved.value;
+  if ("path" in value) return `${source.kind}:${value.path}`;
+  if ("pageId" in value) return `confluence:${value.site}:${value.pageId}`;
+  if ("page" in value) return `wiki:${value.url}:${value.page}`;
+  return `${source.kind}:${value.url}`;
+}
+
 export class SourceSync {
   private readonly inFlight = new Map<string, Promise<Result<SyncStatus>>>();
   private readonly planQueue = new Map<string, Promise<void>>();
@@ -160,12 +170,15 @@ export class SourceSync {
 
   private async regenerate(repo: string): Promise<void> {
     if (!this.deps.model || !this.deps.cache) return;
-    const docs = this.deps.store
-      .listSources(repo)
-      .map(
-        (source) => this.deps.store.getSourceSnapshot(source.id)?.doc ?? null,
-      )
-      .filter((doc) => doc !== null);
+    const seen = new Set<string>();
+    const docs = this.deps.store.listSources(repo).flatMap((source) => {
+      const doc = this.deps.store.getSourceSnapshot(source.id)?.doc;
+      if (!doc) return [];
+      const key = planSourceKey(source, this.deps.confluenceSite);
+      if (seen.has(key)) return [];
+      seen.add(key);
+      return [doc];
+    });
     if (docs.length === 0) return;
     try {
       const extracted = await extractFlightPlan(
