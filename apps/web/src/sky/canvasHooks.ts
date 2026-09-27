@@ -54,7 +54,6 @@ type DrawInput = {
   selectedRepo: string | null;
   reducedMotion: boolean;
   arrivals: ReadonlyMap<string, number>;
-  drifting: boolean;
 };
 
 function startDrawing(input: DrawInput): () => void {
@@ -76,11 +75,7 @@ function startDrawing(input: DrawInput): () => void {
       input.reducedMotion,
       input.arrivals,
     );
-    const arriving = [...input.arrivals.values()].some(
-      (start) => timeMs - start < 850,
-    );
-    if (!input.reducedMotion && (input.drifting || arriving))
-      frame = requestAnimationFrame(render);
+    if (!input.reducedMotion) frame = requestAnimationFrame(render);
   };
   render(performance.now());
   return () => cancelAnimationFrame(frame);
@@ -89,7 +84,6 @@ function startDrawing(input: DrawInput): () => void {
 export function useCanvasRender(
   ref: RefObject<HTMLCanvasElement | null>,
   layout: SkyLayout,
-  satellites: Satellite[],
   selectedRepo: string | null,
   reducedMotion: boolean,
   arrivals: RefObject<Map<string, number>>,
@@ -97,10 +91,6 @@ export function useCanvasRender(
 ): void {
   useEffect(() => {
     if (!ref.current || !visible) return;
-    const drifting = satellites.some(
-      (satellite) =>
-        !satellite.simulated && satellite.label.toLowerCase() === "drifting",
-    );
     return startDrawing({
       canvas: ref.current,
       layout,
@@ -109,7 +99,6 @@ export function useCanvasRender(
       selectedRepo,
       reducedMotion,
       arrivals: arrivals.current,
-      drifting,
     });
-  }, [ref, layout, satellites, selectedRepo, reducedMotion, arrivals, visible]);
+  }, [ref, layout, selectedRepo, reducedMotion, arrivals, visible]);
 }

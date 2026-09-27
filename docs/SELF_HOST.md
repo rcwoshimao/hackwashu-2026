@@ -53,7 +53,7 @@ docker compose exec groundcontrol bun ops sky:scan --top 20 --tiers static,ai
 docker compose exec groundcontrol bun ops sky:scan --top 500 --tiers static,ai
 ```
 
-The larger scan makes many GitHub and Gemini calls, may take a while, and uses your account quota. It selects popular JavaScript and TypeScript repos with a Markdown README and root `package.json`. Results are stored in SQLite; rerunning an unchanged repo reuses its commit result. `sky:simulate --fill-to 500` adds labeled filler only when you need to inspect the layout before a full scan. `sky:export` writes the current snapshot to `/app/data/sky.json` in the Docker volume, including any visibly simulated records; the live Sky uses SQLite.
+The larger scan makes many GitHub and Gemini calls, may take a while, and uses your account quota. It selects popular JavaScript and TypeScript repos with a Markdown README and root `package.json`. Results are stored in SQLite; rerunning an unchanged repo reuses its commit result. `sky:simulate --fill-to 500` adds labeled filler only when you need to inspect the layout before a full scan. `sky:export` writes the current snapshot to `/app/data/sky.json` in the Docker volume, including any visibly simulated records; the live Sky uses SQLite. To keep measured results outside the Docker volume, run `sky:save` (writes `/app/data/sky-snapshot.json` with real public scans, runs, sources, and trust, but no simulated, private, or token data), copy it out with `docker compose cp groundcontrol:/app/data/sky-snapshot.json snapshots/`, and load it into a fresh database with `docker compose cp snapshots/sky-snapshot.json groundcontrol:/app/data/` followed by `sky:load`. Loading keeps local connections, private repos, and newer scans.
 
 ## Connected repositories
 

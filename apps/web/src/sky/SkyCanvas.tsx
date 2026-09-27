@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Satellite } from "../data.ts";
 import { useArrivals, useCanvasRender, useVisibility } from "./canvasHooks.ts";
 import { layoutSky, pickSatellite } from "./layout.ts";
+import { placePoint } from "./motion.ts";
 
 type Props = {
   satellites: Satellite[];
@@ -61,7 +62,6 @@ export function SkyCanvas({ satellites, selectedRepo, onSelect }: Props) {
   useCanvasRender(
     canvasRef,
     layout,
-    satellites,
     selectedRepo,
     reducedMotion,
     arrivals,
@@ -70,10 +70,12 @@ export function SkyCanvas({ satellites, selectedRepo, onSelect }: Props) {
 
   const onPointerSelect = (event: React.PointerEvent<HTMLCanvasElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
+    const now = performance.now();
     const picked = pickSatellite(
       layout,
       ((event.clientX - bounds.left) * width) / bounds.width,
       ((event.clientY - bounds.top) * height) / bounds.height,
+      (point) => placePoint(layout, point, now, reducedMotion),
     );
     if (picked) onSelect(picked.repo);
   };
