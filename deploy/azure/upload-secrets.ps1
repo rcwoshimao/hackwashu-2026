@@ -10,8 +10,6 @@ $names = @{
   SPECTRUM_PROJECT_SECRET = "spectrum-project-secret"
   GITHUB_WRITE_TOKEN = "github-write-token"
   GITHUB_SCAN_TOKEN = "github-scan-token"
-  GITHUB_CLIENT_ID = "github-client-id"
-  GITHUB_CLIENT_SECRET = "github-client-secret"
 }
 $values = @{}
 foreach ($line in [System.IO.File]::ReadAllLines((Resolve-Path -LiteralPath $EnvPath).Path)) {
