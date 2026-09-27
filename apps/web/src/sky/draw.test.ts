@@ -87,6 +87,9 @@ test("amber status rings use a fine stroke", () => {
       [],
     );
     assert.ok(widths.length > 0, label);
-    assert.ok(widths.every((width) => width <= 0.8), label);
+    assert.ok(
+      widths.every((width) => width <= 0.8),
+      label,
+    );
   }
 });
