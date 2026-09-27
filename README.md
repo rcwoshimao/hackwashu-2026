@@ -1,4 +1,25 @@
-# hackwashu-2026
-Repo for Washu Fall Build Challenge, 2026
+# hackwashu
 
-Brainstorm document: https://docs.google.com/document/d/1Tvvr4aTonTk0JwStcXxoIpkWb_T_BNyADP1SHW2quwo/edit?usp=sharing
+A [Spectrum](https://photon.codes/docs/spectrum-ts) project. Wired with: imessage.
+
+## Environment
+
+Before running, open `.env` and fill in the values:
+
+From your project Settings on the [Photon dashboard](https://app.photon.codes):
+
+- `PROJECT_ID`
+- `PROJECT_SECRET`
+
+## Run
+
+```sh
+npm install
+npm run start
+```
+
+## Where to go next
+
+- [Spectrum docs](https://photon.codes/docs/spectrum-ts)
+- Edit `src/index.ts` to replace the echo loop with real agent logic.
+- Add more providers from `spectrum-ts/providers/*`.
