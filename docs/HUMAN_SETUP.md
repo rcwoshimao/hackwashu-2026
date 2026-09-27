@@ -4,6 +4,8 @@ Ground Control is hosted at `https://ground-control-washu26.azurewebsites.net`. 
 
 ## Fast path for deep checks
 
+The signed-in **My repos** page shows how many repositories have reported deep checks. Use its **Deep checks set up** filter to see them together. A repository marked **Deep checks enabled · awaiting CI result** has no saved Action report yet; open its setup instructions and run the draft test PR if needed. Repository pages and **My reports** show the latest saved CI result separately from public README scans. An older CI report confirms that reporting worked at that time; check the repository's current workflow and Actions secret in GitHub if a later run stops arriving.
+
 1. Open the hosted **Connect a repository** page, choose a repository you administer, and enable deep checks.
 2. Copy its one-time telemetry token. Run the page's `gh secret set GROUND_CONTROL_TOKEN -R <owner/repo>` command and paste the token when prompted. The token does not appear in the command.
 3. Download the short `ground-control.yml` from that page into the target repository's `.github/workflows/` directory. It calls this repository's reusable workflow, which runs the flightchecks and reports to the hosted HTTPS server. Ground Control publishes the generated `flightchecks/` files on the target default branch.

@@ -16,9 +16,7 @@ export function DeepCheckLink({
   data: RepoData;
   me: MeData | null;
 }) {
-  const latestCi = data.runtimeEnabled
-    ? data.runs.find((run) => run.origin === "ci")
-    : undefined;
+  const latestCi = data.runs.find((run) => run.origin === "ci");
   const canManage = canOpenDeepChecks(data, me);
   if (latestCi)
     return (
@@ -27,7 +25,9 @@ export function DeepCheckLink({
           <strong>{copy.deepChecksSetUp}</strong> ·{" "}
           {latestCi.verdict === "success"
             ? copy.deepChecksLastPassed
-            : copy.deepChecksLastFailed}{" "}
+            : latestCi.verdict === "failure"
+              ? copy.deepChecksLastFailed
+              : copy.deepChecksLastPending}{" "}
           ·{" "}
           <time dateTime={latestCi.createdAt}>
             {readableDate(latestCi.createdAt)}

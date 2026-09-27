@@ -216,7 +216,8 @@ function ConnectForm({ login }: { login: string }) {
   const { draft, update, selectMine, connectOwn, submit } = useConnectDraft();
   const setupRepo =
     draft.mode === "mine" &&
-    draft.selectedMine?.runtimeEnabled &&
+    (draft.selectedMine?.runtimeEnabled ||
+      draft.selectedMine?.deepChecksSetup) &&
     !draft.connection
       ? draft.selectedMine
       : null;

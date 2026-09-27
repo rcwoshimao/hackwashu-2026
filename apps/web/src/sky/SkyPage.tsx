@@ -113,6 +113,7 @@ export function SkyPage() {
     selected?.account?.visibility === "public" &&
       selected.account.canAdmin &&
       !selected.account.runtimeEnabled &&
+      !selected.account.deepChecksSetup &&
       me?.login &&
       selected.repo.split("/")[0]?.toLowerCase() === me.login.toLowerCase(),
   );

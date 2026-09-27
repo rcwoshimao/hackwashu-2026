@@ -47,16 +47,20 @@ function RepoActions({
           {connecting ? copy.accountReposConnecting : copy.accountReposConnect}
         </button>
       )}
-      {personal && !repo.archived && !repo.fork && !repo.runtimeEnabled && (
-        <button
-          type="button"
-          className="button-secondary"
-          disabled={busy}
-          onClick={onEnableRuntime}
-        >
-          {copy.accountReposEnableRuntime}
-        </button>
-      )}
+      {personal &&
+        !repo.archived &&
+        !repo.fork &&
+        !repo.runtimeEnabled &&
+        !repo.deepChecksSetup && (
+          <button
+            type="button"
+            className="button-secondary"
+            disabled={busy}
+            onClick={onEnableRuntime}
+          >
+            {copy.accountReposEnableRuntime}
+          </button>
+        )}
       {(repo.scanned || repo.connected) && (
         <a
           href={`/repos/${repo.repo.split("/").map(encodeURIComponent).join("/")}`}
@@ -114,9 +118,11 @@ export function RepoRow({
           {repo.archived && <span>{copy.accountReposArchived}</span>}
           {repo.fork && <span>{copy.accountReposFork}</span>}
           {repo.connected && <span>{copy.accountReposConnected}</span>}
-          {repo.runtimeEnabled && (
+          {repo.deepChecksSetup ? (
+            <span>{copy.deepChecksSetUp}</span>
+          ) : repo.runtimeEnabled ? (
             <span>{copy.accountReposRuntimeEnabled}</span>
-          )}
+          ) : null}
           {repo.checked && !repo.scanned && (
             <span>{copy.accountReposChecked}</span>
           )}

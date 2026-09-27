@@ -43,6 +43,7 @@ test("signed-in inventory lists accessible repos without connecting or scanning"
   expect(
     body.repos.every((item: { connected: boolean }) => !item.connected),
   ).toBe(true);
+  expect(body.repos[0].deepChecksSetup).toBe(false);
   expect(JSON.stringify(body)).not.toContain("github-oauth-token");
   expect(store.listRepos()).toEqual([]);
   expect(scans).toEqual([]);
@@ -70,6 +71,7 @@ test("signed-in inventory lists accessible repos without connecting or scanning"
     commitSha: "abcdef0",
     createdAt: "2026-09-26T12:00:00Z",
     verdict: "success",
+    origin: "ci",
     results: [],
     evidence: [],
   });
@@ -86,7 +88,65 @@ test("signed-in inventory lists accessible repos without connecting or scanning"
   });
   expect((await checked.json()).repos[0]).toMatchObject({
     checked: true,
+    deepChecksSetup: true,
     label: "On course",
     scanned: false,
+  });
+});
+
+test("a saved CI run marks deep checks set up when the opt-in flag is stale", async () => {
+  const { app, github, store } = setup();
+  github.accountRepos = {
+    repos: [
+      {
+        repo: "owner/public",
+        visibility: "public",
+        canAdmin: true,
+        description: null,
+        language: null,
+        updatedAt: null,
+        archived: false,
+        fork: false,
+      },
+    ],
+    truncated: false,
+  };
+  store.putRepo({
+    repo: "owner/public",
+    visibility: "public",
+    connected: true,
+    runtimeEnabled: false,
+    tokenHash: null,
+    label: "On course",
+    driftDegrees: 0,
+    latestRunId: "public-scan",
+  });
+  store.putRun({
+    id: "deep-run",
+    repo: "owner/public",
+    commitSha: "abcdef0",
+    createdAt: "2026-09-26T11:00:00Z",
+    verdict: "success",
+    origin: "ci",
+    results: [],
+    evidence: [],
+  });
+  store.putRun({
+    id: "public-scan",
+    repo: "owner/public",
+    commitSha: "abcdef0",
+    createdAt: "2026-09-26T12:00:00Z",
+    verdict: "success",
+    origin: "public_scan",
+    results: [],
+    evidence: [],
+  });
+  const cookie = await login(app);
+  const response = await app.request("/api/account/repos", {
+    headers: { cookie },
+  });
+  expect((await response.json()).repos[0]).toMatchObject({
+    runtimeEnabled: false,
+    deepChecksSetup: true,
   });
 });

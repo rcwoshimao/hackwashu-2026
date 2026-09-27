@@ -127,6 +127,7 @@ export const accountRepoSchema = z.object({
   fork: z.boolean(),
   connected: z.boolean(),
   runtimeEnabled: z.boolean(),
+  deepChecksSetup: z.boolean().optional(),
   checked: z.boolean(),
   label: z.string().nullable(),
   scanned: z.boolean(),

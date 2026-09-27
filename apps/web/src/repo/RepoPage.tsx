@@ -165,11 +165,15 @@ function RepoDetails({ data, run }: { data: RepoData; run: RunData | null }) {
 /** Only owners (or connected private repos) get the deep-check setup offer. */
 function OwnerPrompt({ data, me }: { data: RepoData; me: MeData | null }) {
   if (!canOpenDeepChecks(data, me)) return null;
+  const needsSetup =
+    !data.runtimeEnabled && !data.runs.some((run) => run.origin === "ci");
   return (
     <aside className="repo-owner">
-      <p>
-        <strong>{copy.repoOwnerTitle}</strong> {copy.repoOwnerBody}
-      </p>
+      {needsSetup && (
+        <p>
+          <strong>{copy.repoOwnerTitle}</strong> {copy.repoOwnerBody}
+        </p>
+      )}
       <DeepCheckLink data={data} me={me} />
     </aside>
   );

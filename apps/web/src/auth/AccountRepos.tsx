@@ -5,6 +5,7 @@ import { accountRepoRowsPerPage } from "../config.ts";
 import type { AccountRepoData } from "../data.ts";
 import { accountEventNames, watchEvents } from "../realtime.ts";
 import { RepoRow, type ScanState } from "./AccountRepoRow.tsx";
+import { filterAccountRepos } from "./accountRepoFilter.ts";
 import { personalScanRepos } from "./personalScans.ts";
 
 export function AccountRepos({ login }: { login: string }) {
@@ -58,19 +59,7 @@ export function AccountRepos({ login }: { login: string }) {
   }, []);
 
   const shown = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    return repos.filter((repo) => {
-      const matches = `${repo.repo} ${repo.description ?? ""}`
-        .toLowerCase()
-        .includes(term);
-      return (
-        matches &&
-        (filter === "all" ||
-          (filter === "unscanned"
-            ? !repo.scanned && !repo.checked
-            : repo.visibility === filter))
-      );
-    });
+    return filterAccountRepos(repos, query, filter);
   }, [repos, query, filter]);
   const pageCount = Math.max(
     1,
@@ -80,6 +69,7 @@ export function AccountRepos({ login }: { login: string }) {
   const pageStart = (currentPage - 1) * accountRepoRowsPerPage;
   const visible = shown.slice(pageStart, pageStart + accountRepoRowsPerPage);
   const scannable = personalScanRepos(repos, login);
+  const deepChecksCount = repos.filter((repo) => repo.deepChecksSetup).length;
   const bulkActive =
     bulkProgress !== null && bulkProgress.done < bulkProgress.total;
 
@@ -160,6 +150,12 @@ export function AccountRepos({ login }: { login: string }) {
           <p className="form-hint">
             {copy.accountReposPublicHint} {copy.accountReposPrivateHint}
           </p>
+          <p className="form-hint">
+            {deepChecksCount}{" "}
+            {deepChecksCount === 1
+              ? copy.accountReposDeepSummaryOne
+              : copy.accountReposDeepSummaryMany}
+          </p>
           {truncated && <p role="status">{copy.accountReposTruncated}</p>}
           <div className="account-repo-toolbar">
             <div>
@@ -191,6 +187,9 @@ export function AccountRepos({ login }: { login: string }) {
                 <option value="all">{copy.accountReposFilterAll}</option>
                 <option value="public">{copy.accountReposPublic}</option>
                 <option value="private">{copy.accountReposPrivate}</option>
+                <option value="deep_checks">
+                  {copy.accountReposFilterDeepChecks}
+                </option>
                 <option value="unscanned">
                   {copy.accountReposFilterUnscanned}
                 </option>

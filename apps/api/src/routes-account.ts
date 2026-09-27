@@ -13,10 +13,14 @@ export function registerAccountRoutes(app: Hono, deps: ApiDeps): void {
       repos: listed.value.repos.map((item) => {
         const stored = deps.store.getRepo(item.repo);
         const current = stored?.visibility === item.visibility ? stored : null;
+        const deepChecksSetup =
+          current?.connected === true &&
+          deps.store.listRuns(item.repo).some((run) => run.origin === "ci");
         return {
           ...item,
           connected: current?.connected === true,
           runtimeEnabled: current?.runtimeEnabled === true,
+          deepChecksSetup,
           checked:
             current?.latestRunId !== null && current?.latestRunId !== undefined,
           label: current?.latestRunId ? current.label : null,

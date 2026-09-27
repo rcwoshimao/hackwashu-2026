@@ -21,9 +21,9 @@ const owner: MeData = {
   connectedRepos: [repo.repo],
 };
 
-test("owned public findings link to prefilled deep-scan setup", () => {
+test("owned public findings link to prefilled deep-check setup", () => {
   const markup = renderToStaticMarkup(<DeepCheckLink data={repo} me={owner} />);
-  assert.match(markup, /Add deep scan/);
+  assert.match(markup, /Set up deep checks/);
   assert.match(markup, /connect\?repo=owner%2Fproject&amp;runtime=1/);
 });
 
@@ -48,7 +48,7 @@ test("enabled repositories open setup without an opt-in label", () => {
     />,
   );
   assert.match(markup, /Review deep check setup/);
-  assert.doesNotMatch(markup, /Add deep scan/);
+  assert.doesNotMatch(markup, /Set up deep checks/);
   assert.match(markup, /No CI result received yet/);
 });
 
@@ -84,6 +84,29 @@ test("a successful CI report confirms deep-check setup despite a newer public sc
   assert.match(markup, /Latest CI run passed/);
   assert.match(markup, /runs\/ci-pass/);
   assert.doesNotMatch(markup, /Review deep check setup/);
+});
+
+test("a saved CI report confirms setup even when the opt-in flag is stale", () => {
+  const markup = renderToStaticMarkup(
+    <DeepCheckLink
+      data={{
+        ...repo,
+        runs: [
+          {
+            id: "ci-pass",
+            commitSha: "def",
+            createdAt: "2026-09-27T01:00:00Z",
+            verdict: "success",
+            origin: "ci",
+            failingCount: 0,
+          },
+        ],
+      }}
+      me={owner}
+    />,
+  );
+  assert.match(markup, /Deep checks set up/);
+  assert.doesNotMatch(markup, /Set up deep checks/);
 });
 
 test("a failing latest CI run confirms reporting without claiming checks passed", () => {
