@@ -6,6 +6,7 @@ import type { SkyEntry, SkyScope } from "./catalog.ts";
 const rowsPerPage = 20;
 
 type Props = {
+  title: string;
   entries: SkyEntry[];
   selectedRepo: string | null;
   onSelect: (repo: string) => void;
@@ -62,12 +63,9 @@ export function SkyCatalog(props: Props) {
     currentPage * rowsPerPage,
   );
   return (
-    <section
-      className="satellite-browser panel"
-      aria-label={copy.skyBrowseTitle}
-    >
+    <section className="satellite-browser panel" aria-label={props.title}>
       <div className="panel-heading">
-        <h2>{copy.skyBrowseTitle}</h2>
+        <h2>{props.title}</h2>
         <span className="mono">{props.entries.length.toLocaleString()}</span>
       </div>
       {shown.length === 0 ? (
@@ -100,7 +98,7 @@ export function SkyCatalog(props: Props) {
         </ul>
       )}
       {props.entries.length > rowsPerPage && (
-        <nav className="sky-catalog-pages" aria-label={copy.skyBrowseTitle}>
+        <nav className="sky-catalog-pages" aria-label={props.title}>
           <button
             type="button"
             disabled={currentPage === 1}

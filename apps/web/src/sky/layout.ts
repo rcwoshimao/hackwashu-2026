@@ -1,4 +1,4 @@
-import { scaleLinear, scaleLog } from "d3-scale";
+import { scaleLog, scaleSymlog } from "d3-scale";
 import type { AccountRepoData, Satellite } from "../data.ts";
 
 export const topicKeys = [
@@ -77,13 +77,15 @@ export function layoutSky(
     0,
     ...satellites.map((satellite) => satellite.stars),
   );
-  const lagScale = scaleLinear()
+  // README lag is long-tailed: one repo years behind would pin every other
+  // mark to the inner ring on a linear scale.
+  const lagScale = scaleSymlog()
     .domain([0, Math.max(1, maxLagDays)])
     .range([innerRadius, outerRadius])
     .clamp(true);
   const starScale = scaleLog()
     .domain([1, Math.max(2, maxStars)])
-    .range([3, width < 540 ? 7 : 11])
+    .range([1.8, width < 540 ? 4.5 : 6.5])
     .clamp(true);
   const sector = (Math.PI * 2) / topicKeys.length;
   const points = satellites.map((satellite): SkyPoint => {

@@ -49,7 +49,7 @@ export const webCopy = {
   skyLegendSummary: "How this map works",
   skyLegendTopic: "Angle groups repositories by topic.",
   skyLegendLag:
-    "Farther from center means more days since the README changed relative to code.",
+    "Farther from center means more days since the README changed relative to code, on a log scale.",
   skyLegendStars: "Larger marks mean more GitHub stars, on a log scale.",
   skyLegendDrift: "Amber and a broken ring mean drifting checks.",
   skyLegendSimulated: "Dashed hollow marks are simulated.",
@@ -57,6 +57,9 @@ export const webCopy = {
     "Outlined ovals in the outer orbit are your unscanned repos. Their position has no measured meaning.",
   skyCanvasAlt:
     "Star chart of scanned public repositories by topic, README lag, stars, and check status, with unscanned account repositories in an outer holding orbit. Use the repository list below for keyboard access.",
+  skyZoomIn: "Zoom in",
+  skyZoomOut: "Zoom out",
+  skyZoomHint: "Drag to pan when zoomed in.",
   skyTopicFrameworks: "Frameworks",
   skyTopicUi: "UI libraries",
   skyTopicBuild: "Build tools",
@@ -71,6 +74,7 @@ export const webCopy = {
   skyMedianLag: "Median README lag",
   skyNoFindings: "No measured findings yet. Simulated points are excluded.",
   skyBrowseTitle: "Repositories",
+  skyBrowseSampleTitle: "100 sample repositories",
   skyPreviewAction: "Preview",
   skyBrowseSearch: "Find a repository",
   skyBrowsePlaceholder: "owner/repo",

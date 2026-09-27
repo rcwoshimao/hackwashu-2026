@@ -52,6 +52,19 @@ function drawDiamond(context: CanvasRenderingContext2D, point: SkyPoint): void {
   context.stroke();
 }
 
+/**
+ * A slow star-like shimmer from 0 to 1. The phase and rate come from the stable
+ * spread, so each mark keeps its own rhythm across renders without randomness.
+ */
+function twinkle(point: SkyPoint, timeMs: number): number {
+  const phase = (point.spread * 7.31) % 1;
+  const cyclesPerSecond = 0.9 + phase * 1.1;
+  const wave = Math.sin(
+    (timeMs / 1000) * Math.PI * 2 * cyclesPerSecond + phase * Math.PI * 2,
+  );
+  return (1 + wave) / 2;
+}
+
 function drawPoint(
   context: CanvasRenderingContext2D,
   point: SkyPoint,
@@ -79,6 +92,11 @@ function drawPoint(
       const cyclesPerSecond = 1 + satellite.driftDegrees / 25;
       context.globalAlpha =
         0.58 + 0.42 * Math.sin((timeMs / 1000) * Math.PI * 2 * cyclesPerSecond);
+    } else if (!reducedMotion) {
+      const glow = twinkle(point, timeMs);
+      context.globalAlpha = 0.55 + 0.45 * glow;
+      context.shadowColor = ink;
+      context.shadowBlur = 1 + 5 * glow;
     }
     context.beginPath();
     context.arc(x, y, radius, 0, Math.PI * 2);

@@ -1,8 +1,8 @@
 import type { SkyLayout, SkyPoint } from "./layout.ts";
 
-export const skyTurnPeriodMs = 300_000;
-export const outerGlidePeriodMs = 120_000;
-export const innerGlideFloorMs = 20_000;
+export const skyTurnPeriodMs = 600_000;
+export const outerGlidePeriodMs = 300_000;
+export const innerGlideFloorMs = 60_000;
 
 export type Placement = { x: number; y: number };
 

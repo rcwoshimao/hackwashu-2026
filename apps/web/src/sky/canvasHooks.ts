@@ -83,26 +83,43 @@ function startDrawing(input: DrawInput): () => void {
   return () => cancelAnimationFrame(frame);
 }
 
+export type CanvasScene = {
+  layout: SkyLayout;
+  blimps: BlimpPoint[];
+  width: number;
+  height: number;
+};
+
 export function useCanvasRender(
   ref: RefObject<HTMLCanvasElement | null>,
-  layout: SkyLayout,
+  scene: CanvasScene,
   selectedRepo: string | null,
   reducedMotion: boolean,
   arrivals: RefObject<Map<string, number>>,
   visible: boolean,
-  blimps: BlimpPoint[],
 ): void {
+  const { layout, blimps, width, height } = scene;
   useEffect(() => {
     if (!ref.current || !visible) return;
     return startDrawing({
       canvas: ref.current,
       layout,
-      width: layout.centerX * 2,
-      height: layout.centerY * 2,
+      width,
+      height,
       selectedRepo,
       reducedMotion,
       arrivals: arrivals.current,
       blimps,
     });
-  }, [ref, layout, selectedRepo, reducedMotion, arrivals, visible, blimps]);
+  }, [
+    ref,
+    layout,
+    blimps,
+    width,
+    height,
+    selectedRepo,
+    reducedMotion,
+    arrivals,
+    visible,
+  ]);
 }

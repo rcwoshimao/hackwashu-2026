@@ -42,6 +42,30 @@ test("lays out 500 satellites deterministically within the Canvas", () => {
   assert.equal(first.maxLagDays, 499);
 });
 
+test("README lag uses a log scale so one outlier does not crowd the rest", () => {
+  const lags = [0, 4, 25, 128, 2918];
+  const layout = layoutSky(
+    lags.map((lag, index) => ({
+      ...satellite(index),
+      readmeLagDays: lag,
+    })),
+    960,
+    720,
+  );
+  const share = (index: number) => {
+    const point = layout.points[index];
+    assert.ok(point);
+    return (
+      (point.distance - layout.innerRadius) /
+      (layout.outerRadius - layout.innerRadius)
+    );
+  };
+  assert.equal(share(0), 0);
+  assert.ok(Math.abs(share(4) - 1) < 1e-9);
+  assert.ok(share(2) > 0.35);
+  assert.ok(share(1) < share(2) && share(2) < share(3));
+});
+
 test("topic labels map to the five documented sectors", () => {
   assert.deepEqual(
     ["frameworks", "UI libraries", "build tools", "back end", "unknown"].map(
