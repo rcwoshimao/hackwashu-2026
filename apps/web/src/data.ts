@@ -106,6 +106,8 @@ export const runSchema = z.object({
   origin: z.enum(["public_scan", "ci"]).optional(),
   results: z.array(checkResultSchema),
   evidence: z.array(evidenceGroupSchema),
+  fixes: z.record(z.string(), z.string()).optional(),
+  fixAvailable: z.boolean().optional(),
 });
 
 export const meSchema = z.object({

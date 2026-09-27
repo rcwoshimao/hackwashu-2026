@@ -33,6 +33,7 @@ export type LinkRecord = {
 export type AlertState = "open" | "kept" | "ignored" | "fixing" | "fixed";
 export type AlertRecord = {
   id: string;
+  kind?: "drift" | "scan";
   githubLogin: string;
   repo: string;
   commitSha: string;
@@ -82,6 +83,7 @@ export interface MessagingStore {
   findCorrection(repo: string, commitSha: string): AlertRecord | null;
   isIgnored(repo: string, claimId: string): boolean;
   ignore(repo: string, claimId: string): void;
+  unignore(repo: string, claimId: string): void;
   getPending(hash: string): PendingChoice | null;
   putPending(hash: string, choice: PendingChoice | null): void;
   putOwnedClaims(login: string, run: RunRecord): void;
@@ -138,6 +140,15 @@ export interface CorrectionPort {
     repo: string,
     commitSha: string,
   ): Promise<Result<"success" | "failure" | "pending">>;
+}
+
+export interface ScanFixPort {
+  fix(
+    run: RunRecord,
+    claimIds: readonly string[],
+  ): Promise<
+    Result<{ pullRequestUrl: string; fixedClaimIds: readonly string[] }>
+  >;
 }
 
 export interface PublicScanPort {

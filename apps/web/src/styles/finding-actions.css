@@ -1,0 +1,44 @@
+.finding-actions,
+.finding-fix-all {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+}
+.finding-fix-all {
+  margin: 0.4rem 0 1rem;
+}
+.finding-actions .form-feedback,
+.finding-fix-all .form-feedback {
+  flex-basis: 100%;
+  margin: 0;
+}
+.finding-actions button.finding-ignore {
+  background: transparent;
+  color: var(--paper);
+  border-color: var(--rule);
+}
+.finding-actions button.finding-ignore:hover {
+  background: var(--paper);
+  color: var(--night);
+}
+.finding-pr-link {
+  font-weight: 600;
+}
+.ignored-findings {
+  margin-top: 1rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.8rem;
+}
+.ignored-findings summary {
+  cursor: pointer;
+  color: var(--mist);
+}
+.ignored-findings-intro {
+  color: var(--mist);
+  font-size: 0.9rem;
+}
+.ignored-findings .claim-ignored {
+  opacity: 0.7;
+}

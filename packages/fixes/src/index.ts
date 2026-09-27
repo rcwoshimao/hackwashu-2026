@@ -7,6 +7,8 @@ export { FakePrComments, OctokitPrComments } from "./pr-comment-github.ts";
 export { proposeCorrection } from "./proposal.ts";
 export { rebaseFlightPlan } from "./rebase-plan.ts";
 export { RepoCorrection } from "./repo-correction.ts";
+export type { ScanFixOutcome } from "./scan-correction.ts";
+export { ScanCorrection } from "./scan-correction.ts";
 export type {
   CorrectionProposal,
   DraftInput,

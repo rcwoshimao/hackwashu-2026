@@ -223,6 +223,12 @@ export class SqliteMessagingStore implements MessagingStore {
       .run(repo, claimId);
   }
 
+  unignore(repo: string, claimId: string): void {
+    this.db
+      .query("DELETE FROM messaging_ignored WHERE repo = ? AND claim_id = ?")
+      .run(repo, claimId);
+  }
+
   getPending(hash: string): PendingChoice | null {
     const row = this.db
       .query(

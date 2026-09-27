@@ -65,10 +65,16 @@ export function runClaims(
   });
 }
 
-export function labelFor(results: readonly RunClaim[]): string {
-  const checkable = results.filter(
-    (item) => item.status === "pass" || item.status === "fail",
+function checkableResults(results: readonly RunClaim[]): RunClaim[] {
+  return results.filter(
+    (item) =>
+      item.state !== "dropped" &&
+      (item.status === "pass" || item.status === "fail"),
   );
+}
+
+export function labelFor(results: readonly RunClaim[]): string {
+  const checkable = checkableResults(results);
   if (checkable.length < minCheckableClaims) return "No telemetry";
   const confirmedFailures = checkable.filter(
     (item) => item.state === "confirmed" && item.status === "fail",
@@ -80,9 +86,7 @@ export function labelFor(results: readonly RunClaim[]): string {
 }
 
 export function driftDegrees(results: readonly RunClaim[]): number {
-  const checkable = results.filter(
-    (item) => item.status === "pass" || item.status === "fail",
-  );
+  const checkable = checkableResults(results);
   if (checkable.length === 0) return 0;
   return Math.round(
     (90 * checkable.filter((item) => item.status === "fail").length) /
@@ -94,7 +98,9 @@ export function evidenceFor(
   results: readonly RunClaim[],
 ): RunRecord["evidence"] {
   const facts = new Map<string, RunRecord["evidence"][number]>();
-  for (const result of results.filter((item) => item.status === "fail")) {
+  for (const result of results.filter(
+    (item) => item.status === "fail" && item.state !== "dropped",
+  )) {
     const factKey = `${result.kind}:${JSON.stringify(result.params)}`;
     const previous = facts.get(factKey);
     const detail = {

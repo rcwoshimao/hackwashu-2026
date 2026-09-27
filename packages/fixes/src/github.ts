@@ -15,6 +15,7 @@ function parts(repo: string): { owner: string; repo: string } | null {
 function writable(path: string): boolean {
   return (
     path === "README.md" ||
+    /^readme\.(?:md|markdown)$/iu.test(path) ||
     /^docs\/(?:[^/.][^/]*\/)*[^/.][^/]*\.md$/u.test(path) ||
     /^man\/[^/.][^/]*\.[1-9]$/u.test(path) ||
     path === "flightchecks/flightplan.json" ||
@@ -215,6 +216,19 @@ export class FakeGitHubFixes implements GitHubFixPort {
       : { ok: true, value: content };
   }
 
+  async listFiles(
+    repo: string,
+    ref: string,
+  ): Promise<FixResult<readonly string[]>> {
+    const prefix = `${repo}\n${ref}\n`;
+    return {
+      ok: true,
+      value: [...this.files.keys()]
+        .filter((key) => key.startsWith(prefix))
+        .map((key) => key.slice(prefix.length)),
+    };
+  }
+
   async createDraft(input: DraftInput): Promise<FixResult<DraftResult>> {
     this.drafts.push(input);
     const commitSha = createHash("sha1")
@@ -229,17 +243,6 @@ export class FakeGitHubFixes implements GitHubFixPort {
         commitSha,
         branch: input.branch,
       },
-    };
-  }
-
-  async listFiles(): Promise<FixResult<readonly string[]>> {
-    return {
-      ok: true,
-      value: [
-        ...new Set(
-          [...this.files.keys()].map((key) => key.split("\n")[2] ?? ""),
-        ),
-      ],
     };
   }
 

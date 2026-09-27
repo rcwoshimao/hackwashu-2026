@@ -14,9 +14,7 @@ type Props = {
 
 type FilterProps = {
   scope: SkyScope;
-  search: string;
   onScope: (value: SkyScope) => void;
-  onSearch: (value: string) => void;
 };
 
 export function SkyFilters(props: FilterProps) {
@@ -39,17 +37,6 @@ export function SkyFilters(props: FilterProps) {
           {copy.skyScopePublic}
         </button>
       </fieldset>
-      <div className="sky-search-control">
-        <label htmlFor="satellite-search">{copy.skyBrowseSearch}</label>
-        <input
-          id="satellite-search"
-          value={props.search}
-          onChange={(event) => {
-            props.onSearch(event.target.value);
-          }}
-          placeholder={copy.skyBrowsePlaceholder}
-        />
-      </div>
     </div>
   );
 }

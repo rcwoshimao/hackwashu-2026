@@ -1,14 +1,28 @@
-# Human setup for the local Ground Control demo
+# Human setup for Ground Control
 
-Azure hosting is being provisioned for the Ground Control server. The target repository does not need Azure hosting. The normal deep-check setup will use the server's automatically published flightchecks and a short reusable GitHub workflow; the local checkout command will remain a fallback only if automatic publication fails.
+Ground Control is hosted at `https://ground-control-washu26.azurewebsites.net`. The target repository does not need Azure hosting. Ground Control publishes its flightchecks when documentation changes and repairs older duplicate plans on server startup.
 
-Ground Control runs locally with Docker Desktop. Add keys to the ignored `.env` file in this repository; never put a credential in Git, a README, an issue, or a screenshot. You can run the web app and the bundled Orbit drift fixture before creating any account. Ordinary public scans use static and optional AI checks without executing repository code. A private repo you connect or a public repo owned by your signed-in GitHub account can use deep checks after explicit Actions setup.
+## Fast path for deep checks
+
+1. Open the hosted **Connect a repository** page, choose a repository you administer, and enable deep checks.
+2. Copy its one-time telemetry token. Run the page's `gh secret set GROUND_CONTROL_TOKEN -R <owner/repo>` command and paste the token when prompted. The token does not appear in the command.
+3. Download the short `ground-control.yml` from that page into the target repository's `.github/workflows/` directory. It calls this repository's reusable workflow, which runs the flightchecks and reports to the hosted HTTPS server. Ground Control publishes the generated `flightchecks/` files on the target default branch.
+
+The local checkout command is a fallback when automatic publication fails. The remaining steps below cover local development and optional integrations.
+
+Ground Control also runs locally with Docker Desktop. Add local development keys to the ignored `.env` file in this repository; Azure uses Key Vault references for production credentials. Never put a credential in Git, a README, an issue, or a screenshot. You can run the web app and the bundled Orbit drift fixture before creating any account. Ordinary public scans use static and optional AI checks without executing repository code. A private repo you connect or a public repo owned by your signed-in GitHub account can use deep checks after explicit Actions setup.
+
+For a public README scan you own, sign in with the repository owner account and open its findings. **Fix with a pull request** drafts a correction from cited README lines and opens a draft PR for your review; **Ignore** removes a finding from the active checklist. Fix requires repository write access plus the configured model key. Review every proposed edit before merging it. The same actions are available on the full run page; no separate Ground Control account setup is needed.
 
 The Sky uses steady dot brightness and slow position changes. Rebuild the Docker image after updating the app to receive the reduced-flicker map; no new key or account setup is required.
 
 The desktop Sky map expands to match a taller selected-repository panel, removing the blank area below the map. The mobile layout keeps its stacked map size; no additional setup is required.
 
 From an eligible repository's findings or its card in **My reports**, choose **Add deep scan** to open its prefilled Connect flow. When deep checks are enabled but no CI result has arrived, the page says so and **Review deep check setup** opens the existing instructions without requesting a new token. After an authenticated Action report arrives, the page shows that deep checks are set up, the latest CI verdict, and a link to its evidence. A public README scan alone does not verify the Action setup. If the old token was lost, expand **Lost the Actions token?** in Connect and issue a replacement, then update that repository's Actions secret.
+
+After installing the workflow on the target repository's default branch and adding its `GROUND_CONTROL_TOKEN` Actions secret, choose **Create draft test PR** on the Connect setup page. The server's `GITHUB_WRITE_TOKEN` needs Contents and Pull requests write access to that repository. The draft has an empty commit and no file edits; review its Actions jobs, then close it. The existing PowerShell `gh` command remains a local fallback.
+
+For a confirmed failing deep CI finding with an exact README or `docs/` line citation, choose **Draft line edits** on its run page. A configured Anthropic or Gemini key proposes a cited Markdown change and opens a draft PR. Review each line in GitHub's Files changed view; merge or close the draft to accept or reject it. A same-repository source PR gets a draft against its head branch. Public README scan and deep CI draft bodies identify their source. CI determines whether a proposed edit passes.
 
 | # | Action only you can take | Put the value here | Verify it |
 | --- | --- | --- | --- |
@@ -31,7 +45,7 @@ Run `docker compose up -d` after changing `.env` so the container receives the n
 
 To reuse Rebecca's measured public scan data in this local Docker database, run `docker compose exec -T groundcontrol bun ops sky:load snapshots/sky-snapshot.json`. The loader skips private records and keeps newer local scans and existing connections.
 
-Rebecca's latest Sky interface adds zoom controls and drag-to-pan when zoomed. The map keeps every repository matching the current filter; the list below is paged. The bundled snapshot now contains 102 measured public repositories. The Chrome extension setup in step 11 remains available alongside the new interface.
+Rebecca's latest Sky interface adds zoom controls and drag-to-pan when zoomed. The map keeps every repository matching the current filter; the list below is paged. The bundled snapshot now contains 102 measured public repositories. The Chrome extension setup in step 12 remains available alongside the new interface.
 
 To check repositories from your signed-in account, open `http://localhost:<GROUND_CONTROL_PORT>/signin` and use the **My repos** list. **Check README** requests a static and optional AI check for one public repo. **Scan all personal projects** requests those checks for eligible public projects under your username; it does not include private or organization repos. Listing your repositories does not connect or scan them. GitHub returns up to 500 recently updated accessible repos in this view; the page says when more exist. Once you sign in after this update, a blank `SESSION_SECRET` no longer logs you out on Docker recreation as long as `GITHUB_CLIENT_SECRET` stays the same. Changing either secret intentionally invalidates old sessions.
 

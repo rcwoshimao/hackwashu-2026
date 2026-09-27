@@ -28,6 +28,7 @@ import { createDeepFix } from "./deep-fix.ts";
 import { createApi, EventHub, GitHubCommitStatus } from "./index.ts";
 import { startMessaging } from "./messaging.ts";
 import { FlightPlanPublishQueue } from "./publish-schedule.ts";
+import { createScanFix } from "./scan-fix.ts";
 import { sessionSecret } from "./session-secret.ts";
 import { OctokitSmokePr } from "./smoke-pr.ts";
 
@@ -167,6 +168,14 @@ const prComments = process.env.GITHUB_WRITE_TOKEN
 const commitAuthor = process.env.GITHUB_WRITE_TOKEN
   ? new OctokitCommitAuthor(process.env.GITHUB_WRITE_TOKEN)
   : undefined;
+const scanFix = docFixModel
+  ? createScanFix({
+      store,
+      events,
+      model: docFixModel,
+      serviceToken: process.env.GITHUB_WRITE_TOKEN,
+    })
+  : undefined;
 const smokePr = process.env.GITHUB_WRITE_TOKEN
   ? new OctokitSmokePr(process.env.GITHUB_WRITE_TOKEN)
   : undefined;
@@ -182,6 +191,7 @@ const messaging = await startMessaging({
   projectId: process.env.SPECTRUM_PROJECT_ID,
   projectSecret: process.env.SPECTRUM_PROJECT_SECRET,
   githubWriteToken: process.env.GITHUB_WRITE_TOKEN,
+  scanFix,
   confluenceSite: process.env.CONFLUENCE_SITE,
   confluenceEmail: process.env.CONFLUENCE_EMAIL,
   confluenceToken: process.env.CONFLUENCE_API_TOKEN,
@@ -201,6 +211,7 @@ const app = createApi({
   ...(status === undefined ? {} : { status }),
   ...(prComments === undefined ? {} : { prComments }),
   ...(commitAuthor === undefined ? {} : { commitAuthor }),
+  ...(scanFix === undefined ? {} : { scanFix }),
   ...(smokePr === undefined ? {} : { smokePr }),
   ...(deepFix === undefined ? {} : { deepFix }),
   now: () => new Date(),
@@ -222,4 +233,7 @@ const sourceRefreshError = () => {
   events.publish(event);
 };
 sourceSync.start(sourceRefreshError);
-void sourceSync.refreshDue().catch(sourceRefreshError);
+void sourceSync
+  .refreshDue()
+  .then(() => sourceSync.repairPlans())
+  .catch(sourceRefreshError);

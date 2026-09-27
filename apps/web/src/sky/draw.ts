@@ -52,7 +52,25 @@ function drawDiamond(context: CanvasRenderingContext2D, point: SkyPoint): void {
   context.stroke();
 }
 
-function drawPoint(context: CanvasRenderingContext2D, point: SkyPoint): void {
+/**
+ * A star-like shimmer from 0 to 1. The phase and rate come from the stable
+ * spread, so each mark keeps its own rhythm across renders without randomness.
+ */
+function twinkle(point: SkyPoint, timeMs: number): number {
+  const phase = (point.spread * 7.31) % 1;
+  const cyclesPerSecond = 0.35 + phase * 0.45;
+  const wave = Math.sin(
+    (timeMs / 1000) * Math.PI * 2 * cyclesPerSecond + phase * Math.PI * 2,
+  );
+  return (1 + wave) / 2;
+}
+
+function drawPoint(
+  context: CanvasRenderingContext2D,
+  point: SkyPoint,
+  timeMs: number,
+  reducedMotion: boolean,
+): void {
   const { satellite, x, y, radius } = point;
   const status = satellite.label.toLowerCase();
   context.save();
@@ -70,8 +88,10 @@ function drawPoint(context: CanvasRenderingContext2D, point: SkyPoint): void {
   } else if (status === "lost signal") {
     drawDiamond(context, point);
   } else {
+    const glow = reducedMotion ? 0.5 : twinkle(point, timeMs);
+    if (!reducedMotion) context.globalAlpha = 0.55 + 0.45 * glow;
     context.shadowColor = status === "drifting" ? drift : ink;
-    context.shadowBlur = status === "drifting" ? 3 : 2;
+    context.shadowBlur = 1 + 5 * glow;
     context.beginPath();
     context.arc(x, y, radius, 0, Math.PI * 2);
     if (status === "no telemetry") context.stroke();
@@ -131,7 +151,7 @@ export function drawSky(
       ...resting,
       ...placePoint(layout, resting, timeMs, reducedMotion),
     };
-    drawPoint(context, point);
+    drawPoint(context, point, timeMs, reducedMotion);
     if (point.satellite.repo === selectedRepo) {
       context.strokeStyle = ink;
       context.lineWidth = 2;

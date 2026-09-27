@@ -3,6 +3,7 @@ import type { PrCommentPort } from "@ground-control/fixes";
 import type { MessagingHub } from "@ground-control/messaging";
 import type { SourceSync } from "@ground-control/source-sync";
 import type { AppStore, EventRecord, RunRecord } from "@ground-control/store";
+import type { ScanFixService } from "./scan-fix.ts";
 
 export type ScanResult =
   | { state: "queued"; repo: string }
@@ -54,7 +55,13 @@ export interface ApiDeps {
   deepFix?: DeepFixPort;
   prComments?: PrCommentPort;
   messaging?: Pick<MessagingHub, "alert"> &
-    Partial<Pick<MessagingHub, "requestLink" | "confirmCorrection">>;
+    Partial<
+      Pick<
+        MessagingHub,
+        "requestLink" | "confirmCorrection" | "scanAlert" | "restoreClaim"
+      >
+    >;
+  scanFix?: ScanFixService;
   sourceSync?: Pick<SourceSync, "status" | "refresh" | "discover">;
   confluenceSite?: string | undefined;
   events: EventHub;

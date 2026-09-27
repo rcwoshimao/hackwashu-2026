@@ -1,6 +1,7 @@
 import type { FlightPlan, TrustState } from "@ground-control/plan";
 import type {
   AppStore,
+  ClaimFixRecord,
   EventRecord,
   RepoRecord,
   RunRecord,
@@ -18,6 +19,7 @@ export class MemoryStore implements AppStore {
   private readonly plans = new Map<string, FlightPlan>();
   private readonly runs = new Map<string, RunRecord>();
   private readonly trusts = new Map<string, TrustState>();
+  private readonly claimFixes = new Map<string, ClaimFixRecord>();
   private readonly satellites = new Map<string, SatelliteRecord>();
   private readonly sessions = new Map<string, SessionRecord>();
   private readonly scans = new Map<string, number[]>();
@@ -73,6 +75,12 @@ export class MemoryStore implements AppStore {
   }
   setTrust(repo: string, claimId: string, state: TrustState): void {
     this.trusts.set(`${repo}\n${claimId}`, state);
+  }
+  getClaimFix(repo: string, claimId: string): ClaimFixRecord | null {
+    return this.claimFixes.get(`${repo}\n${claimId}`) ?? null;
+  }
+  putClaimFix(fix: ClaimFixRecord): void {
+    this.claimFixes.set(`${fix.repo}\n${fix.claimId}`, fix);
   }
   getSatellite(repo: string): SatelliteRecord | null {
     return this.satellites.get(repo) ?? null;

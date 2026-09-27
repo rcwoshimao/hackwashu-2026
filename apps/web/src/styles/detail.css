@@ -1,41 +1,138 @@
-.repo-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  margin: 0.8rem 0 1.2rem;
-}
 .repo-back-link {
   display: inline-block;
   margin-top: 0.7rem;
 }
-.repo-scan-status {
+.repo-heading {
+  margin: 1.2rem 0 1.6rem;
+}
+.repo-heading h1 {
+  overflow-wrap: anywhere;
+  margin-bottom: 0.4rem;
+}
+.repo-answer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1.2rem;
+  border: 1px solid var(--rule);
+  border-left-width: 4px;
+  background: var(--hull);
+  padding: clamp(1.1rem, 2.4vw, 1.8rem);
+  margin-bottom: 2rem;
+  scroll-margin-top: 1rem;
+}
+.repo-answer.tone-wrong,
+.repo-answer.tone-maybe {
+  border-left-color: var(--drift);
+}
+.repo-answer.tone-ok {
+  border-left-color: var(--paper);
+}
+.repo-answer-mark {
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--mist);
+}
+.tone-wrong .repo-answer-mark,
+.tone-maybe .repo-answer-mark {
+  color: var(--drift);
+}
+.tone-ok .repo-answer-mark {
+  color: var(--paper);
+}
+.repo-answer h2 {
+  margin: 0.2rem 0 0.45rem;
+}
+.repo-answer-text p {
+  margin: 0;
+  color: var(--mist);
+}
+.repo-answer-date {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+}
+.repo-answer-action {
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+}
+.repo-answer-action .button-secondary {
+  background: transparent;
+  color: var(--paper);
+  border-color: var(--rule);
+}
+.repo-answer-action .button-secondary:hover {
+  background: var(--rule);
+}
+.repo-answer-feedback {
+  margin: 0;
+  color: var(--mist);
+  font-size: 0.85rem;
+  max-width: 16rem;
+  text-align: right;
+}
+.repo-checklist {
+  margin-bottom: 2rem;
+}
+.repo-checklist h2 {
+  font-size: 1.15rem;
+  margin-bottom: 0.6rem;
+}
+.repo-checklist ul {
+  list-style: none;
+  margin: 0 0 0.8rem;
+  padding: 0;
+}
+.repo-claim {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr);
+  gap: 0.8rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--rule);
+}
+.repo-claim-mark {
+  font-weight: 600;
+  text-align: center;
+  color: var(--mist);
+}
+.claim-wrong .repo-claim-mark,
+.claim-maybe .repo-claim-mark,
+.claim-wrong .repo-claim-label,
+.claim-maybe .repo-claim-label {
+  color: var(--drift);
+}
+.claim-ok .repo-claim-mark {
+  color: var(--paper);
+}
+.repo-claim p {
+  margin: 0;
+}
+.repo-claim-quote {
+  overflow-wrap: anywhere;
+}
+.repo-claim-meta {
+  margin-top: 0.25rem;
+  color: var(--mist);
+  font-size: 0.88rem;
+}
+.repo-owner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.4rem;
+  gap: 0.8rem 1.4rem;
+  border: 1px dashed var(--rule);
+  padding: 1rem 1.2rem;
+  margin-bottom: 2rem;
 }
-.repo-scan-status h2 {
-  margin-bottom: 0.4rem;
-}
-.repo-scan-status p {
-  color: var(--mist);
-  margin-bottom: 0.3rem;
-}
-.repo-heading h1 {
-  overflow-wrap: anywhere;
-  margin-bottom: 0.7rem;
-}
-.repo-result {
-  margin-bottom: 1.4rem;
-  scroll-margin-top: 1rem;
-}
-.repo-result h2 {
-  margin-bottom: 0.5rem;
-}
-.repo-result > p:not(.eyebrow) {
+.repo-owner p {
+  margin: 0;
   color: var(--mist);
 }
 .repo-result-actions {
@@ -101,21 +198,48 @@
 .repo-sources {
   margin-bottom: 1.4rem;
 }
+.repo-owner strong {
+  color: var(--paper);
+}
 .repo-source-details {
   margin-top: 0.8rem;
 }
-.repo-source-details summary,
-.repo-technical > summary {
+.repo-source-details summary {
   cursor: pointer;
   font-weight: 600;
 }
-.repo-technical > summary {
-  font-size: 1.1rem;
+.repo-details {
+  border-top: 1px solid var(--rule);
+  padding-top: 1rem;
 }
-.repo-technical[open] > summary {
+.repo-details > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--mist);
+}
+.repo-details[open] > summary {
   margin-bottom: 1.2rem;
 }
-.repo-technical .repo-runs {
+.repo-details-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 2.4rem;
+  margin: 0 0 1.4rem;
+}
+.repo-details-facts dt {
+  color: var(--mist);
+  font-size: 0.8rem;
+}
+.repo-details-facts dd {
+  margin: 0.2rem 0 0;
+}
+.repo-sources {
+  margin-bottom: 1.4rem;
+}
+.repo-sources h3 {
+  margin-bottom: 0.6rem;
+}
+.repo-details .repo-runs {
   margin-top: 1.2rem;
 }
 .trajectory {
@@ -333,8 +457,15 @@ th {
   }
 }
 @media (max-width: 760px) {
-  .repo-heading {
-    align-items: start;
+  .repo-answer {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .repo-answer-action {
+    grid-column: 1 / -1;
+    justify-items: start;
+  }
+  .repo-answer-feedback {
+    text-align: left;
   }
   .evidence-claim dl,
   .check-card dl {

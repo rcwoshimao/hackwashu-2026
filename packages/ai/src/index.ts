@@ -1,5 +1,5 @@
 export { ClaudeModel } from "./claude.ts";
-export type { DocFixModel } from "./docfix.ts";
+export type { DocFix, DocFixInput, DocFixModel } from "./docfix.ts";
 export {
   ClaudeDocFixer,
   FixtureDocFixer,

@@ -248,7 +248,12 @@ function registerRepoReadRoutes(app: Hono, deps: ApiDeps): void {
     if (repo === null) return error("repo_not_found", 404);
     const allowed = await accessRepo(deps, c.req.raw, repo);
     if (!allowed.ok) return error("repo_access_denied", allowed.status);
-    return c.json(run);
+    const fixes: Record<string, string> = {};
+    for (const result of run.results) {
+      const fix = deps.store.getClaimFix(run.repo, result.claimId);
+      if (fix) fixes[result.claimId] = fix.pullRequestUrl;
+    }
+    return c.json({ ...run, fixes, fixAvailable: deps.scanFix !== undefined });
   });
 
   app.get("/api/sources/:id/status", async (c) => {

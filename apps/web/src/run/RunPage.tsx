@@ -4,6 +4,12 @@ import { api } from "../api.ts";
 import { useMe } from "../auth/useMe.ts";
 import type { CheckResult, RunData } from "../data.ts";
 import { readableDate, repoPath, safeExternalUrl } from "../presentation.ts";
+import {
+  canTriage,
+  FindingActions,
+  FixAllButton,
+  RestoreButton,
+} from "../repo/FindingActions.tsx";
 import { DeepFixButton } from "./DeepFixButton.tsx";
 
 function useRun(id: string) {
@@ -94,15 +100,19 @@ function EvidenceGroups({ data }: { data: RunData }) {
 
 function CheckCard({
   result,
-  runId,
+  run,
+  canAct,
+  canDeepFix,
   onChange,
-  canFix,
 }: {
   result: CheckResult;
-  runId: string;
+  run: RunData;
+  canAct: boolean;
+  canDeepFix: boolean;
   onChange: () => Promise<void>;
-  canFix: boolean;
 }) {
+  const runId = run.id;
+  const scanFinding = run.origin === "public_scan";
   const [feedback, setFeedback] = useState("");
   const [pending, setPending] = useState(false);
   const action = async (kind: "confirm" | "drop") => {
@@ -122,7 +132,8 @@ function CheckCard({
     setPending(false);
   };
   const actionable =
-    result.state === "unconfirmed" || result.state === "disputed";
+    !scanFinding &&
+    (result.state === "unconfirmed" || result.state === "disputed");
   const link = result.deepLink ? safeExternalUrl(result.deepLink) : null;
   return (
     <li
@@ -169,10 +180,29 @@ function CheckCard({
             </button>
           </>
         )}
-        {canFix && result.state === "confirmed" && result.status === "fail" && (
-          <DeepFixButton runId={runId} claimId={result.claimId} />
-        )}
+        {run.origin === "ci" &&
+          canDeepFix &&
+          result.state === "confirmed" &&
+          result.status === "fail" && (
+            <DeepFixButton runId={runId} claimId={result.claimId} />
+          )}
       </div>
+      {scanFinding && (
+        <>
+          <FindingActions
+            run={run}
+            result={result}
+            canAct={canAct}
+            onChange={onChange}
+          />
+          <RestoreButton
+            run={run}
+            result={result}
+            canAct={canAct}
+            onChange={onChange}
+          />
+        </>
+      )}
       {feedback && (
         <p className="form-feedback" role="status">
           {feedback}
@@ -185,12 +215,14 @@ function CheckCard({
 function RunContent({
   data,
   refresh,
-  canFix,
 }: {
   data: RunData;
   refresh: () => Promise<void>;
-  canFix: boolean;
 }) {
+  const { me } = useMe();
+  const canAct = canTriage(data, me);
+  const canDeepFix =
+    data.origin === "ci" && !!me?.connectedRepos.includes(data.repo);
   return (
     <>
       <header className="detail-heading">
@@ -212,7 +244,13 @@ function RunContent({
       <EvidenceGroups data={data} />
       <section className="panel check-results">
         <h2>{copy.runChecks}</h2>
-        {canFix && <p>{copy.runDeepFixIntro}</p>}
+        {canDeepFix && <p>{copy.runDeepFixIntro}</p>}
+        <FixAllButton
+          run={data}
+          findings={data.results}
+          canAct={canAct}
+          onChange={refresh}
+        />
         {data.results.length === 0 ? (
           <p>{copy.runNoChecks}</p>
         ) : (
@@ -221,9 +259,10 @@ function RunContent({
               <CheckCard
                 key={result.claimId}
                 result={result}
-                runId={data.id}
+                run={data}
+                canAct={canAct}
+                canDeepFix={canDeepFix}
                 onChange={refresh}
-                canFix={canFix}
               />
             ))}
           </ol>
@@ -235,7 +274,6 @@ function RunContent({
 
 export function RunPage({ id }: { id: string }) {
   const { data, loading, denied, refresh } = useRun(id);
-  const { me } = useMe();
   return (
     <main className="page run-page">
       {loading && (
@@ -254,15 +292,7 @@ export function RunPage({ id }: { id: string }) {
           )}
         </div>
       )}
-      {data && (
-        <RunContent
-          data={data}
-          refresh={refresh}
-          canFix={
-            data.origin === "ci" && !!me?.connectedRepos.includes(data.repo)
-          }
-        />
-      )}
+      {data && <RunContent data={data} refresh={refresh} />}
     </main>
   );
 }

@@ -53,6 +53,20 @@ export const messageCopy = {
     "| {source} | {quote} | {expected} | {actual} | [Open evidence]({url}) |",
   prEvidenceFooter:
     "Reply FIX by iMessage to request a correction, or review the cited evidence before changing code or docs.",
+  scanAlert:
+    "Ground Control scanned {repo} at {sha} and found {count} possible README {noun}:\n{findings}\nEvidence: {url}\nReply FIX for an AI-drafted pull request, KEEP to leave the docs as they are, or IGNORE to hide these findings.",
+  scanFixStarted: "Drafting a README correction. This takes about a minute.",
+  scanFixDone:
+    "Draft pull request {pr} corrects {count} of {total} findings. Review it before merging; the next scan will clear the fixed lines.",
+  scanFixUnavailable:
+    "I couldn't draft a correction for these findings. Review them and edit the README directly: {url}",
+  scanKeepDone:
+    "Kept the README as written. The findings stay visible at {url}",
+  scanIgnoreDone:
+    "Ignored {count} {noun}. They won't count toward this repo's drift or alert you again.",
+  scanFixPrTitle: "Correct {count} README {noun} found by Ground Control",
+  scanFixPrBody:
+    "Source: public README scan with static and optional AI assessment at commit {sha}; no repository code ran. An AI model drafted these line edits from the repository file list and package.json:\n\n{changes}\n\nReview each change before merging.",
   keepDone:
     "Kept the docs as written. The check stays failing until the code matches.",
   ignoreDone:

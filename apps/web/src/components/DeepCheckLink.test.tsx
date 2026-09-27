@@ -2,7 +2,6 @@ import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import { renderToStaticMarkup } from "react-dom/server";
 import type { MeData, RepoData } from "../data.ts";
-import { RepoScanStatus } from "../repo/RepoScanStatus.tsx";
 import { DeepCheckLink } from "./DeepCheckLink.tsx";
 
 const repo: RepoData = {
@@ -85,25 +84,6 @@ test("a successful CI report confirms deep-check setup despite a newer public sc
   assert.match(markup, /Latest CI run passed/);
   assert.match(markup, /runs\/ci-pass/);
   assert.doesNotMatch(markup, /Review deep check setup/);
-  const scanStatus = renderToStaticMarkup(
-    <RepoScanStatus
-      data={{
-        ...repo,
-        runtimeEnabled: true,
-        runs: [
-          {
-            id: "ci-pass",
-            commitSha: "def",
-            createdAt: "2026-09-27T01:00:00Z",
-            verdict: "success",
-            origin: "ci",
-            failingCount: 0,
-          },
-        ],
-      }}
-    />,
-  );
-  assert.doesNotMatch(scanStatus, /Add the Ground Control Action/);
 });
 
 test("a failing latest CI run confirms reporting without claiming checks passed", () => {

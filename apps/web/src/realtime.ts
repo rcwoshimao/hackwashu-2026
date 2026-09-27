@@ -2,6 +2,7 @@ export const repoEventNames = [
   "scan_complete",
   "run",
   "trust_changed",
+  "scan_fix",
   "source_added",
   "source_refresh",
   "repo_connected",
