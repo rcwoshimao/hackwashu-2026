@@ -47,13 +47,15 @@ export const messageCopy = {
   fixConfluencePosted:
     "I posted a correction comment on {count} Confluence page(s).",
   prEvidenceLead:
-    "Source: deep scan in the repository's CI. Ground Control found {count} confirmed documentation mismatch(es) on commit {sha}.",
+    "Source: deep scan in the repository's CI. Ground Control found confirmed documentation findings ({count}) on commit {sha}.",
   prEvidenceHeading:
     "| Source | Documented claim | Expected | Observed | Evidence |\n| --- | --- | --- | --- | --- |",
   prEvidenceRow:
     "| {source} | {quote} | {expected} | {actual} | [Open evidence]({url}) |",
   prEvidenceFooter:
-    "Reply FIX by iMessage to request a correction, or review the cited evidence before changing code or docs.",
+    "Suggested next step: verify the cited claim against the implementation. If the check is correct, update the documentation or implement the documented behavior. For README and docs findings, [Draft line edits]({url}) can propose a cited edit for review. If the check is wrong, review its trust state before changing code or docs.",
+  prEvidenceResolved:
+    "Ground Control has no active documentation findings for this run. The reported check was dropped after review. [Review the run]({url}).",
   prReviewLead:
     "Source: deep scan in the repository's CI. This run needs review: {count} disputed documentation findings on commit {sha}. These checks do not fail the Ground Control verdict.",
   prReviewFooter:

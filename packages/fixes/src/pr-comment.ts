@@ -83,7 +83,12 @@ function evidenceBody(
       }),
     );
     appendRows(lines, store, run, confirmed, publicUrl);
-    lines.push("", renderMessage("prEvidenceFooter"));
+    lines.push(
+      "",
+      renderMessage("prEvidenceFooter", {
+        url: `${publicUrl}/runs/${encodeURIComponent(run.id)}`,
+      }),
+    );
   }
   if (review.length > 0) {
     if (confirmed.length > 0) lines.push("");
@@ -126,8 +131,19 @@ export async function commentOnRunFindings(
   const review = failing.filter(
     (claim) => claim.state === "disputed" || claim.state === "unconfirmed",
   );
-  if (confirmed.length + review.length === 0)
-    return { ok: true, value: "skipped" };
+  if (confirmed.length + review.length === 0) {
+    if (!failing.some((claim) => claim.state === "dropped"))
+      return { ok: true, value: "skipped" };
+    return port.upsert(
+      run.repo,
+      pullRequestNumber,
+      run.commitSha,
+      prEvidenceMarker,
+      `${prEvidenceMarker}\n${renderMessage("prEvidenceResolved", {
+        url: `${publicUrl}/runs/${encodeURIComponent(run.id)}`,
+      })}`,
+    );
+  }
   return port.upsert(
     run.repo,
     pullRequestNumber,

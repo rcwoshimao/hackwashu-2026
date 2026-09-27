@@ -41,7 +41,7 @@ export async function runCliFlag(
   let found = false;
   for (const path of listed.value) {
     if (
-      !/\.(?:js|jsx|ts|tsx)$/u.test(path) ||
+      !/\.(?:js|jsx|ts|tsx|py)$/u.test(path) ||
       /(^|\/)(?:node_modules|dist|build)(\/|$)/u.test(path)
     )
       continue;

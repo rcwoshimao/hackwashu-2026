@@ -131,9 +131,12 @@ function CheckCard({
     if (response.ok) await onChange();
     setPending(false);
   };
-  const actionable =
+  const canConfirm =
     !scanFinding &&
     (result.state === "unconfirmed" || result.state === "disputed");
+  const canDrop =
+    !scanFinding &&
+    (canConfirm || (result.state === "confirmed" && result.status === "fail"));
   const link = result.deepLink ? safeExternalUrl(result.deepLink) : null;
   return (
     <li
@@ -162,23 +165,23 @@ function CheckCard({
             {copy.runOpenSource}
           </a>
         )}
-        {actionable && (
-          <>
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => void action("confirm")}
-            >
-              {copy.runConfirm}
-            </button>
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => void action("drop")}
-            >
-              {copy.runDrop}
-            </button>
-          </>
+        {canConfirm && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => void action("confirm")}
+          >
+            {copy.runConfirm}
+          </button>
+        )}
+        {canDrop && (
+          <button
+            type="button"
+            disabled={pending}
+            onClick={() => void action("drop")}
+          >
+            {copy.runDrop}
+          </button>
         )}
         {run.origin === "ci" &&
           canDeepFix &&

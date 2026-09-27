@@ -6,6 +6,8 @@ To publish a reviewed server or web fix, push its merged commit to this reposito
 
 ## Fast path for deep checks
 
+If a confirmed CLI flag failure came from a Python repository before the runner included `.py` files, deploy the corrected Ground Control server, then refresh that repository's README source so the updated generated `flightchecks/runner.mjs` is published to its default branch. Create a new smoke PR from that branch; the existing PR head still contains the old runner. Review the new run before editing documentation. GitHub's **Apply suggestion** button needs a changed line in the PR diff, so an empty smoke PR cannot show an inline suggested edit. A true confirmed README or docs drift can use **Draft line edits** on the run page to open a separate draft PR.
+
 A green Ground Control status means no **confirmed** documentation check failed. A first-run failure is disputed and needs an owner to review it on the linked run page; choose **Confirm** if the check is valid, then **Draft line edits** for a confirmed failing README or docs claim. A PR with disputed failures receives one review comment linking to those controls. GitHub's separate dependency and npm audit jobs must be resolved in the target repository's security workflow. This clarification requires no new credential or setup step.
 
 To clear a repository's **Recent runs** list, sign in with a GitHub account that administers that repository, open its repository page, expand the details, and choose **Clear run log**. Confirm the prompt. The current result and existing run links remain available; subsequent runs appear in the list.
