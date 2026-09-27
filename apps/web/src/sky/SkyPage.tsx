@@ -132,9 +132,17 @@ export function SkyPage() {
   const [accountLoading, setAccountLoading] = useState(true);
   const [scope, setScope] = useState<SkyScope>("public");
   const [search, setSearch] = useState("");
+  const explicitPublicScope =
+    new URLSearchParams(window.location.search).get("scope") === "public";
   useEffect(() => {
-    if (me?.signedIn) setScope("mine");
-  }, [me?.signedIn]);
+    if (me?.signedIn && !explicitPublicScope) setScope("mine");
+  }, [me?.signedIn, explicitPublicScope]);
+  const changeScope = (next: SkyScope) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("scope", next);
+    window.history.replaceState(null, "", url);
+    setScope(next);
+  };
   const inspect = (repo: string) => {
     select(repo);
     if (window.matchMedia("(max-width: 1050px)").matches) {
@@ -235,7 +243,7 @@ export function SkyPage() {
           <SkyFilters
             scope={scope}
             search={search}
-            onScope={setScope}
+            onScope={changeScope}
             onSearch={setSearch}
           />
           <p className="sky-scope-hint">

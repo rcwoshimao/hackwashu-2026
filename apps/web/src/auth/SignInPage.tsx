@@ -40,8 +40,8 @@ export function SignInPage() {
               {copy.navSignOut}
             </button>
             {signoutFailed && <p role="alert">{copy.signInUnavailable}</p>}
-            <AccountRepos login={me.login ?? ""} />
             <IMessageLink />
+            <AccountRepos login={me.login ?? ""} />
           </div>
         ) : (
           <a className="button" href="/auth/github">

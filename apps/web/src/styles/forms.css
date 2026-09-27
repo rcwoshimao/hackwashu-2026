@@ -28,6 +28,38 @@
   margin-bottom: 0.1rem;
   font-size: 0.85rem;
 }
+.connect-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.connect-mode legend {
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+.connect-mode label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+}
+.connect-mode input[type="radio"],
+.checkbox-row input[type="checkbox"] {
+  width: 1.15rem;
+  min-height: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  margin: 0;
+  flex: none;
+  accent-color: var(--paper);
+}
+.connect-repo-picker {
+  display: grid;
+  gap: 0.45rem;
+}
 .form-panel button {
   justify-self: start;
   margin-top: 0.8rem;
