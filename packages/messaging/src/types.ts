@@ -83,6 +83,7 @@ export interface MessagingStore {
   findCorrection(repo: string, commitSha: string): AlertRecord | null;
   isIgnored(repo: string, claimId: string): boolean;
   ignore(repo: string, claimId: string): void;
+  unignore(repo: string, claimId: string): void;
   getPending(hash: string): PendingChoice | null;
   putPending(hash: string, choice: PendingChoice | null): void;
   putOwnedClaims(login: string, run: RunRecord): void;

@@ -113,6 +113,9 @@ export class MemoryMessagingStore implements MessagingStore {
   ignore(repo: string, claimId: string): void {
     this.ignored.add(`${repo}\n${claimId}`);
   }
+  unignore(repo: string, claimId: string): void {
+    this.ignored.delete(`${repo}\n${claimId}`);
+  }
   getPending(hash: string): PendingChoice | null {
     return this.pending.get(hash) ?? null;
   }

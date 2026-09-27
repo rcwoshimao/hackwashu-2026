@@ -104,6 +104,21 @@
   background: var(--paper);
   color: var(--night);
 }
+.ignored-findings {
+  margin-top: 1rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.8rem;
+}
+.ignored-findings summary {
+  cursor: pointer;
+  color: var(--mist);
+}
+.ignored-findings .repo-finding-card {
+  opacity: 0.75;
+}
+.finding-ignored-tag {
+  color: var(--mist);
+}
 .finding-pr-link {
   font-weight: 600;
 }

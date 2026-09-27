@@ -4,7 +4,12 @@ import { api } from "../api.ts";
 import { useMe } from "../auth/useMe.ts";
 import type { CheckResult, RepoData, RunData } from "../data.ts";
 import { safeExternalUrl } from "../presentation.ts";
-import { canTriage, FindingActions, FixAllButton } from "./FindingActions.tsx";
+import {
+  canTriage,
+  FindingActions,
+  FixAllButton,
+  IgnoredFindings,
+} from "./FindingActions.tsx";
 import { type FindingSummary, summarizeRun } from "./findingSummary.ts";
 
 function useLatestRun(id: string | null, version: unknown) {
@@ -149,6 +154,7 @@ function ResultBody({
         </ul>
       )}
       {findings.length > 5 && <p>{copy.repoFindingsMore}</p>}
+      <IgnoredFindings run={run} canAct={canAct} onChange={onChange} />
       <a href={`/runs/${encodeURIComponent(run.id)}`}>
         {copy.repoFindingOpenRun}
       </a>

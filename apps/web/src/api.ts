@@ -175,6 +175,12 @@ export const api = {
       {},
       actionSchema,
     ),
+  restore: (runId: string, claimId: string) =>
+    postJson(
+      `/api/runs/${encodeURIComponent(runId)}/claims/${encodeURIComponent(claimId)}/restore`,
+      {},
+      actionSchema,
+    ),
   fix: (runId: string, claimIds?: readonly string[]) =>
     postJson(
       `/api/runs/${encodeURIComponent(runId)}/fix`,

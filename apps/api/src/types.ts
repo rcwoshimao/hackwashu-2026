@@ -34,7 +34,10 @@ export interface ApiDeps {
   prComments?: PrCommentPort;
   messaging?: Pick<MessagingHub, "alert"> &
     Partial<
-      Pick<MessagingHub, "requestLink" | "confirmCorrection" | "scanAlert">
+      Pick<
+        MessagingHub,
+        "requestLink" | "confirmCorrection" | "scanAlert" | "restoreClaim"
+      >
     >;
   scanFix?: ScanFixService;
   sourceSync?: Pick<SourceSync, "status" | "refresh" | "discover">;

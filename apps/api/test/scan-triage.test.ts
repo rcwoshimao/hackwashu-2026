@@ -250,3 +250,44 @@ test("an owner's scan sends one iMessage when the scan completes", async () => {
   await Promise.resolve();
   expect(alerts).toHaveLength(1);
 });
+
+test("the owner can restore an ignored scan finding", async () => {
+  const base = setup();
+  base.github.permission = {
+    visibility: "public",
+    canRead: true,
+    canAdmin: true,
+  };
+  const run = seed(base.store);
+  const restored: string[] = [];
+  const app = createApi({
+    store: base.store,
+    auth: base.auth,
+    events: base.events,
+    now: () => new Date("2026-09-26T12:00:00Z"),
+    publicUrl: "http://localhost:8787",
+    messaging: {
+      async alert() {
+        return { ok: true, value: { sent: false, alertId: null } };
+      },
+      restoreClaim(name, claimId) {
+        restored.push(`${name}:${claimId}`);
+      },
+    },
+  });
+  const cookie = await login(app);
+  const path = `/api/runs/${run.id}/claims/c_1111111111`;
+  const early = await json(app, `${path}/restore`, {}, { cookie });
+  expect(early.status).toBe(409);
+  await json(app, `${path}/drop`, {}, { cookie });
+  expect(base.store.getRepo(repo)?.label).toBe("On course");
+  const back = await json(app, `${path}/restore`, {}, { cookie });
+  expect(back.status).toBe(200);
+  expect(base.store.getTrust(repo, "c_1111111111")).toBe("disputed");
+  expect(base.store.getRun(run.id)?.results[0]?.state).toBe("disputed");
+  expect(base.store.getRepo(repo)).toMatchObject({
+    label: "Possible drift",
+    driftDegrees: 30,
+  });
+  expect(restored).toEqual([`${repo}:c_1111111111`]);
+});

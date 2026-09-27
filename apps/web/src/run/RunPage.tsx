@@ -8,6 +8,7 @@ import {
   canTriage,
   FindingActions,
   FixAllButton,
+  RestoreButton,
 } from "../repo/FindingActions.tsx";
 
 function useRun(id: string) {
@@ -178,12 +179,20 @@ function CheckCard({
         )}
       </div>
       {scanFinding && (
-        <FindingActions
-          run={run}
-          result={result}
-          canAct={canAct}
-          onChange={onChange}
-        />
+        <>
+          <FindingActions
+            run={run}
+            result={result}
+            canAct={canAct}
+            onChange={onChange}
+          />
+          <RestoreButton
+            run={run}
+            result={result}
+            canAct={canAct}
+            onChange={onChange}
+          />
+        </>
       )}
       {feedback && (
         <p className="form-feedback" role="status">

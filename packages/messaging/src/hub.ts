@@ -91,6 +91,10 @@ export class MessagingHub {
     });
   }
 
+  restoreClaim(repo: string, claimId: string): void {
+    this.deps.messages.unignore(repo, claimId);
+  }
+
   async handleInbound(
     message: InboundMessage,
   ): Promise<Result<"handled" | "duplicate" | "ignored">> {
