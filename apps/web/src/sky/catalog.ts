@@ -40,18 +40,13 @@ export function catalogEntries(
 export function filterEntries(
   entries: SkyEntry[],
   scope: SkyScope,
-  search: string,
   login: string | null = null,
 ): SkyEntry[] {
-  const term = search.trim().toLowerCase();
   return entries.filter((entry) => {
     const own =
       entry.account !== null ||
       (login !== null &&
         entry.repo.split("/")[0]?.toLowerCase() === login.toLowerCase());
-    return (
-      entry.repo.toLowerCase().includes(term) &&
-      (scope === "mine" ? own : !own && entry.kind === "scanned")
-    );
+    return scope === "mine" ? own : !own && entry.kind === "scanned";
   });
 }

@@ -12,10 +12,14 @@ function navigation(path: string) {
   const reports =
     path === "/reports" || path === "/connect" || path === "/sources/new";
   const sky = path === "/" || path === "/sky";
+  const repos = path === "/signin";
   return (
     <>
       <a href="/sky" aria-current={sky ? "page" : undefined}>
         {copy.navSky}
+      </a>
+      <a href="/signin" aria-current={repos ? "page" : undefined}>
+        {copy.navMyRepos}
       </a>
       <a href="/reports" aria-current={reports ? "page" : undefined}>
         {copy.navReports}
