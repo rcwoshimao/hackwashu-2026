@@ -120,6 +120,14 @@
   cursor: crosshair;
   touch-action: manipulation;
 }
+.sky-map-count {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-top: 1px solid var(--rule);
+  color: var(--mist);
+  font-size: 0.85rem;
+  text-align: center;
+}
 .sky-legend {
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);

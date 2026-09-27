@@ -18,7 +18,7 @@ function drawGrid(
   context.fillRect(0, 0, width, height);
   context.strokeStyle = rule;
   context.lineWidth = 1;
-  context.globalAlpha = 0.42;
+  context.globalAlpha = 0.28;
   for (const radius of [
     layout.innerRadius,
     (layout.innerRadius + layout.outerRadius) / 2,
@@ -84,7 +84,12 @@ function drawPoint(
     context.arc(x, y, radius, 0, Math.PI * 2);
     if (status === "no telemetry") context.stroke();
     else context.fill();
-    if (status === "corrected" || status === "drifting") {
+    if (
+      status === "corrected" ||
+      status === "drifting" ||
+      status === "possible drift"
+    ) {
+      if (status === "possible drift") context.strokeStyle = drift;
       context.setLineDash(status === "drifting" ? [3, 3] : []);
       context.beginPath();
       context.arc(x, y, radius + 3, 0, Math.PI * 2);

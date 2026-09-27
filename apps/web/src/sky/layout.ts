@@ -1,4 +1,4 @@
-import { scaleLinear, scaleLog } from "d3-scale";
+import { scaleLog } from "d3-scale";
 import type { AccountRepoData, Satellite } from "../data.ts";
 
 export const topicKeys = [
@@ -57,10 +57,61 @@ export function topicKey(value: string): TopicKey {
   return "other";
 }
 
+type Slot = { start: number; span: number; spread: number };
+
+function skySlots(satellites: Satellite[]): Map<string, Slot> {
+  const sector = (Math.PI * 2) / topicKeys.length;
+  const slots = new Map<string, Slot>();
+  for (const [group, key] of topicKeys.entries()) {
+    const items = satellites
+      .filter((item) => topicKey(item.topicCluster) === key)
+      .sort(
+        (left, right) =>
+          left.readmeLagDays - right.readmeLagDays ||
+          left.repo.localeCompare(right.repo),
+      );
+    const sliceStart = -Math.PI / 2 + group * sector + 0.08;
+    const slotWidth = (sector - 0.16) / Math.max(1, items.length);
+    for (const [index, item] of items.entries()) {
+      const span = slotWidth * 0.12;
+      const center = sliceStart + (index + 0.5) * slotWidth;
+      slots.set(item.repo, {
+        start: center - span / 2,
+        span,
+        spread: stableFraction(item.repo),
+      });
+    }
+  }
+  return slots;
+}
+
+function skyPoint(
+  satellite: Satellite,
+  slot: Slot,
+  center: { x: number; y: number },
+  lagScale: (value: number) => number,
+  starScale: (value: number) => number,
+): SkyPoint {
+  const angle = slot.start + slot.spread * slot.span;
+  const distance = lagScale(Math.max(0, satellite.readmeLagDays) + 1);
+  return {
+    satellite,
+    x: center.x + Math.cos(angle) * distance,
+    y: center.y + Math.sin(angle) * distance,
+    radius: starScale(Math.max(1, satellite.stars)),
+    angle,
+    distance,
+    sectorStart: slot.start,
+    sectorSpan: slot.span,
+    spread: slot.spread,
+  };
+}
+
 export function layoutSky(
   satellites: Satellite[],
   width: number,
   height: number,
+  reference: Satellite[] = satellites,
 ): SkyLayout {
   const centerX = width / 2;
   const centerY = height / 2;
@@ -68,42 +119,34 @@ export function layoutSky(
     0,
     Math.min(width, height) / 2 - (width < 540 ? 34 : 55),
   );
-  const innerRadius = outerRadius * 0.18;
+  const innerRadius = outerRadius * (width < 540 ? 0.42 : 0.32);
   const maxLagDays = Math.max(
     0,
-    ...satellites.map((satellite) => satellite.readmeLagDays),
+    ...reference.map((satellite) => satellite.readmeLagDays),
   );
   const maxStars = Math.max(
     0,
-    ...satellites.map((satellite) => satellite.stars),
+    ...reference.map((satellite) => satellite.stars),
   );
-  const lagScale = scaleLinear()
-    .domain([0, Math.max(1, maxLagDays)])
+  const lagScale = scaleLog()
+    .domain([1, Math.max(2, maxLagDays + 1)])
     .range([innerRadius, outerRadius])
     .clamp(true);
   const starScale = scaleLog()
     .domain([1, Math.max(2, maxStars)])
-    .range([3, width < 540 ? 7 : 11])
+    .range([3, width < 540 ? 6 : 8])
     .clamp(true);
-  const sector = (Math.PI * 2) / topicKeys.length;
+  const slots = skySlots(satellites);
   const points = satellites.map((satellite): SkyPoint => {
-    const group = topicKeys.indexOf(topicKey(satellite.topicCluster));
-    const sectorStart = -Math.PI / 2 + group * sector + 0.08;
-    const sectorSpan = sector - 0.16;
-    const spread = stableFraction(satellite.repo);
-    const angle = sectorStart + spread * sectorSpan;
-    const distance = lagScale(satellite.readmeLagDays);
-    return {
+    const slot = slots.get(satellite.repo);
+    if (!slot) throw new Error("Missing Sky position");
+    return skyPoint(
       satellite,
-      x: centerX + Math.cos(angle) * distance,
-      y: centerY + Math.sin(angle) * distance,
-      radius: starScale(Math.max(1, satellite.stars)),
-      angle,
-      distance,
-      sectorStart,
-      sectorSpan,
-      spread,
-    };
+      slot,
+      { x: centerX, y: centerY },
+      lagScale,
+      starScale,
+    );
   });
   return {
     points,
@@ -143,13 +186,9 @@ export function layoutBlimps(
   const sorted = [...repos].sort((left, right) =>
     left.repo.localeCompare(right.repo),
   );
-  const ringCount = 3;
   return sorted.map((repo, index) => {
-    const ring = index % ringCount;
-    const position = Math.floor(index / ringCount);
-    const count = Math.ceil((sorted.length - ring) / ringCount);
-    const angle = -Math.PI / 2 + (position * Math.PI * 2) / Math.max(1, count);
-    const distance = layout.outerRadius + 9 + ring * 10;
+    const angle = -Math.PI / 2 + (index * Math.PI * 2) / sorted.length;
+    const distance = layout.outerRadius + 18;
     return {
       repo,
       x: layout.centerX + Math.cos(angle) * distance,

@@ -1,0 +1,62 @@
+import { strict as assert } from "node:assert";
+import { test } from "node:test";
+import type { AccountRepoData, Satellite } from "../data.ts";
+import { selectMapBlimps, selectMapSatellites } from "./mapSelection.ts";
+
+function satellite(index: number): Satellite {
+  return {
+    repo: `team/repo-${index}`,
+    stars: index + 1,
+    topicCluster:
+      ["Frameworks", "UI libraries", "Build tools", "Back end", "Other"][
+        index % 5
+      ] ?? "Other",
+    readmeLagDays: index * 3,
+    label: index % 7 === 0 ? "Possible drift" : "On course",
+    driftDegrees: index % 7 === 0 ? 20 : 0,
+    commitSha: "abcdef123456",
+    scannedAt: "2026-09-26T00:00:00Z",
+    tiersRun: ["static"],
+    simulated: false,
+  };
+}
+
+function blimp(index: number): AccountRepoData {
+  return {
+    repo: `owner/unscanned-${index}`,
+    visibility: "public",
+    canAdmin: true,
+    description: null,
+    language: null,
+    updatedAt: null,
+    archived: false,
+    fork: false,
+    connected: false,
+    runtimeEnabled: false,
+    checked: false,
+    label: null,
+    scanned: false,
+  };
+}
+
+test("the map limits five topics while retaining the selected scanned repo", () => {
+  const all = Array.from({ length: 500 }, (_, index) => satellite(index));
+  const desktop = selectMapSatellites(all, "team/repo-249", 4);
+  const mobile = selectMapSatellites(all, "team/repo-249", 2);
+  assert.equal(desktop.length, 20);
+  assert.equal(mobile.length, 10);
+  assert.ok(desktop.some((item) => item.repo === "team/repo-249"));
+  assert.ok(mobile.some((item) => item.repo === "team/repo-249"));
+  assert.equal(new Set(desktop.map((item) => item.repo)).size, desktop.length);
+  assert.deepEqual(selectMapSatellites(all, "team/repo-249", 4), desktop);
+});
+
+test("the holding orbit samples many repos and keeps the selected one", () => {
+  const all = Array.from({ length: 500 }, (_, index) => blimp(index));
+  const desktop = selectMapBlimps(all, "owner/unscanned-249", 12);
+  const mobile = selectMapBlimps(all, "owner/unscanned-249", 6);
+  assert.equal(desktop.length, 12);
+  assert.equal(mobile.length, 6);
+  assert.ok(desktop.some((item) => item.repo === "owner/unscanned-249"));
+  assert.ok(mobile.some((item) => item.repo === "owner/unscanned-249"));
+});
