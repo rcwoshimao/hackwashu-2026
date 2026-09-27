@@ -48,12 +48,9 @@ test("reduced motion keeps every moon at its resting position", () => {
     });
 });
 
-test("at time zero the moving sky matches the resting layout", () => {
-  for (const point of layout.points) {
-    const placed = placePoint(layout, point, 0, false);
-    assert.ok(Math.abs(placed.x - point.x) < 1e-6);
-    assert.ok(Math.abs(placed.y - point.y) < 1e-6);
-  }
+test("at time zero the marks start scattered around their slots", () => {
+  const offsets = layout.points.map((point) => swayAngle(layout, point, 0));
+  assert.ok(Math.max(...offsets) - Math.min(...offsets) > 0.2);
 });
 
 test("moons never change distance, which encodes README lag", () => {
