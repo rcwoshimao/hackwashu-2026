@@ -19,7 +19,11 @@ function sample(label: string): Satellite {
   };
 }
 
-function fillOpacity(label: string, timeMs: number): number {
+function fillOpacity(
+  label: string,
+  timeMs: number,
+  reducedMotion: boolean,
+): number {
   const fills: number[] = [];
   const surface = {
     globalAlpha: 1,
@@ -39,16 +43,35 @@ function fillOpacity(label: string, timeMs: number): number {
   };
   const context = surface as unknown as CanvasRenderingContext2D;
   const layout = layoutSky([sample(label)], 600, 600);
-  drawSky(context, layout, 600, 600, timeMs, null, false, new Map(), []);
+  drawSky(
+    context,
+    layout,
+    600,
+    600,
+    timeMs,
+    null,
+    reducedMotion,
+    new Map(),
+    [],
+  );
   const opacity = fills[0];
   assert.ok(opacity !== undefined);
   return opacity;
 }
 
-test("measured dots keep steady brightness during map motion", () => {
+test("measured dots twinkle while the map moves", () => {
   for (const label of ["On course", "Possible drift", "Drifting"]) {
     const opacities = Array.from({ length: 30 }, (_, index) =>
-      fillOpacity(label, index * 100),
+      fillOpacity(label, index * 100, false),
+    );
+    assert.ok(Math.max(...opacities) - Math.min(...opacities) > 0.2, label);
+  }
+});
+
+test("reduced motion keeps dots at steady brightness", () => {
+  for (const label of ["On course", "Possible drift", "Drifting"]) {
+    const opacities = Array.from({ length: 30 }, (_, index) =>
+      fillOpacity(label, index * 100, true),
     );
     assert.ok(Math.max(...opacities) - Math.min(...opacities) < 0.05, label);
   }
