@@ -113,6 +113,21 @@ function setup(visibility: "public" | "private" = "public") {
 }
 
 describe("connected source sync", () => {
+  test("a second README record does not duplicate generated checks", async () => {
+    const f = setup();
+    f.store.putSource({
+      ...file,
+      id: "readme-copy",
+      url: "https://github.com/owner/project/blob/abcdef1/README.md",
+    });
+    await f.sync.refresh("readme");
+    const baseline = f.store.getFlightPlan(repo);
+    await f.sync.refresh("readme-copy");
+    const refreshed = f.store.getFlightPlan(repo);
+    expect(Object.keys(refreshed?.sourceHashes ?? {})).toEqual(["readme"]);
+    expect(refreshed?.claims).toEqual(baseline?.claims);
+  });
+
   test("converts four source kinds, persists hashes and versions, and polls by kind", async () => {
     const f = setup();
     expect(await f.sync.refreshDue()).toBe(4);

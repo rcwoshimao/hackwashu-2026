@@ -4,6 +4,8 @@ This plan follows `docs/CODEX_MASTER_PROMPT.md` and the user's later instruction
 
 ## Current implementation status
 
+- Duplicate connected-source checks: a live opted-in repository has two stored README records for the same `README.md` path, producing duplicate flightplan claims and tests. Add a source-sync regression test and deduplicate logical sources when rebuilding a plan, without changing the frozen store or plan public types. Republish the corrected plan and verify the target workflow still reports the real missing-folder drift once.
+
 - Deep-check smoke PR setup: the Connect page now provides a copyable PowerShell script scoped to the selected `owner/repo`. It clones the remote default branch into a temporary checkout, makes an empty commit on a timestamped branch, pushes it, and opens a PR with `gh`. This exercises the PR workflow without a throwaway file edit. The script needs Git, GitHub CLI authentication, and a configured Git commit identity; it is shown only for runtime-enabled connections. The existing Actions secret and workflow must be in place first. The production web build and `bun run check` passed in a fresh local Docker image with 274 tests and five goldens. A live PR requires the owner's GitHub access and remains unverified here.
 
 - Live Action report follow-up: the demo PR and its first default-branch push passed both reusable jobs after the Action request limit was extended to 60 seconds and its bundle rebuilt. Telemetry ingestion uses a stable run ID when the Action retries. The hosted database recorded the run and GitHub received a Ground Control success status.
