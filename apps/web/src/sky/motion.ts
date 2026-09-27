@@ -3,6 +3,10 @@ import type { SkyLayout, SkyPoint } from "./layout.ts";
 export const skyTurnPeriodMs = 600_000;
 export const outerGlidePeriodMs = 300_000;
 export const innerGlideFloorMs = 60_000;
+export const outerSwayPeriodMs = 90_000;
+export const innerSwayFloorMs = 25_000;
+/** Below the 0.1 rad margin between a topic's outer slots and its edge. */
+export const swayAmplitudeRadians = 0.09;
 
 export type Placement = { x: number; y: number };
 
@@ -32,6 +36,29 @@ export function glideFraction(
 }
 
 /**
+ * Each mark's own sway period: inner marks swing faster (Kepler again), and a
+ * stable per-repo factor of 0.85 to 1.15 keeps neighbours out of step.
+ */
+export function swayPeriodMs(layout: SkyLayout, point: SkyPoint): number {
+  const ratio = point.distance / Math.max(1, layout.outerRadius);
+  const base = Math.max(innerSwayFloorMs, outerSwayPeriodMs * ratio ** 1.5);
+  return base * (0.85 + 0.3 * point.spread);
+}
+
+/**
+ * A bounded swing around the mark's slot, so marks never leave their topic.
+ * It starts at zero; the differing periods pull neighbours out of step.
+ */
+export function swayAngle(
+  layout: SkyLayout,
+  point: SkyPoint,
+  timeMs: number,
+): number {
+  const phase = timeMs / swayPeriodMs(layout, point);
+  return swayAmplitudeRadians * Math.sin(phase * 2 * Math.PI);
+}
+
+/**
  * Only the angle moves. Distance encodes README lag and is never animated, and
  * the angle stays inside the moon's topic slice.
  */
@@ -48,7 +75,10 @@ export function placePoint(
     glidePeriodMs(layout, point),
   );
   const angle =
-    point.sectorStart + fraction * point.sectorSpan + skyTurn(timeMs);
+    point.sectorStart +
+    fraction * point.sectorSpan +
+    swayAngle(layout, point, timeMs) +
+    skyTurn(timeMs);
   return {
     x: layout.centerX + Math.cos(angle) * point.distance,
     y: layout.centerY + Math.sin(angle) * point.distance,
