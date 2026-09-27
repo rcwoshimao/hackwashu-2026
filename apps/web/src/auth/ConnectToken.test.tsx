@@ -16,3 +16,15 @@ test("connect setup presents the returned token and exact Actions settings", () 
   assert.match(markup, /GROUND_CONTROL_URL/);
   assert.match(markup, /https:\/\/demo\.example/);
 });
+
+test("localhost is not presented as an Actions server URL", () => {
+  const markup = renderToStaticMarkup(
+    <ConnectToken
+      token="one-time-telemetry-token"
+      serverUrl="http://localhost:8877"
+    />,
+  );
+  assert.match(markup, /GROUND_CONTROL_URL/);
+  assert.match(markup, /https:\/\/&lt;your-public-host&gt;/);
+  assert.doesNotMatch(markup, /GROUND_CONTROL_URL.*localhost/);
+});

@@ -19,6 +19,9 @@ test("private connection shows the Actions token and source link", () => {
   assert.match(markup, /GROUND_CONTROL_TOKEN/);
   assert.match(markup, /private-telemetry-token/);
   assert.match(markup, /sources\/new\?repo=owner%2Fprivate/);
+  assert.match(markup, /bun ops seed-plan &lt;checkout&gt; owner\/private/);
+  assert.match(markup, /rcwoshimao\/hackwashu-2026\/action@hussein/);
+  assert.match(markup, /confirmed drift/);
 });
 
 test("public connection offers sources without Actions setup", () => {
@@ -37,6 +40,7 @@ test("public connection offers sources without Actions setup", () => {
   assert.doesNotMatch(markup, /GROUND_CONTROL_TOKEN/);
   assert.doesNotMatch(markup, /GROUND_CONTROL_URL/);
   assert.doesNotMatch(markup, /telemetry-token/);
+  assert.doesNotMatch(markup, /seed-plan/);
 });
 
 test("personal public runtime opt-in shows its one-time Actions token", () => {
@@ -54,6 +58,7 @@ test("personal public runtime opt-in shows its one-time Actions token", () => {
   assert.match(markup, /Deep checks enabled/);
   assert.match(markup, /GROUND_CONTROL_TOKEN/);
   assert.match(markup, /public-runtime-telemetry-token/);
+  assert.match(markup, /bun ops seed-plan &lt;checkout&gt; owner\/public/);
 });
 
 test("reconnecting an opted-in public repository does not imply a new token", () => {
@@ -69,4 +74,5 @@ test("reconnecting an opted-in public repository does not imply a new token", ()
   );
   assert.match(markup, /already enabled/);
   assert.doesNotMatch(markup, /GROUND_CONTROL_TOKEN/);
+  assert.match(markup, /bun ops seed-plan &lt;checkout&gt; owner\/public/);
 });

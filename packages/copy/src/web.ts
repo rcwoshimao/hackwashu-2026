@@ -372,8 +372,23 @@ export const webCopy = {
   connectTokenHide: "Hide token",
   connectTokenSecret: "Repository Actions secret:",
   connectServerVariable: "Repository Actions variable:",
+  connectPublicUrlPlaceholder: "https://<your-public-host>",
   connectHostedActionHint:
     "GitHub-hosted Actions need an HTTPS tunnel to this server. Open Ground Control through that HTTPS origin before copying the URL.",
+  connectStepsTitle: "Finish deep-check setup",
+  connectStepPlan:
+    "From the Ground Control project root, generate a plan for a local checkout of this repository:",
+  connectSeedCommand: "bun ops seed-plan <checkout> {repo}",
+  connectStepReview:
+    "Review the generated checks, run them once in that checkout, then commit the three flightchecks files to its default branch.",
+  connectStepWorkflow:
+    "Copy the sample workflow into this repository's .github/workflows directory and replace both Action references with:",
+  connectWorkflowLink: "Open the sample workflow",
+  connectActionRef: "rcwoshimao/hackwashu-2026/action@hussein",
+  connectStepRun:
+    "Open a pull request from a branch in this repository and check the flight-checks and report jobs. The report job needs the HTTPS server URL and saved token above.",
+  connectCommentExpectation:
+    "A PR comment appears for confirmed drift when a previously passing check fails. It shows cited evidence; the Action does not write a suggested change to your PR. The current iMessage FIX flow can draft a correction for a supported server-port change.",
   connectFailed:
     "The repository could not be connected. Check administrator access and try again.",
   connectVisibilityChanged:

@@ -49,6 +49,9 @@ export function ConnectToken({
   token: string;
   serverUrl: string;
 }) {
+  const actionUrl = serverUrl.startsWith("https://")
+    ? serverUrl
+    : copy.connectPublicUrlPlaceholder;
   return (
     <section className="connect-token" aria-label={copy.connectTokenTitle}>
       <h2>{copy.connectTokenTitle}</h2>
@@ -59,7 +62,7 @@ export function ConnectToken({
       </p>
       <p>
         {copy.connectServerVariable} <code>GROUND_CONTROL_URL</code> ={" "}
-        <code>{serverUrl}</code>
+        <code>{actionUrl}</code>
       </p>
       <p className="form-hint">{copy.connectHostedActionHint}</p>
     </section>
