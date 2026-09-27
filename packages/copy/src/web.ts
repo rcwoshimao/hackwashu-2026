@@ -23,7 +23,13 @@ export const webCopy = {
   reportsOpenRepo: "Open repository",
   reportsBack: "Back to my reports",
   deepScanAddAction: "Add deep scan",
-  deepChecksSetupAction: "Set up deep checks",
+  deepChecksSetupAction: "Review deep check setup",
+  deepChecksSetUp: "Deep checks set up",
+  deepChecksLastPassed: "Latest CI run passed",
+  deepChecksLastFailed: "Latest CI run found drift",
+  deepChecksNoCiResult: "Deep checks enabled. No CI result received yet.",
+  deepChecksViewRun: "View latest deep check",
+  deepChecksManageAction: "Manage deep checks",
   deepScanTitle: "Add deep scan",
   deepScanIntro:
     "Choose a repository you own, then enable deep checks and add the Ground Control Action in its GitHub Actions settings.",
@@ -230,7 +236,7 @@ export const webCopy = {
   repoScanReady: "Last public scan",
   repoScanTiers: "Tiers completed",
   repoDeepReady:
-    "Deep checks enabled. Add the Ground Control Action to send CI results.",
+    "Deep checks enabled. Waiting for the first CI result from the Ground Control Action.",
   repoDeepAvailable:
     "Own this public repo? Enable deep checks from My repos after signing in.",
   repoScanLimited:
@@ -402,7 +408,25 @@ export const webCopy = {
   connectWorkflowDownload: "Download workflow",
   connectVerifyTitle: "Open a test pull request",
   connectStepRun:
-    "Run this PowerShell command after the workflow and Actions secret are ready. It clones this repository into a temporary folder, creates an empty commit, pushes a test branch, and opens a pull request. The Ground Control check and report appear in Actions; the first passing run establishes a baseline.",
+    "After the workflow and Actions secret are ready, create a draft test PR with one click. It has an empty commit and no file edits. The Ground Control jobs appear in Actions; the first passing run establishes a baseline.",
+  connectSmokeCreate: "Create draft test PR",
+  connectSmokePending: "Creating draft PR",
+  connectSmokeOpen: "Open draft test PR",
+  connectSmokeSetupMissing:
+    "Add the workflow to the repository's default branch, then try again.",
+  connectSmokeFailed:
+    "Ground Control could not create the draft PR. Check repository write access, or use the command below.",
+  connectSmokeFallback:
+    "Prefer a local command? Copy this PowerShell script. It targets the selected GitHub repository and makes no file edits.",
+  runDeepFixIntro:
+    "Confirmed deep-scan findings can become draft PRs with cited documentation line edits. Review each proposed change in GitHub before merging.",
+  runDeepFixCreate: "Draft line edits",
+  runDeepFixPending: "Drafting line edits",
+  runDeepFixOpen: "Review draft PR",
+  runDeepFixNone:
+    "No grounded line edit was available for this finding, or a newer run replaced it.",
+  runDeepFixFailed:
+    "Ground Control could not draft this fix. Check AI and GitHub write access, then try again.",
   connectSmokeCommand: `$repo = '{repo}'
 $branch = 'ground-control-smoke-' + (Get-Date -Format 'yyyyMMddHHmmssfff')
 $checkout = Join-Path ([IO.Path]::GetTempPath()) $branch

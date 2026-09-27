@@ -1,7 +1,9 @@
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import {
+  ClaudeDocFixer,
   ClaudeModel,
+  GeminiDocFixer,
   GeminiModel,
   HeuristicModel,
   SqliteModelCache,
@@ -22,10 +24,12 @@ import { ConfluenceCloud } from "@ground-control/sources";
 import { SqliteStore } from "@ground-control/store";
 import { planPublishDebounceMs } from "../../../config/limits.ts";
 import { OctokitCommitAuthor } from "./commit-author.ts";
+import { createDeepFix } from "./deep-fix.ts";
 import { createApi, EventHub, GitHubCommitStatus } from "./index.ts";
 import { startMessaging } from "./messaging.ts";
 import { FlightPlanPublishQueue } from "./publish-schedule.ts";
 import { sessionSecret } from "./session-secret.ts";
+import { OctokitSmokePr } from "./smoke-pr.ts";
 
 const dbPath = process.env.DATABASE_PATH || "data/groundcontrol.db";
 mkdirSync(dirname(dbPath), { recursive: true });
@@ -88,6 +92,12 @@ const connectedModel =
   process.env.EXTRACTION_MODEL === "claude"
     ? new ClaudeModel(process.env.ANTHROPIC_API_KEY ?? "")
     : publicModel;
+const docFixModel = process.env.ANTHROPIC_API_KEY
+  ? new ClaudeDocFixer(process.env.ANTHROPIC_API_KEY)
+  : process.env.GEMINI_API_KEY
+    ? new GeminiDocFixer(process.env.GEMINI_API_KEY)
+    : null;
+const deepFix = docFixModel ? createDeepFix(docFixModel) : undefined;
 const modelCache = new SqliteModelCache(dbPath);
 const confluence =
   process.env.CONFLUENCE_SITE &&
@@ -157,6 +167,9 @@ const prComments = process.env.GITHUB_WRITE_TOKEN
 const commitAuthor = process.env.GITHUB_WRITE_TOKEN
   ? new OctokitCommitAuthor(process.env.GITHUB_WRITE_TOKEN)
   : undefined;
+const smokePr = process.env.GITHUB_WRITE_TOKEN
+  ? new OctokitSmokePr(process.env.GITHUB_WRITE_TOKEN)
+  : undefined;
 const messaging = await startMessaging({
   dbPath,
   secret,
@@ -188,6 +201,8 @@ const app = createApi({
   ...(status === undefined ? {} : { status }),
   ...(prComments === undefined ? {} : { prComments }),
   ...(commitAuthor === undefined ? {} : { commitAuthor }),
+  ...(smokePr === undefined ? {} : { smokePr }),
+  ...(deepFix === undefined ? {} : { deepFix }),
   now: () => new Date(),
   publicUrl,
   webDist: resolve(process.cwd(), "apps/web/dist"),

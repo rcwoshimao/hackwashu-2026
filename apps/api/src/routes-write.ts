@@ -5,6 +5,8 @@ import type { Context, Hono } from "hono";
 import { z } from "zod";
 import { accessRepo, sessionToken } from "./access.ts";
 import { registerConnectRoute } from "./routes-connect.ts";
+import { registerDeepFixRoute } from "./routes-deep-fix.ts";
+import { registerSmokePrRoute } from "./routes-smoke-pr.ts";
 import { registerSourceWriteRoutes } from "./routes-sources.ts";
 import { ingestTelemetry, refreshTrust, telemetrySchema } from "./telemetry.ts";
 import type { ApiDeps } from "./types.ts";
@@ -222,6 +224,8 @@ async function imessageLink(c: Context, deps: ApiDeps) {
 export function registerWriteRoutes(app: Hono, deps: ApiDeps): void {
   app.post("/api/scan", (c) => scan(c, deps));
   registerConnectRoute(app, deps);
+  registerSmokePrRoute(app, deps);
+  registerDeepFixRoute(app, deps);
   registerSourceWriteRoutes(app, deps);
   app.post("/api/runs/:id/claims/:claimId/confirm", (c) =>
     trustAction(c, deps, "confirmed"),

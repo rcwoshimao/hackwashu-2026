@@ -1,8 +1,10 @@
 import { copy } from "@ground-control/copy";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../api.ts";
+import { useMe } from "../auth/useMe.ts";
 import type { CheckResult, RunData } from "../data.ts";
 import { readableDate, repoPath, safeExternalUrl } from "../presentation.ts";
+import { DeepFixButton } from "./DeepFixButton.tsx";
 
 function useRun(id: string) {
   const [data, setData] = useState<RunData | null>(null);
@@ -94,10 +96,12 @@ function CheckCard({
   result,
   runId,
   onChange,
+  canFix,
 }: {
   result: CheckResult;
   runId: string;
   onChange: () => Promise<void>;
+  canFix: boolean;
 }) {
   const [feedback, setFeedback] = useState("");
   const [pending, setPending] = useState(false);
@@ -165,6 +169,9 @@ function CheckCard({
             </button>
           </>
         )}
+        {canFix && result.state === "confirmed" && result.status === "fail" && (
+          <DeepFixButton runId={runId} claimId={result.claimId} />
+        )}
       </div>
       {feedback && (
         <p className="form-feedback" role="status">
@@ -178,9 +185,11 @@ function CheckCard({
 function RunContent({
   data,
   refresh,
+  canFix,
 }: {
   data: RunData;
   refresh: () => Promise<void>;
+  canFix: boolean;
 }) {
   return (
     <>
@@ -203,6 +212,7 @@ function RunContent({
       <EvidenceGroups data={data} />
       <section className="panel check-results">
         <h2>{copy.runChecks}</h2>
+        {canFix && <p>{copy.runDeepFixIntro}</p>}
         {data.results.length === 0 ? (
           <p>{copy.runNoChecks}</p>
         ) : (
@@ -213,6 +223,7 @@ function RunContent({
                 result={result}
                 runId={data.id}
                 onChange={refresh}
+                canFix={canFix}
               />
             ))}
           </ol>
@@ -224,6 +235,7 @@ function RunContent({
 
 export function RunPage({ id }: { id: string }) {
   const { data, loading, denied, refresh } = useRun(id);
+  const { me } = useMe();
   return (
     <main className="page run-page">
       {loading && (
@@ -242,7 +254,15 @@ export function RunPage({ id }: { id: string }) {
           )}
         </div>
       )}
-      {data && <RunContent data={data} refresh={refresh} />}
+      {data && (
+        <RunContent
+          data={data}
+          refresh={refresh}
+          canFix={
+            data.origin === "ci" && !!me?.connectedRepos.includes(data.repo)
+          }
+        />
+      )}
     </main>
   );
 }

@@ -1,5 +1,6 @@
 import { copy } from "@ground-control/copy";
 import type { MeData, RepoData } from "../data.ts";
+import { readableDate } from "../presentation.ts";
 
 export function canOpenDeepChecks(data: RepoData, me: MeData | null): boolean {
   if (!me?.signedIn) return false;
@@ -15,15 +16,45 @@ export function DeepCheckLink({
   data: RepoData;
   me: MeData | null;
 }) {
-  if (!canOpenDeepChecks(data, me)) return null;
+  const latestCi = data.runtimeEnabled
+    ? data.runs.find((run) => run.origin === "ci")
+    : undefined;
+  const canManage = canOpenDeepChecks(data, me);
+  if (latestCi)
+    return (
+      <div className="deep-check-state">
+        <p>
+          <strong>{copy.deepChecksSetUp}</strong> ·{" "}
+          {latestCi.verdict === "success"
+            ? copy.deepChecksLastPassed
+            : copy.deepChecksLastFailed}{" "}
+          ·{" "}
+          <time dateTime={latestCi.createdAt}>
+            {readableDate(latestCi.createdAt)}
+          </time>
+        </p>
+        <a href={`/runs/${encodeURIComponent(latestCi.id)}`}>
+          {copy.deepChecksViewRun}
+        </a>
+        {canManage && (
+          <a href={`/connect?repo=${encodeURIComponent(data.repo)}&runtime=1`}>
+            {copy.deepChecksManageAction}
+          </a>
+        )}
+      </div>
+    );
+  if (!canManage) return null;
   return (
-    <a
-      className="button deep-check-link"
-      href={`/connect?repo=${encodeURIComponent(data.repo)}&runtime=1`}
-    >
-      {data.runtimeEnabled
-        ? copy.deepChecksSetupAction
-        : copy.deepScanAddAction}
-    </a>
+    <div className="deep-check-state">
+      {data.runtimeEnabled && <p>{copy.deepChecksNoCiResult}</p>}
+      <a
+        className="button deep-check-link"
+        href={`/connect?repo=${encodeURIComponent(data.repo)}&runtime=1`}
+      >
+        {data.runtimeEnabled
+          ? copy.deepChecksSetupAction
+          : copy.deepScanAddAction}
+      </a>
+    </div>
   );
 }

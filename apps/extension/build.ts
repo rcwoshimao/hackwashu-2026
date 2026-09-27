@@ -1,10 +1,11 @@
 import { copyFile, mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { extensionCopy } from "@ground-control/copy";
 import { build } from "vite";
 import { resolvePublicUrl } from "./src/buildConfig.ts";
 
-const root = resolve(import.meta.dir);
+const root = fileURLToPath(new URL(".", import.meta.url));
 const localEnv = await readFile(resolve(root, "../../.env"), "utf8").catch(
   () => "",
 );

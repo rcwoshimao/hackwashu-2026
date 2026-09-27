@@ -43,6 +43,20 @@
   flex-wrap: wrap;
   margin-top: 1.25rem;
 }
+.deep-check-state {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+}
+.deep-check-state p {
+  width: 100%;
+  margin: 0;
+  color: var(--mist);
+}
+.deep-check-state strong {
+  color: var(--paper);
+}
 .repo-result-counts {
   display: flex;
   flex-wrap: wrap;

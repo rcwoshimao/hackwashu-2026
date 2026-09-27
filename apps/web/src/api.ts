@@ -122,6 +122,10 @@ const connectSchema = z.discriminatedUnion("visibility", [
 ]);
 export type Connection = z.infer<typeof connectSchema>;
 const imessageLinkSchema = z.object({ status: z.literal("sent") });
+const draftPrSchema = z.object({ url: z.string().url() });
+const deepFixSchema = draftPrSchema.extend({
+  fixedClaimIds: z.array(z.string()),
+});
 
 export const api = {
   sky: (signal?: AbortSignal) => readJson("/api/sky", skySchema, signal),
@@ -143,6 +147,18 @@ export const api = {
       "/api/connect",
       runtime ? { repo, runtime: true } : { repo },
       connectSchema,
+    ),
+  smokePr: (repo: string) =>
+    postJson(
+      `/api/repos/${repo.split("/").map(encodeURIComponent).join("/")}/smoke-pr`,
+      {},
+      draftPrSchema,
+    ),
+  deepFix: (runId: string, claimId: string) =>
+    postJson(
+      `/api/runs/${encodeURIComponent(runId)}/claims/${encodeURIComponent(claimId)}/fix`,
+      {},
+      deepFixSchema,
     ),
   source: (repo: string, kind: string, url: string) =>
     postJson("/api/sources", { repo, kind, url }, sourceSchema),

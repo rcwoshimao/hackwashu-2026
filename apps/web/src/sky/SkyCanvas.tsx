@@ -33,25 +33,23 @@ function useReducedMotion(): boolean {
   return reduced;
 }
 
-function useCanvasSize(ref: React.RefObject<HTMLDivElement | null>): {
+function useCanvasSize(ref: React.RefObject<HTMLCanvasElement | null>): {
   width: number;
   height: number;
 } {
   const [size, setSize] = useState({ width: 720, height: 620 });
   useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
+    const canvas = ref.current;
+    if (!canvas) return;
     const resize = () => {
-      const width = Math.max(280, Math.floor(element.clientWidth));
-      const height =
-        width < 540
-          ? Math.max(340, Math.floor(width * 0.98))
-          : Math.min(900, Math.max(560, Math.floor(width * 0.82)));
+      const width = Math.max(280, Math.floor(canvas.clientWidth));
+      const height = Math.floor(canvas.clientHeight);
+      if (height < 1) return;
       setSize({ width, height });
     };
     resize();
     const observer = new ResizeObserver(resize);
-    observer.observe(element);
+    observer.observe(canvas);
     return () => observer.disconnect();
   }, [ref]);
   return size;
@@ -116,7 +114,7 @@ export function SkyCanvas({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<CanvasScene | null>(null);
   const reducedMotion = useReducedMotion();
-  const { width, height } = useCanvasSize(containerRef);
+  const { width, height } = useCanvasSize(canvasRef);
   const visibleSatellites = useMemo(
     () => selectMapSatellites(satellites),
     [satellites],
@@ -168,7 +166,6 @@ export function SkyCanvas({
       <canvas
         ref={canvasRef}
         className={view.zoom > 1 ? "sky-canvas zoomed" : "sky-canvas"}
-        style={{ height }}
         {...handlers}
         role="img"
         aria-label={copy.skyCanvasAlt}

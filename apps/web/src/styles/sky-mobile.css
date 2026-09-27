@@ -18,6 +18,13 @@
   .sky-side {
     width: 100%;
   }
+  .sky-main {
+    grid-template-rows: auto;
+  }
+  .sky-canvas {
+    flex: none;
+    min-height: 340px;
+  }
   .legend-grid {
     grid-template-columns: 1fr;
   }

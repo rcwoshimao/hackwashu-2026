@@ -4,6 +4,12 @@ This plan follows `docs/CODEX_MASTER_PROMPT.md` and the user's later instruction
 
 ## Current implementation status
 
+- One-click deep-scan review: add a server-side GitHub adapter that makes an empty draft smoke PR from the connected repository's default branch after verifying the workflow file exists. The Connect page keeps the PowerShell command as a fallback. For a current confirmed CI failure, an admin can ask an AI model for a cited README or docs line edit; only the cited file lines are changed, and the result opens as a draft PR for line review. Draft bodies and CI evidence comments identify their deep-scan origin. Tests cover authorization, empty commits, cited edit boundaries, and the full check gate. This does not change the teammate's `ran` branch or claim that an AI proposal has passed CI before its draft run.
+
+- Deep-check setup evidence: repository findings and report cards derive setup status from saved `ci` runs rather than public README scans. An opted-in repo with no CI telemetry says enabled and links to setup review; a repo with CI telemetry shows the latest CI verdict, time, and evidence link. The public README panel stops asking owners with a saved CI run to add the Action. Six web tests, a production web build, TypeScript, lint, and copy lint passed. The full gate remains blocked by the concurrent deep-fix API test, which expects HTTP 409 but receives 201; this change does not touch that API. No token or GitHub secret value is inspected or displayed.
+
+- Duplicate connected-source checks: a live opted-in repository has two stored README records for the same `README.md` path, producing duplicate flightplan claims and tests. Add a source-sync regression test and deduplicate logical sources when rebuilding a plan, without changing the frozen store or plan public types. Republish the corrected plan and verify the target workflow still reports the real missing-folder drift once.
+
 - Deep-check smoke PR setup: the Connect page now provides a copyable PowerShell script scoped to the selected `owner/repo`. It clones the remote default branch into a temporary checkout, makes an empty commit on a timestamped branch, pushes it, and opens a PR with `gh`. This exercises the PR workflow without a throwaway file edit. The script needs Git, GitHub CLI authentication, and a configured Git commit identity; it is shown only for runtime-enabled connections. The existing Actions secret and workflow must be in place first. The production web build and `bun run check` passed in a fresh local Docker image with 274 tests and five goldens. A live PR requires the owner's GitHub access and remains unverified here.
 
 - Live Action report follow-up: the demo PR and its first default-branch push passed both reusable jobs after the Action request limit was extended to 60 seconds and its bundle rebuilt. Telemetry ingestion uses a stable run ID when the Action retries. The hosted database recorded the run and GitHub received a Ground Control success status.
@@ -87,6 +93,7 @@ This plan follows `docs/CODEX_MASTER_PROMPT.md` and the user's later instruction
 - Files: `apps/extension` popup, background and content scripts, shared evidence rendering, Manifest V3, and build output.
 - Tests: unpacked Chromium fixture pages verify quote states, tooltip, scan request, and URL-only request payloads.
 - Assumptions: optional host permissions are requested when users add a docs domain.
+- Hosted plugin update: the Azure site is the extension's default server origin, with an explicit `PUBLIC_URL` override. The generated manifest and bundles target Azure, the hosted page-claims endpoint returned saved claims, and `bun run check` passed in a fresh local image. The hosted server must allow the unpacked extension ID for OAuth.
 
 ## Phase 8: proof and polish
 

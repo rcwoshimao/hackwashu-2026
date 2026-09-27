@@ -1,4 +1,7 @@
-type Setting = "PUBLIC_URL" | "GROUND_CONTROL_PORT";
+export const defaultPublicUrl =
+  "https://ground-control-washu26.azurewebsites.net";
+
+type Setting = "PUBLIC_URL";
 
 function setting(
   name: Setting,
@@ -19,13 +22,7 @@ export function resolvePublicUrl(
   environment: Record<string, string | undefined>,
 ): URL {
   const configured = setting("PUBLIC_URL", localEnv, environment);
-  const port = setting("GROUND_CONTROL_PORT", localEnv, environment) || "8787";
-  if (
-    !configured &&
-    (!/^\d{1,5}$/.test(port) || Number(port) < 1 || Number(port) > 65535)
-  )
-    throw new Error("GROUND_CONTROL_PORT must be a valid TCP port.");
-  const url = new URL(configured || `http://localhost:${port}`);
+  const url = new URL(configured || defaultPublicUrl);
   const local = ["localhost", "127.0.0.1"].includes(url.hostname);
   if (url.protocol !== "https:" && !(local && url.protocol === "http:"))
     throw new Error("PUBLIC_URL must use HTTPS, or HTTP on localhost.");

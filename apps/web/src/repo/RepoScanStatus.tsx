@@ -50,9 +50,11 @@ export function RepoScanStatus({ data }: { data: RepoData }) {
         {data.scan && data.label.toLowerCase() === "no telemetry" && (
           <p>{copy.repoScanLimited}</p>
         )}
-        <p>
-          {data.runtimeEnabled ? copy.repoDeepReady : copy.repoDeepAvailable}
-        </p>
+        {!data.runs.some((run) => run.origin === "ci") && (
+          <p>
+            {data.runtimeEnabled ? copy.repoDeepReady : copy.repoDeepAvailable}
+          </p>
+        )}
       </div>
       <button
         type="button"

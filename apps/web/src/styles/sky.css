@@ -101,7 +101,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.85fr) minmax(300px, 0.8fr);
   gap: 1.4rem;
-  align-items: start;
+  align-items: stretch;
 }
 .sky-main,
 .sky-side {
@@ -109,14 +109,22 @@
   display: grid;
   gap: 1.4rem;
 }
+.sky-main {
+  grid-template-rows: minmax(0, 1fr);
+}
 .sky-canvas-wrap {
   position: relative;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--rule);
   background: var(--night);
   overflow: hidden;
 }
 .sky-canvas {
   width: 100%;
+  flex: 1 1 auto;
+  min-height: 560px;
   display: block;
   cursor: crosshair;
   touch-action: manipulation;

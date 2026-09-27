@@ -103,6 +103,7 @@ export const runSchema = z.object({
   commitSha: z.string(),
   createdAt: z.string(),
   verdict: z.string(),
+  origin: z.enum(["public_scan", "ci"]).optional(),
   results: z.array(checkResultSchema),
   evidence: z.array(evidenceGroupSchema),
 });

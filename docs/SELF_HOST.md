@@ -85,13 +85,13 @@ Add documentation sources through `groundcontrol.yml` or the web app. README and
 
 ## Chrome extension
 
-Build the extension from this root after setting `.env`. When `PUBLIC_URL` is blank, the build uses `GROUND_CONTROL_PORT` (8877 in this shared workspace). When an HTTPS tunnel is used, set `PUBLIC_URL` to its origin before building, so the extension calls the same server as the browser:
+Build the extension from this root. When `PUBLIC_URL` is blank, it calls `https://ground-control-washu26.azurewebsites.net`. For a local server or an HTTPS tunnel, set `PUBLIC_URL` to that server's origin before building:
 
 ```sh
 bun run build:extension
 ```
 
-Open Chrome's Extensions page, enable Developer mode, load unpacked `apps/extension/dist`, and copy the assigned extension ID to `EXTENSION_ID` in `.env`. Recreate the server container with `docker compose up -d`, then sign in from the extension popup. The popup can check an unknown public GitHub README or watch a Confluence or docs page for one of your connected repositories. Watching another docs host asks for that host's permission at the time you choose Watch. If a page does not show marks immediately, reload it.
+Open Chrome's Extensions page, enable Developer mode, load unpacked `apps/extension/dist`, and copy the assigned extension ID. For a local server, set `EXTENSION_ID` in `.env` and recreate its container with `docker compose up -d`. For the hosted server, configure that same ID as its `EXTENSION_ID` setting. Then sign in from the extension popup. The popup can check an unknown public GitHub README or watch a Confluence or docs page for one of your connected repositories. Watching another docs host asks for that host's permission at the time you choose Watch. If a page does not show marks immediately, reload it.
 
 ## Local tests
 
