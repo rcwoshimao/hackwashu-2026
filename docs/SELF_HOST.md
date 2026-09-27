@@ -13,6 +13,8 @@ This setup uses one Bun server, a built React web app, and a SQLite file in a Do
 
 The container serves only on `127.0.0.1` by default. To test from another machine, set up an HTTPS reverse proxy or tunnel, set `PUBLIC_URL` to that HTTPS origin, and configure the matching GitHub OAuth callback.
 
+With GitHub OAuth configured, sign in and open **My repos** (`/signin`). The header displays your GitHub login. The account page automatically lists up to 500 recently updated repositories GitHub says you can access. Listing them does not connect or scan them. Choose **Check README** beside one eligible public repo, or **Scan all public READMEs** to request checks for all eligible public repos in the displayed list. Private repos require an explicit **Connect** action before CI checks; they are not part of the bulk public scan. If `SESSION_SECRET` is blank, the server generates a new signing secret on restart, so you must sign in again after rebuilding the container.
+
 ## Add keys in `.env`
 
 | Goal | Variables | Result |
@@ -44,7 +46,7 @@ When `EXTRACTION_MODEL=claude` is set, connected source extraction sends that so
 
 ## Scan public repos
 
-From the web app, paste a public `owner/repo` and use **Check this README**. An unknown repo offers the button; a saved result appears on the next visit. Public scans fetch the default branch README and package metadata, validate exact quote locations, run static checks, and cache the result by commit SHA. With Gemini configured, claim extraction can use the AI tier. Public repositories never have dependencies installed, package scripts run, generated tests run, or project code executed by Ground Control, even when submitted or connected.
+From the web app, paste a public `owner/repo` and use **Check this README**, or select one from **My repos**. An unknown repo offers the button; a saved result appears on the next visit. Public scans fetch the default branch README and package metadata, validate exact quote locations, run static checks, and cache the result by commit SHA. With Gemini configured, claim extraction can use the AI tier. Public repositories never have dependencies installed, package scripts run, generated tests run, or project code executed by Ground Control, even when submitted or connected.
 
 To fill the Sky with actual top JavaScript and TypeScript repos, configure both scan keys and run:
 

@@ -1,18 +1,26 @@
 import { copy } from "@ground-control/copy";
 import { ConnectPage } from "./auth/ConnectPage.tsx";
 import { SignInPage } from "./auth/SignInPage.tsx";
+import { useMe } from "./auth/useMe.ts";
+import type { MeData } from "./data.ts";
 import { RepoPage } from "./repo/RepoPage.tsx";
 import { RunPage } from "./run/RunPage.tsx";
 import { SkyPage } from "./sky/SkyPage.tsx";
 import { SourcePage } from "./sources/SourcePage.tsx";
 
-function navigation() {
+function navigation(me: MeData | null) {
   return (
     <>
       <a href="/sky">{copy.navSky}</a>
-      <a href="/connect">{copy.navConnect}</a>
+      <a href={me?.signedIn ? "/signin" : "/connect"}>
+        {me?.signedIn ? copy.navMyRepos : copy.navConnect}
+      </a>
       <a href="/sources/new">{copy.navSources}</a>
-      <a href="/signin">{copy.navSignIn}</a>
+      <a className={me?.signedIn ? "nav-account" : ""} href="/signin">
+        {me?.signedIn
+          ? `${copy.navSignedInAs} @${me.login ?? copy.commonUnknown}`
+          : copy.navSignIn}
+      </a>
     </>
   );
 }
@@ -50,6 +58,7 @@ function decodeSegment(value: string): string | null {
 }
 
 export function App() {
+  const { me } = useMe();
   const stage =
     new URLSearchParams(window.location.search).get("stage") === "1";
   return (
@@ -60,19 +69,25 @@ export function App() {
       <div className="site-header">
         <div className="brand">
           <a href="/sky">
-            <span aria-hidden="true" className="brand-mark">
-              ◎
-            </span>
+            <img className="brand-mark" src="/favicon.svg" alt="" />
             {copy.brand}
           </a>
           <small>{copy.appTagline}</small>
         </div>
         <nav className="desktop-nav" aria-label={copy.navMenu}>
-          {navigation()}
+          {navigation(me)}
         </nav>
         <details className="mobile-nav">
-          <summary>{copy.navMenu}</summary>
-          <nav aria-label={copy.navMenu}>{navigation()}</nav>
+          <summary
+            aria-label={
+              me?.signedIn
+                ? `${copy.navMenu}, ${copy.navSignedInAs} @${me.login ?? copy.commonUnknown}`
+                : copy.navMenu
+            }
+          >
+            {me?.signedIn ? `@${me.login ?? copy.commonUnknown}` : copy.navMenu}
+          </summary>
+          <nav aria-label={copy.navMenu}>{navigation(me)}</nav>
         </details>
       </div>
       <div id="main-content">{route(window.location.pathname)}</div>

@@ -182,16 +182,18 @@ export class GitHubHttp implements GitHubPort {
       const parsed = accountRepoSchema.safeParse(response.value.body);
       if (response.value.status !== 200 || !parsed.success)
         return { ok: false, error: { code: "github_unavailable" } };
-      repos.push(...parsed.data.map((item) => ({
-        repo: item.full_name,
-        visibility: item.private ? "private" as const : "public" as const,
-        canAdmin: item.permissions?.admin === true,
-        description: item.description ?? null,
-        language: item.language ?? null,
-        updatedAt: item.updated_at ?? null,
-        archived: item.archived,
-        fork: item.fork,
-      })));
+      repos.push(
+        ...parsed.data.map((item) => ({
+          repo: item.full_name,
+          visibility: item.private ? ("private" as const) : ("public" as const),
+          canAdmin: item.permissions?.admin === true,
+          description: item.description ?? null,
+          language: item.language ?? null,
+          updatedAt: item.updated_at ?? null,
+          archived: item.archived,
+          fork: item.fork,
+        })),
+      );
       const hasNext = response.value.link?.includes('rel="next"') === true;
       if (!hasNext) return { ok: true, value: { repos, truncated: false } };
     }

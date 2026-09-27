@@ -10,6 +10,7 @@ The API serves the web app and extension from `http://localhost:8787` in Docker.
 - `GET /api/runs/:id` returns `{ id, repo, commitSha, createdAt, verdict, results, evidence }`. A result has `{ claimId, state, status, quote, sourceId, expected, actual }`. Evidence groups facts by kind and canonical parameters.
 - `GET /api/page-claims?url=<encoded>` returns `{ known, canCheck, repo?, claims }`. A claim has `{ id, quote, state, deepLink, tooltip }`; `state` is `verified`, `drifting`, `unconfirmed`, or `disputed`. Unknown pages return `claims: []`.
 - `GET /api/me` returns `{ signedIn, login?, connectedRepos }`.
+- `GET /api/account/repos` requires a GitHub session and returns `{ repos, truncated }`, with up to 500 recently updated accessible repositories. Each repo contains `repo`, `visibility`, `canAdmin`, `description`, `language`, `updatedAt`, `archived`, `fork`, `connected`, and `scanned`. `connected` and `scanned` reflect stored Ground Control data; listing never connects or scans a repo. The response has `Cache-Control: private, no-store` because private repository names may appear.
 - `GET /api/events` streams changes with Server-Sent Events.
 
 ## Write routes

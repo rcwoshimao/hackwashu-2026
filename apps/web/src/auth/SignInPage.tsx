@@ -1,6 +1,8 @@
 import { copy } from "@ground-control/copy";
 import { useState } from "react";
 import { api } from "../api.ts";
+import { AccountRepos } from "./AccountRepos.tsx";
+import { IMessageLink } from "./IMessageLink.tsx";
 import { useMe } from "./useMe.ts";
 
 export function SignInPage() {
@@ -17,11 +19,11 @@ export function SignInPage() {
     }
   };
   return (
-    <main className="page form-page">
+    <main className="page form-page account-page">
       <div className="form-panel panel">
         <p className="eyebrow">{copy.brand}</p>
-        <h1>{copy.signInTitle}</h1>
-        <p>{copy.signInIntro}</p>
+        <h1>{me?.signedIn ? copy.accountTitle : copy.signInTitle}</h1>
+        {!me?.signedIn && <p>{copy.signInIntro}</p>}
         {loading && <p role="status">{copy.commonLoading}</p>}
         {failed && <p role="alert">{copy.signInUnavailable}</p>}
         {me?.signedIn ? (
@@ -38,6 +40,8 @@ export function SignInPage() {
               {copy.navSignOut}
             </button>
             {signoutFailed && <p role="alert">{copy.signInUnavailable}</p>}
+            <AccountRepos />
+            <IMessageLink />
           </div>
         ) : (
           <a className="button" href="/auth/github">

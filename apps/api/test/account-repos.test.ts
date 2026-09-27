@@ -40,7 +40,9 @@ test("signed-in inventory lists accessible repos without connecting or scanning"
     "owner/private",
     "owner/public",
   ]);
-  expect(body.repos.every((item: { connected: boolean }) => !item.connected)).toBe(true);
+  expect(
+    body.repos.every((item: { connected: boolean }) => !item.connected),
+  ).toBe(true);
   expect(JSON.stringify(body)).not.toContain("github-oauth-token");
   expect(store.listRepos()).toEqual([]);
   expect(scans).toEqual([]);

@@ -104,6 +104,24 @@ export const meSchema = z.object({
   connectedRepos: z.array(z.string()),
 });
 
+export const accountRepoSchema = z.object({
+  repo: z.string(),
+  visibility: z.enum(["public", "private"]),
+  canAdmin: z.boolean(),
+  description: z.string().nullable(),
+  language: z.string().nullable(),
+  updatedAt: z.string().nullable(),
+  archived: z.boolean(),
+  fork: z.boolean(),
+  connected: z.boolean(),
+  scanned: z.boolean(),
+});
+
+export const accountReposSchema = z.object({
+  repos: z.array(accountRepoSchema),
+  truncated: z.boolean(),
+});
+
 export type Satellite = z.infer<typeof satelliteSchema>;
 export type SkyData = z.infer<typeof skySchema>;
 export type RepoData = z.infer<typeof repoSchema>;
@@ -111,6 +129,8 @@ export type RunData = z.infer<typeof runSchema>;
 export type CheckResult = z.infer<typeof checkResultSchema>;
 export type EvidenceGroup = z.infer<typeof evidenceGroupSchema>;
 export type MeData = z.infer<typeof meSchema>;
+export type AccountRepoData = z.infer<typeof accountRepoSchema>;
+export type AccountReposData = z.infer<typeof accountReposSchema>;
 export type SourceData = z.infer<typeof sourceSchema>;
 export type SourceSync = z.infer<typeof sourceSyncSchema>;
 

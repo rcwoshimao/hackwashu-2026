@@ -55,6 +55,9 @@ export function registerWebRoutes(app: Hono, dist: string): void {
       return new Response("Not Found", { status: 404 });
     return fileResponse(candidate, true);
   });
+  app.get("/favicon.svg", () =>
+    fileResponse(resolve(root, "favicon.svg"), false),
+  );
   app.get("*", (c) => {
     const path = new URL(c.req.url).pathname;
     if (!spaPath(path)) return new Response("Not Found", { status: 404 });

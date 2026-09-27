@@ -18,6 +18,8 @@ docker compose exec groundcontrol bun ops sky:scan --top 500 --tiers static,ai
 
 The first command is a useful key check before starting all 500. `bun ops sky:simulate --fill-to 500` adds visibly simulated layout filler; simulated records never count toward findings. The server stores scan results in a Docker volume and serves the web app from the same container.
 
+After signing in with GitHub, open **My repos**. Ground Control lists up to 500 recently updated repositories your OAuth account can access, including private repositories, without scanning or connecting them. Search the list, choose **Check README** on one public repository, or choose **Scan all public READMEs** to request checks for the eligible public repositories shown. The scan results are saved and join the Sky. For a private repository you administer, choose **Connect** to get the one-time Actions token and opt in to runtime checks. Private repositories are never included in the public bulk scan. The header shows your GitHub login while signed in.
+
 ## Test the drift loop locally
 
 After the container is running, use `docker compose exec -T groundcontrol bun ops fly` for the keyless drift rehearsal. This explicit command copies Ground Control's bundled `demo/orbit-app` fixture to a disposable checkout, runs its flight checks, applies a one-line port change, and reports the resulting drift. It never fetches a public repository to execute. It chooses an available loopback port in the copy so another host service cannot affect the result. The original demo files are untouched. To run it on the host instead, install Bun and Node.js, run `bun install` in this repository, and run `npm ci` in `demo/orbit-app` if its `node_modules` directory is absent. Then run `bun ops fly` from the repository root.
@@ -28,7 +30,7 @@ For an owner-selected private checkout, `bun run gc scan --private <checkout>` g
 
 ## Connect a repository to CI
 
-Sign in through the web app and connect a **private repository you administer**. Save the one-time telemetry token shown on the Connect page as that repository's Actions secret `GROUND_CONTROL_TOKEN`. From the Ground Control root, generate the first committed flight checks against a separate checkout of that private repository:
+Sign in through the web app, open **My repos**, and choose **Connect** on a **private repository you administer**. Save the one-time telemetry token shown there as that repository's Actions secret `GROUND_CONTROL_TOKEN`. From the Ground Control root, generate the first committed flight checks against a separate checkout of that private repository:
 
 ```sh
 bun ops seed-plan <checkout> <owner/repo>

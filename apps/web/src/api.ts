@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { apiTimeoutMs } from "./config.ts";
 import {
+  accountReposSchema,
   meSchema,
   repoSchema,
   runSchema,
@@ -132,6 +133,8 @@ export const api = {
   run: (id: string, signal?: AbortSignal) =>
     readJson(`/api/runs/${encodeURIComponent(id)}`, runSchema, signal),
   me: (signal?: AbortSignal) => readJson("/api/me", meSchema, signal),
+  accountRepos: (signal?: AbortSignal) =>
+    readJson("/api/account/repos", accountReposSchema, signal),
   scan: (repo: string) => postJson("/api/scan", { repo }, scanSchema),
   connect: (repo: string) => postJson("/api/connect", { repo }, connectSchema),
   source: (repo: string, kind: string, url: string) =>
