@@ -61,3 +61,30 @@ test("commit status targets the run and uses the server verdict", async () => {
     ).post(run),
   ).toBe(false);
 });
+
+test("a successful verdict describes disputed failures as review items", async () => {
+  const failed = run.results[0];
+  if (!failed) throw new Error("Missing test result");
+  const bodies: Record<string, string>[] = [];
+  const status = new GitHubCommitStatus(
+    "write-token",
+    "https://groundcontrol.example",
+    async (_url, init) => {
+      bodies.push(JSON.parse(String(init.body)) as Record<string, string>);
+      return Response.json({}, { status: 201 });
+    },
+  );
+  expect(
+    await status.post({
+      ...run,
+      verdict: "success",
+      results: [
+        { ...failed, state: "disputed" },
+        { ...failed, claimId: "c_2222222222", state: "disputed" },
+      ],
+    }),
+  ).toBe(true);
+  expect(bodies[0]?.state).toBe("success");
+  expect(bodies[0]?.description).toContain("2 findings need review");
+  expect(bodies[0]?.description).not.toContain("checks passed");
+});

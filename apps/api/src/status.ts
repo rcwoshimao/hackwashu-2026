@@ -20,10 +20,17 @@ export class GitHubCommitStatus implements CommitStatusPort {
     const failing = run.results.filter(
       (item) => item.state === "confirmed" && item.status === "fail",
     ).length;
+    const review = run.results.filter(
+      (item) =>
+        item.status === "fail" &&
+        (item.state === "disputed" || item.state === "unconfirmed"),
+    ).length;
     const description =
-      failing === 0
-        ? "Ground Control: documentation checks passed"
-        : `Ground Control: ${failing} confirmed documentation checks failed`;
+      failing > 0
+        ? `Ground Control: ${failing} confirmed documentation checks failed`
+        : review > 0
+          ? `Ground Control: 0 confirmed failures; ${review} findings need review`
+          : "Ground Control: no confirmed documentation failures";
     try {
       const response = await this.request(url, {
         method: "POST",

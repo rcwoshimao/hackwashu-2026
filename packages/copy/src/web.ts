@@ -26,7 +26,8 @@ export const webCopy = {
   deepScanAddAction: "Set up deep checks",
   deepChecksSetupAction: "Review deep check setup",
   deepChecksSetUp: "Deep checks set up",
-  deepChecksLastPassed: "Latest CI run passed",
+  deepChecksLastPassed: "Latest CI run has no confirmed drift",
+  deepChecksNeedReview: "findings need review in latest CI run",
   deepChecksLastFailed: "Latest CI run found drift",
   deepChecksLastPending: "Latest CI run is pending",
   deepChecksNoCiResult: "Deep checks enabled. No CI result received yet.",
@@ -492,6 +493,8 @@ export const webCopy = {
     "Prefer a local command? Copy this PowerShell script. It targets the selected GitHub repository and makes no file edits.",
   runDeepFixIntro:
     "Confirmed deep-check findings can become draft PRs with cited documentation line edits. Review each proposed change in GitHub before merging.",
+  runDisputedIntro:
+    "Disputed checks need review. Confirm a valid failing check to mark the finding as drift and make Draft line edits available; drop an incorrect check.",
   runDeepFixCreate: "Draft line edits",
   runDeepFixPending: "Drafting line edits",
   runDeepFixOpen: "Review draft PR",

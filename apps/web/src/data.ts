@@ -48,6 +48,7 @@ export const runSummarySchema = z.object({
   verdict: z.string(),
   origin: z.enum(["public_scan", "ci", "unknown"]),
   failingCount: z.number().nonnegative(),
+  reviewCount: z.number().nonnegative().optional(),
 });
 
 export const repoSchema = z.object({

@@ -108,6 +108,11 @@ describe("telemetry and messaging API", () => {
     ).json();
     expect(initial.verdict).toBe("success");
     expect(initial.results[0].state).toBe("disputed");
+    const repository = await (
+      await app.request("/api/repos/owner/project", { headers: { cookie } })
+    ).json();
+    expect(repository.latestCiRun.reviewCount).toBe(1);
+    expect(repository.latestCiRun.failingCount).toBe(0);
     const confirmed = await json(
       app,
       `/api/runs/${runId}/claims/c_1234567890/confirm`,

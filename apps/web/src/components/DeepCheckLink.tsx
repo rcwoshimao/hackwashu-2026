@@ -25,7 +25,9 @@ export function DeepCheckLink({
         <p>
           <strong>{copy.deepChecksSetUp}</strong> ·{" "}
           {latestCi.verdict === "success"
-            ? copy.deepChecksLastPassed
+            ? (latestCi.reviewCount ?? 0) > 0
+              ? `${latestCi.reviewCount} ${copy.deepChecksNeedReview}`
+              : copy.deepChecksLastPassed
             : latestCi.verdict === "failure"
               ? copy.deepChecksLastFailed
               : copy.deepChecksLastPending}{" "}

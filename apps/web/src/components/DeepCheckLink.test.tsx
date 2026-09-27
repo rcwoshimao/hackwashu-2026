@@ -81,9 +81,32 @@ test("a successful CI report confirms deep-check setup despite a newer public sc
     />,
   );
   assert.match(markup, /Deep checks set up/);
-  assert.match(markup, /Latest CI run passed/);
+  assert.match(markup, /Latest CI run has no confirmed drift/);
   assert.match(markup, /runs\/ci-pass/);
   assert.doesNotMatch(markup, /Review deep check setup/);
+});
+
+test("a green CI verdict with disputed failures asks for review", () => {
+  const markup = renderToStaticMarkup(
+    <DeepCheckLink
+      data={{
+        ...repo,
+        latestCiRun: {
+          id: "ci-review",
+          commitSha: "abc",
+          createdAt: "2026-09-27T02:00:00Z",
+          verdict: "success",
+          origin: "ci",
+          failingCount: 0,
+          reviewCount: 7,
+        },
+      }}
+      me={owner}
+    />,
+  );
+  assert.match(markup, /7 findings need review/);
+  assert.doesNotMatch(markup, /Latest CI run has no confirmed drift/);
+  assert.match(markup, /runs\/ci-review/);
 });
 
 test("a saved CI report confirms setup even when the opt-in flag is stale", () => {

@@ -89,6 +89,11 @@ function runSummary(run: RunRecord) {
     failingCount: run.results.filter(
       (item) => item.state === "confirmed" && item.status === "fail",
     ).length,
+    reviewCount: run.results.filter(
+      (item) =>
+        item.status === "fail" &&
+        (item.state === "disputed" || item.state === "unconfirmed"),
+    ).length,
   };
 }
 

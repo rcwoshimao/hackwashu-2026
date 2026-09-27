@@ -223,6 +223,11 @@ function RunContent({
   const canAct = canTriage(data, me);
   const canDeepFix =
     data.origin === "ci" && !!me?.connectedRepos.includes(data.repo);
+  const needsReview =
+    data.origin === "ci" &&
+    data.results.some(
+      (item) => item.status === "fail" && item.state === "disputed",
+    );
   return (
     <>
       <header className="detail-heading">
@@ -244,6 +249,7 @@ function RunContent({
       <EvidenceGroups data={data} />
       <section className="panel check-results">
         <h2>{copy.runChecks}</h2>
+        {needsReview && <p>{copy.runDisputedIntro}</p>}
         {canDeepFix && <p>{copy.runDeepFixIntro}</p>}
         <FixAllButton
           run={data}
