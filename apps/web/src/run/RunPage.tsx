@@ -1,8 +1,14 @@
 import { copy } from "@ground-control/copy";
 import { useCallback, useEffect, useState } from "react";
 import { api } from "../api.ts";
+import { useMe } from "../auth/useMe.ts";
 import type { CheckResult, RunData } from "../data.ts";
 import { readableDate, repoPath, safeExternalUrl } from "../presentation.ts";
+import {
+  canTriage,
+  FindingActions,
+  FixAllButton,
+} from "../repo/FindingActions.tsx";
 
 function useRun(id: string) {
   const [data, setData] = useState<RunData | null>(null);
@@ -92,13 +98,17 @@ function EvidenceGroups({ data }: { data: RunData }) {
 
 function CheckCard({
   result,
-  runId,
+  run,
+  canAct,
   onChange,
 }: {
   result: CheckResult;
-  runId: string;
+  run: RunData;
+  canAct: boolean;
   onChange: () => Promise<void>;
 }) {
+  const runId = run.id;
+  const scanFinding = run.origin === "public_scan";
   const [feedback, setFeedback] = useState("");
   const [pending, setPending] = useState(false);
   const action = async (kind: "confirm" | "drop") => {
@@ -118,7 +128,8 @@ function CheckCard({
     setPending(false);
   };
   const actionable =
-    result.state === "unconfirmed" || result.state === "disputed";
+    !scanFinding &&
+    (result.state === "unconfirmed" || result.state === "disputed");
   const link = result.deepLink ? safeExternalUrl(result.deepLink) : null;
   return (
     <li
@@ -166,6 +177,14 @@ function CheckCard({
           </>
         )}
       </div>
+      {scanFinding && (
+        <FindingActions
+          run={run}
+          result={result}
+          canAct={canAct}
+          onChange={onChange}
+        />
+      )}
       {feedback && (
         <p className="form-feedback" role="status">
           {feedback}
@@ -182,6 +201,8 @@ function RunContent({
   data: RunData;
   refresh: () => Promise<void>;
 }) {
+  const { me } = useMe();
+  const canAct = canTriage(data, me);
   return (
     <>
       <header className="detail-heading">
@@ -203,6 +224,12 @@ function RunContent({
       <EvidenceGroups data={data} />
       <section className="panel check-results">
         <h2>{copy.runChecks}</h2>
+        <FixAllButton
+          run={data}
+          findings={data.results}
+          canAct={canAct}
+          onChange={refresh}
+        />
         {data.results.length === 0 ? (
           <p>{copy.runNoChecks}</p>
         ) : (
@@ -211,7 +238,8 @@ function RunContent({
               <CheckCard
                 key={result.claimId}
                 result={result}
-                runId={data.id}
+                run={data}
+                canAct={canAct}
                 onChange={refresh}
               />
             ))}

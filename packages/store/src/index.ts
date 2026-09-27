@@ -3,6 +3,7 @@ export { SqliteStore } from "./sqlite.ts";
 export type {
   AppStore,
   CheckStatus,
+  ClaimFixRecord,
   EventRecord,
   FactEvidence,
   RepoRecord,

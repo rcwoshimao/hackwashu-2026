@@ -4,6 +4,8 @@ Azure hosting is being provisioned for the Ground Control server. The target rep
 
 Ground Control runs locally with Docker Desktop. Add keys to the ignored `.env` file in this repository; never put a credential in Git, a README, an issue, or a screenshot. You can run the web app and the bundled Orbit drift fixture before creating any account. Ordinary public scans use static and optional AI checks without executing repository code. A private repo you connect or a public repo owned by your signed-in GitHub account can use deep checks after explicit Actions setup.
 
+For a public README scan you own, sign in with the repository owner account and open its findings. **Fix with a pull request** drafts a correction from cited README lines and opens a draft PR for your review; **Ignore** removes a finding from the active checklist. Fix requires repository write access plus the configured model key. Review every proposed edit before merging it. The same actions are available on the full run page; no separate Ground Control account setup is needed.
+
 The Sky uses steady dot brightness and slow position changes. Rebuild the Docker image after updating the app to receive the reduced-flicker map; no new key or account setup is required.
 
 The desktop Sky map expands to match a taller selected-repository panel, removing the blank area below the map. The mobile layout keeps its stacked map size; no additional setup is required.

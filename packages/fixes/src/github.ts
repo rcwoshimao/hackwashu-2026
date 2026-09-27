@@ -15,6 +15,7 @@ function parts(repo: string): { owner: string; repo: string } | null {
 function writable(path: string): boolean {
   return (
     path === "README.md" ||
+    /^readme\.(?:md|markdown)$/iu.test(path) ||
     /^docs\/(?:[^/.][^/]*\/)*[^/.][^/]*\.md$/u.test(path) ||
     /^man\/[^/.][^/]*\.[1-9]$/u.test(path) ||
     path === "flightchecks/flightplan.json" ||
@@ -56,6 +57,31 @@ export class OctokitFixes implements GitHubFixPort {
       return {
         ok: true,
         value: Buffer.from(data.content, "base64").toString("utf8"),
+      };
+    } catch {
+      return { ok: false, error: { code: "github_failed" } };
+    }
+  }
+
+  async listFiles(
+    repo: string,
+    ref: string,
+  ): Promise<FixResult<readonly string[]>> {
+    const names = parts(repo);
+    if (!names || !/^[0-9a-f]{40}$/u.test(ref))
+      return { ok: false, error: { code: "github_failed" } };
+    try {
+      const response = await this.client.rest.git.getTree({
+        ...names,
+        tree_sha: ref,
+        recursive: "true",
+      });
+      return {
+        ok: true,
+        value: response.data.tree
+          .filter((item) => item.type === "blob" && item.path)
+          .map((item) => item.path ?? "")
+          .filter((path) => !/(^|\/)node_modules\//u.test(path)),
       };
     } catch {
       return { ok: false, error: { code: "github_failed" } };
@@ -171,6 +197,19 @@ export class FakeGitHubFixes implements GitHubFixPort {
     return content === undefined
       ? { ok: false, error: { code: "github_failed" } }
       : { ok: true, value: content };
+  }
+
+  async listFiles(
+    repo: string,
+    ref: string,
+  ): Promise<FixResult<readonly string[]>> {
+    const prefix = `${repo}\n${ref}\n`;
+    return {
+      ok: true,
+      value: [...this.files.keys()]
+        .filter((key) => key.startsWith(prefix))
+        .map((key) => key.slice(prefix.length)),
+    };
   }
 
   async createDraft(input: DraftInput): Promise<FixResult<DraftResult>> {

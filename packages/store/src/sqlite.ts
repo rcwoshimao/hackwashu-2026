@@ -2,6 +2,7 @@ import { Database } from "bun:sqlite";
 import type { FlightPlan, TrustState } from "@ground-control/plan";
 import type {
   AppStore,
+  ClaimFixRecord,
   EventRecord,
   RepoRecord,
   RunRecord,
@@ -135,6 +136,12 @@ export class SqliteStore implements AppStore {
   }
   setTrust(repo: string, claimId: string, state: TrustState): void {
     this.write("trust", `${repo}\n${claimId}`, state);
+  }
+  getClaimFix(repo: string, claimId: string): ClaimFixRecord | null {
+    return this.read("claim_fix", `${repo}\n${claimId}`);
+  }
+  putClaimFix(fix: ClaimFixRecord): void {
+    this.write("claim_fix", `${fix.repo}\n${fix.claimId}`, fix);
   }
   getSatellite(repo: string): SatelliteRecord | null {
     return this.read("satellite", repo);

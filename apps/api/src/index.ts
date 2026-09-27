@@ -17,6 +17,8 @@ export function createApi(deps: ApiDeps): Hono {
 }
 
 export { OctokitCommitAuthor } from "./commit-author.ts";
+export type { ScanFixResult, ScanFixService } from "./scan-fix.ts";
+export { createScanFix } from "./scan-fix.ts";
 export { seedLocalDemo } from "./seed.ts";
 export { GitHubCommitStatus } from "./status.ts";
 export { ingestTelemetry, refreshTrust, telemetrySchema } from "./telemetry.ts";

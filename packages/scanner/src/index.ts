@@ -1,3 +1,4 @@
+export { driftDegrees, evidenceFor, labelFor } from "./assessment.ts";
 export type {
   PublicGitHubPort,
   PublicRepo,

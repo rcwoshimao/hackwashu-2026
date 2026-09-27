@@ -1,5 +1,5 @@
 import type { AppStore, RunRecord } from "@ground-control/store";
-import { sendDriftAlert } from "./alerts.ts";
+import { sendDriftAlert, sendScanAlert } from "./alerts.ts";
 import { answerRepo, answerRun, answerStatus } from "./answers.ts";
 import { confirmCorrection, fixAlert } from "./corrections.ts";
 import { type MessagingCipher, token32 } from "./identity.ts";
@@ -15,6 +15,7 @@ import type {
   PublicScanPort,
   ReplyRoute,
   Result,
+  ScanFixPort,
   TrustPort,
 } from "./types.ts";
 
@@ -26,6 +27,7 @@ export type HubDeps = {
   correction: CorrectionPort;
   trust: TrustPort;
   scanner?: PublicScanPort;
+  scanFix?: ScanFixPort;
   publicUrl: string;
   now: () => Date;
 };
@@ -67,6 +69,19 @@ export class MessagingHub {
       run,
       authorLogin,
       codeChanged,
+      appStore: this.deps.appStore,
+      messages: this.deps.messages,
+      cipher: this.deps.cipher,
+      imessage: this.deps.imessage,
+      publicUrl: this.deps.publicUrl,
+      now: this.deps.now(),
+    });
+  }
+
+  async scanAlert(run: RunRecord, githubLogin: string) {
+    return sendScanAlert({
+      run,
+      githubLogin,
       appStore: this.deps.appStore,
       messages: this.deps.messages,
       cipher: this.deps.cipher,
@@ -152,7 +167,7 @@ export class MessagingHub {
     if (command.kind === "run")
       return answerRun(this.deps, route, login, command.repo);
     if (command.kind === "repo")
-      return answerRepo(this.deps, route, command.repo);
+      return this.ownRepo(route, login, command.repo);
     if (command.kind === "confirm" || command.kind === "drop") {
       return this.trust(route, login, command.claimId, command.kind);
     }
@@ -166,6 +181,23 @@ export class MessagingHub {
       return this.decision(route, hash, login, command.kind);
     }
     return this.reply(route, renderMessage("unknown"));
+  }
+
+  private async ownRepo(
+    route: ReplyRoute,
+    login: string,
+    name: string,
+  ): Promise<Result<"handled">> {
+    const answered = await answerRepo(this.deps, route, name);
+    if (
+      !answered.ok ||
+      name.split("/")[0]?.toLowerCase() !== login.toLowerCase()
+    )
+      return answered;
+    const latest = this.deps.appStore.getRepo(name)?.latestRunId;
+    const run = latest ? this.deps.appStore.getRun(latest) : null;
+    if (run) await this.scanAlert(run, login);
+    return answered;
   }
 
   private async decision(
@@ -213,6 +245,7 @@ export class MessagingHub {
     alert: AlertRecord,
     action: "fix" | "keep" | "ignore",
   ): Promise<Result<"handled">> {
+    if (alert.kind === "scan") return this.actOnScan(route, alert, action);
     if (action === "fix") return fixAlert(this.deps, route, alert);
     if (action === "ignore") {
       for (const id of alert.claimIds)
@@ -222,6 +255,52 @@ export class MessagingHub {
     }
     this.deps.messages.putAlert({ ...alert, state: "kept" });
     return this.reply(route, renderMessage("keepDone"));
+  }
+
+  private async actOnScan(
+    route: ReplyRoute,
+    alert: AlertRecord,
+    action: "fix" | "keep" | "ignore",
+  ): Promise<Result<"handled">> {
+    const url = `${this.deps.publicUrl}/runs/${encodeURIComponent(alert.runId)}`;
+    if (action === "keep") {
+      this.deps.messages.putAlert({ ...alert, state: "kept" });
+      return this.reply(route, renderMessage("scanKeepDone", { url }));
+    }
+    if (action === "ignore") {
+      for (const id of alert.claimIds) {
+        this.deps.messages.ignore(alert.repo, id);
+        await this.deps.trust.set(alert.repo, id, "dropped");
+      }
+      this.deps.messages.putAlert({ ...alert, state: "ignored" });
+      return this.reply(
+        route,
+        renderMessage("scanIgnoreDone", {
+          count: alert.claimIds.length,
+          noun: alert.claimIds.length === 1 ? "finding" : "findings",
+        }),
+      );
+    }
+    const run = this.deps.appStore.getRun(alert.runId);
+    if (!run || !this.deps.scanFix)
+      return this.reply(route, renderMessage("scanFixUnavailable", { url }));
+    await this.reply(route, renderMessage("scanFixStarted"));
+    const fixed = await this.deps.scanFix.fix(run, alert.claimIds);
+    if (!fixed.ok)
+      return this.reply(route, renderMessage("scanFixUnavailable", { url }));
+    this.deps.messages.putAlert({
+      ...alert,
+      state: "fixing",
+      pullRequestUrl: fixed.value.pullRequestUrl,
+    });
+    return this.reply(
+      route,
+      renderMessage("scanFixDone", {
+        count: fixed.value.fixedClaimIds.length,
+        total: alert.claimIds.length,
+        pr: fixed.value.pullRequestUrl,
+      }),
+    );
   }
 
   async confirmCorrection(run: RunRecord): Promise<Result<boolean>> {
