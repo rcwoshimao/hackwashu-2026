@@ -1,7 +1,7 @@
 import { lookup } from "node:dns/promises";
 import type { IncomingMessage } from "node:http";
 import { request } from "node:https";
-import { isIP } from "node:net";
+import { isIP, type LookupFunction } from "node:net";
 import type { FetchResult, WebPagePort } from "@ground-control/sources";
 import { safePublicUrl } from "@ground-control/sources";
 import {
@@ -93,6 +93,15 @@ export function readBody(
   });
 }
 
+// Node and Bun ask for every address (options.all) when connecting, so the
+// pinned answer must come back as a list in that case, not a bare string.
+export function pinnedLookup(address: string): LookupFunction {
+  return (_host, options, callback) => {
+    if (options.all) callback(null, [{ address, family: 4 }]);
+    else callback(null, address, 4);
+  };
+}
+
 function pinnedGet(
   url: string,
   address: string,
@@ -103,7 +112,7 @@ function pinnedGet(
       {
         timeout: sourceFetchTimeoutMs,
         signal: AbortSignal.timeout(sourceFetchTimeoutMs),
-        lookup: (_host, _options, callback) => callback(null, address, 4),
+        lookup: pinnedLookup(address),
         headers: { "user-agent": "Ground-Control/0.1" },
       },
       (response) => {

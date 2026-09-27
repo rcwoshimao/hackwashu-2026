@@ -49,6 +49,7 @@ async function addSource(c: Context, deps: ApiDeps) {
   const refreshed = await deps.sourceSync.refresh(
     source.id,
     allowed.session?.oauthToken,
+    { waitForPlan: false },
   );
   const sync = refreshed.ok
     ? refreshed.value
@@ -67,6 +68,7 @@ async function refreshSource(c: Context, deps: ApiDeps) {
   const refreshed = await deps.sourceSync.refresh(
     source.id,
     allowed.session?.oauthToken,
+    { waitForPlan: false },
   );
   return refreshed.ok
     ? c.json(refreshed.value)
