@@ -10,6 +10,7 @@ import {
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, sep } from "node:path";
+import { flightPlanSchema } from "../../packages/plan/src/schema.ts";
 import {
   actionMetadata,
   checkedOutCommit,
@@ -49,7 +50,7 @@ test("run mode records every claim and keeps a failed check in telemetry", async
       );
     const telemetry = await runFlightChecks(
       root,
-      "team/orbit-app",
+      "demo/orbit-app",
       "a".repeat(40),
       runner,
       { codeChanged: true },
@@ -88,11 +89,48 @@ test("change metadata compares base and head and separates docs from code", () =
     ["diff", "--name-only", "a".repeat(40), "b".repeat(40)],
   ]);
   expect(metadata).toMatchObject({
-    authorLogin: "teammate",
     pullRequestNumber: 42,
     docsChanged: true,
     codeChanged: true,
   });
+  expect(metadata.authorLogin).toBeUndefined();
+});
+
+test("push metadata includes only the head commit's GitHub author", () => {
+  const event = {
+    head_commit: { author: { username: "commit-author" } },
+    sender: { login: "person-who-pushed" },
+  };
+  expect(actionMetadata(process.cwd(), event).authorLogin).toBe(
+    "commit-author",
+  );
+  expect(
+    actionMetadata(process.cwd(), { sender: event.sender }).authorLogin,
+  ).toBeUndefined();
+});
+
+test("run mode refuses a plan for another repository before invoking its runner", async () => {
+  const root = mkdtempSync(join(tmpdir(), "groundcontrol-action-plan-"));
+  if (!realpathSync(root).startsWith(`${realpathSync(tmpdir())}${sep}`))
+    throw new Error("Action fixture escaped temp directory");
+  let called = false;
+  try {
+    mkdirSync(join(root, "flightchecks"));
+    writeFileSync(
+      join(root, "flightchecks/flightplan.json"),
+      readFileSync(orbitPlan),
+    );
+    const runner: FlightRunner = async () => {
+      called = true;
+      return {};
+    };
+    expect(
+      runFlightChecks(root, "different/orbit-app", "a".repeat(40), runner),
+    ).rejects.toThrow("Flight plan repository does not match checkout");
+    expect(called).toBe(false);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("only a valid pull request event contributes a PR number", () => {
@@ -171,7 +209,7 @@ test("runtime permission requires matching private repository metadata for every
   expect(privateRunRepository({}, repo.full_name)).toBe(false);
 });
 
-test("run mode refuses public and missing visibility before importing checkout code", async () => {
+test("run mode validates privacy and plan before importing checkout code", async () => {
   const root = mkdtempSync(join(tmpdir(), "groundcontrol-action-gate-"));
   if (!realpathSync(root).startsWith(`${realpathSync(tmpdir())}${sep}`))
     throw new Error("Action fixture escaped temp directory");
@@ -197,9 +235,30 @@ test("run mode refuses public and missing visibility before importing checkout c
       });
       expect(existsSync(join(root, "runner-imported"))).toBe(false);
     }
+    const privateEvent = {
+      repository: { full_name: "team/orbit-app", private: true },
+    };
+    const planPath = join(root, "flightchecks/flightplan.json");
+    writeFileSync(planPath, "{}");
+    expect(
+      loadPrivateRunner(root, privateEvent, "team/orbit-app"),
+    ).rejects.toThrow("Flight plan is invalid");
+    expect(existsSync(join(root, "runner-imported"))).toBe(false);
+    writeFileSync(planPath, readFileSync(orbitPlan));
+    expect(
+      loadPrivateRunner(root, privateEvent, "team/orbit-app"),
+    ).rejects.toThrow("Flight plan repository does not match checkout");
+    expect(existsSync(join(root, "runner-imported"))).toBe(false);
+    const plan = flightPlanSchema.parse(
+      JSON.parse(readFileSync(orbitPlan, "utf8")),
+    );
+    writeFileSync(
+      planPath,
+      JSON.stringify({ ...plan, repo: "team/orbit-app" }),
+    );
     const allowed = await loadPrivateRunner(
       root,
-      { repository: { full_name: "team/orbit-app", private: true } },
+      privateEvent,
       "team/orbit-app",
     );
     expect(allowed.ok).toBe(true);

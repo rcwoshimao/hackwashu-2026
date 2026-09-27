@@ -1,0 +1,44 @@
+{
+  "repo": "team/orbit-app",
+  "commitSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "pullRequestNumber": 42,
+  "authorLogin": "hussein",
+  "codeChanged": true,
+  "docsChanged": false,
+  "changedFiles": ["src/server.js"],
+  "results": [
+    {
+      "kind": "file_exists",
+      "params": { "path": ".env.example" },
+      "claimId": "c_13d2e74663",
+      "sourceId": "readme",
+      "quote": "Copy `.env.example` to `.env`",
+      "status": "pass",
+      "expected": ".env.example exists",
+      "actual": ".env.example exists",
+      "deepLink": "https://github.com/team/orbit-app/blob/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/README.md#L9"
+    },
+    {
+      "kind": "port_listens",
+      "params": { "port": 3000, "startScript": "dev", "timeoutMs": 5000 },
+      "claimId": "c_8ce6190173",
+      "sourceId": "readme",
+      "quote": "The server listens on port 3000 by default.",
+      "status": "pass",
+      "expected": "TCP and GET / on port 3000 with status below 500",
+      "actual": "HTTP 200 on port 3000",
+      "deepLink": "https://github.com/team/orbit-app/blob/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/README.md#L24"
+    },
+    {
+      "kind": "port_listens",
+      "params": { "port": 3000, "startScript": "dev", "timeoutMs": 5000 },
+      "claimId": "c_6eef036f77",
+      "sourceId": "readme",
+      "quote": "Open `http://localhost:3000/` after the server starts.",
+      "status": "pass",
+      "expected": "TCP and GET / on port 3000 with status below 500",
+      "actual": "HTTP 200 on port 3000",
+      "deepLink": "https://github.com/team/orbit-app/blob/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/README.md#L30"
+    }
+  ]
+}

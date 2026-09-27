@@ -1,3 +1,4 @@
+import { cliCopy } from "./cli.ts";
 import { extensionCopy } from "./extension.ts";
 import { messageCopy } from "./messages.ts";
 import { webCopy } from "./web.ts";
@@ -6,6 +7,7 @@ export { extensionCopy } from "./extension.ts";
 export { messageCopy } from "./messages.ts";
 
 export const copy = {
+  ...cliCopy,
   ...webCopy,
   ...messageCopy,
   ...extensionCopy,

@@ -18,8 +18,9 @@ The container serves only on `127.0.0.1` by default. To test from another machin
 | Goal | Variables | Result |
 | --- | --- | --- |
 | Real top-500 Sky scan | `GITHUB_SCAN_TOKEN`, `GEMINI_API_KEY` | GitHub read-only API access and Gemini claim extraction. |
+| Optional Claude claim extraction for connected sources and local checkouts | `EXTRACTION_MODEL=claude`, `ANTHROPIC_API_KEY` | Uses Claude Sonnet 5 for those sources; public Sky scans continue to use Gemini or static checks. |
 | Sign in and connect repos | `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`, `SESSION_SECRET`, `PUBLIC_URL` | GitHub OAuth callback at `<PUBLIC_URL>/auth/github/callback`. |
-| GitHub commit status and corrections | `GITHUB_WRITE_TOKEN` | Server-side GitHub write access scoped to connected demo repos. |
+| GitHub commit status, PR comments, and verified iMessage routing | `GITHUB_WRITE_TOKEN` | Server-side GitHub access scoped to connected demo repos; resolves the checked commit's GitHub author before an alert. |
 | iMessage alerts | `SPECTRUM_PROJECT_ID`, `SPECTRUM_PROJECT_SECRET` | Spectrum Cloud iMessage through a line provisioned in that project. No Mac or bot token is needed. |
 | Confluence source comments | `CONFLUENCE_SITE`, `CONFLUENCE_EMAIL`, `CONFLUENCE_API_TOKEN` | Read pages and post footer comments. The page body is never edited. |
 | Extension sign-in | `EXTENSION_ID` | Limits the OAuth redirect to the unpacked extension's exact Chrome ID. |
@@ -35,9 +36,11 @@ docker compose exec groundcontrol bun ops ping-models
 
 `ping-github` needs a GitHub scan or write token and reports the API quota remaining. `ping-models` needs `GEMINI_API_KEY` and checks both configured Gemini models. Run only the diagnostic for services you configured; either command exits with an error when its key or service is unavailable.
 
-To test iMessage, provision a managed iMessage line in your Spectrum project, set the two project variables above, and recreate the container. Sign in to Ground Control with GitHub, open **Connect a repo**, and enter your iMessage phone number in E.164 format such as `+15551234567`. Ground Control sends a one-time code to that number. Reply with the `LINK <code>` line in the received iMessage; a welcome reply confirms the link. Only that linked sender can act on its alerts. A confirmed drift can then send one grouped message, and `FIX`, `KEEP`, and `IGNORE` are handled by reply. Spectrum Cloud uses an outbound provider connection from the container; iMessage linking itself does not need an HTTPS tunnel. Leave the Spectrum variables empty for a keyless web and simulator demo.
+To test iMessage, provision a managed iMessage line in your Spectrum project, set the two project variables above and `GITHUB_WRITE_TOKEN`, and recreate the container. Sign in to Ground Control with GitHub, open **Connect a repo**, and enter your iMessage phone number in E.164 format such as `+15551234567`. Ground Control sends a one-time code to that number. Reply with the `LINK <code>` line in the received iMessage; a welcome reply confirms the link. Only that linked sender can act on its alerts. A confirmed drift can then send one grouped message, and `FIX`, `KEEP`, and `IGNORE` are handled by reply. Spectrum Cloud uses an outbound provider connection from the container; iMessage linking itself does not need an HTTPS tunnel. Leave the Spectrum variables empty for a keyless web and simulator demo.
 
 The AI tier sends README and connected source text to Gemini. This also applies to Confluence and external docs pages you choose to connect. Leave `GEMINI_API_KEY` blank for local static checks only. Do not connect confidential content to Gemini without your organization's approval.
+
+When `EXTRACTION_MODEL=claude` is set, connected source extraction sends that source text to Claude instead. The server requires `ANTHROPIC_API_KEY` in that mode. Decide which external model may receive private documentation before enabling either key.
 
 ## Scan public repos
 
@@ -87,5 +90,7 @@ docker compose exec -T groundcontrol bun ops fly
 ```
 
 The simulator uses a temporary copy of Ground Control's bundled `demo/orbit-app` fixture and chooses a free local port. It reports a passing baseline, applies the port drift patch, and shows the failed claim and dependent skips. It runs only that bundled fixture after this explicit command; it never fetches or executes a public GitHub repository.
+
+To exercise a private checkout you own, run `bun run gc scan --private <checkout>` from the Ground Control root to create and run its flight checks. Use `bun run gc check --private <checkout>` for later reruns. A Git remote is not required. Review the generated `flightchecks/flightplan.json` and any runtime commands before installing that checkout's dependencies. The flag is your explicit local execution choice and is not a GitHub visibility proof. These are local workspace scripts; no npm package has been published.
 
 To run the code checks on the host, install Bun and run `bun install` and `bun run check` from the Ground Control root. A host drift run also needs Node.js: run `npm ci` in `demo/orbit-app` if its `node_modules` directory is absent, then run `bun ops fly` from the Ground Control root.

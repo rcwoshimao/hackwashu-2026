@@ -1,10 +1,8 @@
+export { ClaudeModel } from "./claude.ts";
 export type { Extraction } from "./extract.ts";
-export {
-  extractFlightPlan,
-  HeuristicModel,
-  heuristicChecks,
-} from "./extract.ts";
+export { extractFlightPlan } from "./extract.ts";
 export { FixtureModel, GeminiModel } from "./gemini.ts";
+export { HeuristicModel, heuristicChecks } from "./heuristic.ts";
 export { SqliteModelCache } from "./sqlite-cache.ts";
 export type {
   ModelCache,

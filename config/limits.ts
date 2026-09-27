@@ -1,4 +1,5 @@
 export const maxCandidateFileBytes = 2 * 1024 * 1024;
+export const maxSavedPlanBytes = 2 * 1024 * 1024;
 export const sourceFetchTimeoutMs = 10_000;
 export const maxSourceHtmlBytes = 2 * 1024 * 1024;
 export const sourceFetchAttempts = 3;

@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import {
+  ClaudeModel,
   GeminiModel,
   HeuristicModel,
   SqliteModelCache,
@@ -21,6 +22,7 @@ import {
 import { ConfluenceCloud } from "@ground-control/sources";
 import { SqliteStore } from "@ground-control/store";
 import { planPublishDebounceMs } from "../../../config/limits.ts";
+import { OctokitCommitAuthor } from "./commit-author.ts";
 import {
   createApi,
   EventHub,
@@ -80,9 +82,15 @@ const publishQueue = planWriter
       planPublishDebounceMs,
     )
   : null;
-const model = process.env.GEMINI_API_KEY
+const publicModel = process.env.GEMINI_API_KEY
   ? new GeminiModel(process.env.GEMINI_API_KEY)
   : new HeuristicModel();
+if (process.env.EXTRACTION_MODEL === "claude" && !process.env.ANTHROPIC_API_KEY)
+  throw new Error("anthropic_api_key_required_for_claude");
+const connectedModel =
+  process.env.EXTRACTION_MODEL === "claude"
+    ? new ClaudeModel(process.env.ANTHROPIC_API_KEY ?? "")
+    : publicModel;
 const modelCache = new SqliteModelCache(dbPath);
 const confluence =
   process.env.CONFLUENCE_SITE &&
@@ -101,7 +109,7 @@ const sourceSync = new SourceSync({
   confluence,
   serviceToken: process.env.GITHUB_WRITE_TOKEN,
   confluenceSite: process.env.CONFLUENCE_SITE,
-  model,
+  model: connectedModel,
   cache: modelCache,
   now: () => new Date(),
   onUpdate: (snapshot, changed) => {
@@ -137,7 +145,7 @@ const sourceSync = new SourceSync({
 const scanner = new PublicScanner(
   store,
   new OctokitPublicGitHub(process.env.GITHUB_SCAN_TOKEN || undefined),
-  model,
+  publicModel,
   modelCache,
   () => new Date(),
   (event) => events.publish(event),
@@ -147,6 +155,9 @@ const status = process.env.GITHUB_WRITE_TOKEN
   : undefined;
 const prComments = process.env.GITHUB_WRITE_TOKEN
   ? new OctokitPrComments(process.env.GITHUB_WRITE_TOKEN)
+  : undefined;
+const commitAuthor = process.env.GITHUB_WRITE_TOKEN
+  ? new OctokitCommitAuthor(process.env.GITHUB_WRITE_TOKEN)
   : undefined;
 const messaging = await startMessaging({
   dbPath,
@@ -175,6 +186,7 @@ const app = createApi({
   ...(messaging === null ? {} : { messaging }),
   ...(status === undefined ? {} : { status }),
   ...(prComments === undefined ? {} : { prComments }),
+  ...(commitAuthor === undefined ? {} : { commitAuthor }),
   now: () => new Date(),
   publicUrl,
   webDist: resolve(process.cwd(), "apps/web/dist"),

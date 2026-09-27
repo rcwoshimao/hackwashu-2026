@@ -11,6 +11,11 @@ async function main(): Promise<void> {
   const root = process.env.GITHUB_WORKSPACE ?? process.cwd();
   const mode = process.env.INPUT_MODE;
   if (mode === "report") {
+    if (!process.env.INPUT_SERVER || !process.env.INPUT_TOKEN) {
+      process.stderr.write("missing_configuration\n");
+      process.exitCode = 1;
+      return;
+    }
     const identity = trustedReportIdentity({
       repository: process.env.GITHUB_REPOSITORY,
       workflowSha: process.env.GITHUB_SHA,
@@ -40,7 +45,7 @@ async function main(): Promise<void> {
     process.exitCode = 1;
     return;
   }
-  const sha = checkedOutCommit(root) ?? process.env.GITHUB_SHA;
+  const sha = checkedOutCommit(root);
   if (!sha || !/^[0-9a-f]{40,64}$/u.test(sha))
     throw new TypeError(
       "GitHub repository and checked-out commit are required",

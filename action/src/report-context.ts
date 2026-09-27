@@ -1,3 +1,5 @@
+import { privateRunRepository } from "./git-context.ts";
+
 export type ReportIdentity = {
   repo: string;
   commitSha: string;
@@ -38,6 +40,26 @@ export function validReportIdentity(
   );
 }
 
+function pullRequestIdentity(
+  event: unknown,
+  repo: string,
+): ReportIdentity | null {
+  const head = field(event, ["pull_request", "head", "sha"]);
+  const number = field(event, ["number"]);
+  const headRepo = field(event, ["pull_request", "head", "repo", "full_name"]);
+  if (
+    typeof head !== "string" ||
+    !shaPattern.test(head) ||
+    typeof number !== "number" ||
+    !Number.isSafeInteger(number) ||
+    number < 1 ||
+    number > 2_147_483_647 ||
+    headRepo !== repo
+  )
+    return null;
+  return { repo, commitSha: head, pullRequestNumber: number };
+}
+
 export function trustedReportIdentity(
   context: GitHubWorkflowContext,
 ): ReportIdentity | null {
@@ -46,25 +68,12 @@ export function trustedReportIdentity(
     !repository ||
     !workflowSha ||
     !repoPattern.test(repository) ||
-    !shaPattern.test(workflowSha)
+    !shaPattern.test(workflowSha) ||
+    !privateRunRepository(event, repository)
   )
     return null;
-  if (eventName === "pull_request") {
-    const head = field(event, ["pull_request", "head", "sha"]);
-    const number = field(event, ["number"]);
-    const eventRepo = field(event, ["repository", "full_name"]);
-    if (
-      typeof head !== "string" ||
-      !shaPattern.test(head) ||
-      typeof number !== "number" ||
-      !Number.isSafeInteger(number) ||
-      number < 1 ||
-      number > 2_147_483_647 ||
-      eventRepo !== repository
-    )
-      return null;
-    return { repo: repository, commitSha: head, pullRequestNumber: number };
-  }
+  if (eventName === "pull_request")
+    return pullRequestIdentity(event, repository);
   if (
     eventName !== "push" &&
     eventName !== "schedule" &&

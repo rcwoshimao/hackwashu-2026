@@ -14,9 +14,9 @@ test("PR report identity uses GitHub's head SHA rather than its merge SHA", () =
     workflowSha: merge,
     eventName: "pull_request",
     event: {
-      repository: { full_name: repo },
+      repository: { full_name: repo, private: true },
       number: 7,
-      pull_request: { head: { sha: head } },
+      pull_request: { head: { sha: head, repo: { full_name: repo } } },
     },
   };
   expect(trustedReportIdentity(context)).toEqual({
@@ -39,6 +39,26 @@ test("PR report identity uses GitHub's head SHA rather than its merge SHA", () =
       event: { ...context.event, number: 0 },
     }),
   ).toBeNull();
+  expect(
+    trustedReportIdentity({
+      ...context,
+      event: {
+        ...context.event,
+        pull_request: {
+          head: { sha: head, repo: { full_name: "fork/orbit-app" } },
+        },
+      },
+    }),
+  ).toBeNull();
+  expect(
+    trustedReportIdentity({
+      ...context,
+      event: {
+        ...context.event,
+        repository: { full_name: repo, private: false },
+      },
+    }),
+  ).toBeNull();
 });
 
 test("push and dispatch identity use GitHub's workflow SHA and fail closed", () => {
@@ -47,7 +67,7 @@ test("push and dispatch identity use GitHub's workflow SHA and fail closed", () 
       repository: repo,
       workflowSha: head,
       eventName: "push",
-      event: { after: head },
+      event: { repository: { full_name: repo, private: true }, after: head },
     }),
   ).toEqual({ repo, commitSha: head });
   expect(
@@ -55,7 +75,7 @@ test("push and dispatch identity use GitHub's workflow SHA and fail closed", () 
       repository: repo,
       workflowSha: head,
       eventName: "push",
-      event: { after: merge },
+      event: { repository: { full_name: repo, private: true }, after: merge },
     }),
   ).toBeNull();
   expect(
@@ -63,7 +83,7 @@ test("push and dispatch identity use GitHub's workflow SHA and fail closed", () 
       repository: repo,
       workflowSha: head,
       eventName: "workflow_dispatch",
-      event: {},
+      event: { repository: { full_name: repo, private: true } },
     }),
   ).toEqual({ repo, commitSha: head });
   expect(

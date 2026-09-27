@@ -105,17 +105,19 @@ function watchedDocs(root: string): Set<string> {
   return paths;
 }
 
+function commitAuthorLogin(event: unknown): string | null {
+  if (field(event, ["pull_request"]) !== null) return null;
+  const login = stringField(event, ["head_commit", "author", "username"]);
+  return login && /^[A-Za-z0-9-]{1,39}$/u.test(login) ? login : null;
+}
+
 export function actionMetadata(
   root: string,
   event: unknown,
   diff: DiffPort = systemGitDiff,
 ): ChangeMetadata {
   const changedFiles = changedPaths(root, event, diff);
-  const authorLogin =
-    stringField(event, ["head_commit", "author", "username"]) ??
-    stringField(event, ["pull_request", "user", "login"]) ??
-    stringField(event, ["pull_request", "head", "user", "login"]) ??
-    stringField(event, ["sender", "login"]);
+  const authorLogin = commitAuthorLogin(event);
   const metadata: ChangeMetadata = {};
   const pullRequestNumber = field(event, ["number"]);
   const pullRequest = field(event, ["pull_request"]);

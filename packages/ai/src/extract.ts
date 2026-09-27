@@ -14,6 +14,7 @@ import {
   sourceTextHash,
   splitSections,
 } from "@ground-control/sources";
+import { groundedParameters } from "./grounding.ts";
 import type {
   ModelCache,
   ModelInput,
@@ -22,7 +23,7 @@ import type {
   Result,
 } from "./types.ts";
 
-const promptVersion = "extract-v1";
+const promptVersion = "extract-v2";
 
 export type Extraction = {
   plan: FlightPlan;
@@ -95,12 +96,11 @@ function safeClaim(
 ): Claim | null {
   const check = checkSchema.safeParse(proposal);
   if (!check.success) return null;
+  if (!groundedParameters(check.data, proposal.quote, section.text))
+    return null;
   const command = check.data.kind === "command_succeeds";
   const occurrences = quoteLocations(doc, section, proposal.quote, command);
   if (occurrences.length === 0) return null;
-  if (check.data.kind === "command_succeeds") {
-    if (!proposal.quote.includes(check.data.params.command)) return null;
-  }
   const tier = ["command_succeeds", "port_listens", "http_example"].includes(
     check.data.kind,
   )
@@ -168,53 +168,4 @@ export async function extractFlightPlan(
   return plan.success
     ? { ok: true, value: { plan: plan.data, sections, modelCalls, rejected } }
     : { ok: false, error: { code: "invalid_response" } };
-}
-
-export function heuristicChecks(input: ModelInput): ProposedCheck[] {
-  const checks: ProposedCheck[] = [];
-  for (const candidate of input.candidates) {
-    if (
-      candidate.signal === "shell_command" ||
-      candidate.signal === "inline_code"
-    ) {
-      const script = /^(?:npm|pnpm|yarn|bun) run ([\w:-]+)/.exec(
-        candidate.quote,
-      )?.[1];
-      if (script)
-        checks.push({
-          kind: "script_exists",
-          params: { script },
-          quote: candidate.quote,
-        });
-    }
-    if (candidate.signal === "version") {
-      const range =
-        /(?:Node(?:\.js)?|Bun|npm)\s*(?:v(?:ersion)?\s*)?([^\s]+)/i.exec(
-          candidate.quote,
-        )?.[1];
-      if (range && /\d/.test(range))
-        checks.push({
-          kind: "version",
-          params: { range },
-          quote: candidate.quote,
-        });
-    }
-    if (
-      candidate.signal === "inline_code" &&
-      /^(?:[\w.-]+\/)+[\w.-]+\.[A-Za-z0-9]+$/.test(candidate.quote)
-    )
-      checks.push({
-        kind: "file_exists",
-        params: { path: candidate.quote },
-        quote: candidate.quote,
-      });
-  }
-  return checks;
-}
-
-export class HeuristicModel implements ModelPort {
-  readonly model = "local-static";
-  async extract(input: ModelInput): Promise<Result<readonly ProposedCheck[]>> {
-    return { ok: true, value: heuristicChecks(input) };
-  }
 }

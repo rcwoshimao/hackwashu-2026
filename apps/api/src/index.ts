@@ -14,11 +14,14 @@ export function createApi(deps: ApiDeps): Hono {
   return app;
 }
 
+export { OctokitCommitAuthor } from "./commit-author.ts";
 export { seedLocalDemo } from "./seed.ts";
 export { GitHubCommitStatus } from "./status.ts";
 export { ingestTelemetry, refreshTrust, telemetrySchema } from "./telemetry.ts";
 export type {
   ApiDeps,
+  CommitAuthorPort,
+  CommitAuthorResult,
   CommitStatusPort,
   PublicScanPort,
   ScanResult,

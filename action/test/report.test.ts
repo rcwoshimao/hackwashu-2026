@@ -70,12 +70,15 @@ test("report mode sends only the JSON artifact with scoped bearer token", async 
   }
 });
 
-test("report mode skips an unavailable fork token and rejects an unsafe server URL", async () => {
+test("the local reporter skips absent configuration and rejects an unsafe server URL", async () => {
   const root = telemetryRoot();
   try {
     expect(
       await reportTelemetry(root, "https://groundcontrol.example", "", null),
-    ).toEqual({ ok: true, kind: "skipped" });
+    ).toEqual({
+      ok: true,
+      kind: "skipped",
+    });
     expect(
       await reportTelemetry(root, "http://outside.example", "token", identity),
     ).toEqual({ ok: false, error: "invalid_server" });

@@ -24,6 +24,8 @@ After the container is running, use `docker compose exec -T groundcontrol bun op
 
 Use `bun run check` for TypeScript, lint, unit tests, copy checks, and golden tests. See [SELF_HOST.md](docs/SELF_HOST.md) for keys, private repositories, the extension, and troubleshooting.
 
+For an owner-selected private checkout, `bun run gc scan --private <checkout>` generates and runs its flight checks; `bun run gc check --private <checkout>` reruns the saved plan. The commands work without a Git repository. `--private` records your explicit choice to execute that local checkout; it does not look up GitHub visibility. This CLI is available from this workspace and has not been published to npm. See [HUSSEIN_HANDOFF.md](docs/HUSSEIN_HANDOFF.md) for the engine and teammate integration contract.
+
 ## Connect a repository to CI
 
 Sign in through the web app and connect a **private repository you administer**. Save the one-time telemetry token shown on the Connect page as that repository's Actions secret `GROUND_CONTROL_TOKEN`. From the Ground Control root, generate the first committed flight checks against a separate checkout of that private repository:
@@ -33,6 +35,8 @@ bun ops seed-plan <checkout> <owner/repo>
 ```
 
 Review and commit the three generated files in `<checkout>/flightchecks/` before enabling the [sample two-job workflow](demo/orbit-app/.github/workflows/ground-control.yml). On your own private checkout, you may explicitly install its dependencies and run `node --test flightchecks` after reviewing the plan. The workflow checks GitHub's private-repository flag before checkout, dependency installation, or tests. Replace its `YOUR_GITHUB_USER` Action reference with a published, accessible copy of this repository. GitHub-hosted Actions need an HTTPS tunnel to this local Docker server; use that origin for `PUBLIC_URL`, the OAuth callback, and the repository Actions variable `GROUND_CONTROL_URL`. With a `GITHUB_WRITE_TOKEN` that has Contents write access, default-branch source changes schedule a flightchecks commit. Verify that commit before relying on it; if publication fails or a PR branch changes documentation, run `seed-plan` against that branch, review the generated files, and commit them there. Report mode checks the repository, commit SHA, and PR number against the workflow context. Treat its status as advisory for branches whose authors can edit the runner until trusted attestation is added. Private GitHub wiki sync is unavailable. [SELF_HOST.md](docs/SELF_HOST.md) has the full sequence.
+
+To use Claude for connected-source and local seed/scan claim extraction, set `EXTRACTION_MODEL=claude` and `ANTHROPIC_API_KEY` in `.env`. Gemini remains the default AI path and the public Sky continues to use Gemini or static checks. Without either model key, local heuristic extraction works.
 
 ## Link iMessage for drift alerts
 

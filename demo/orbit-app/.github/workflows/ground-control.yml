@@ -29,7 +29,7 @@ jobs:
         with: { name: telemetry, path: .groundcontrol/telemetry.json }
   report:
     needs: flight-checks
-    if: ${{ always() && github.event.repository.private == true && needs.flight-checks.result == 'success' }}
+    if: ${{ always() && github.event.repository.private == true && needs.flight-checks.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     permissions: {}
     steps:

@@ -71,6 +71,23 @@ function tokenMatches(raw: string, hash: string | null): boolean {
   return stored.length === 32 && timingSafeEqual(sha256(raw), stored);
 }
 
+async function authorForTelemetry(
+  deps: ApiDeps,
+  repo: string,
+  commitSha: string,
+): Promise<string | null> {
+  if (!deps.commitAuthor) {
+    emit(deps, "commit_author_lookup_unavailable", { repo, commitSha });
+    return null;
+  }
+  const found = await deps.commitAuthor.lookup(repo, commitSha);
+  if (!found.ok) {
+    emit(deps, "commit_author_lookup_failed", { repo, commitSha });
+    return null;
+  }
+  return found.login;
+}
+
 async function scan(c: Context, deps: ApiDeps) {
   const parsed = repoSchema.safeParse(await requestBody(c.req.raw));
   if (!parsed.success) return fail(c, "invalid_request", 400);
@@ -157,10 +174,13 @@ async function telemetry(c: Context, deps: ApiDeps) {
         runId: run.id,
       });
   }
-  if (parsed.data.authorLogin && deps.messaging) {
+  const authorLogin = deps.messaging
+    ? await authorForTelemetry(deps, repo.repo, parsed.data.commitSha)
+    : null;
+  if (authorLogin && deps.messaging) {
     const alerted = await deps.messaging.alert(
       run,
-      parsed.data.authorLogin,
+      authorLogin,
       parsed.data.codeChanged === true,
     );
     if (!alerted.ok)

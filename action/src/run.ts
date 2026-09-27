@@ -1,7 +1,10 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import type { FlightPlan } from "../../packages/plan/src/schema.ts";
+import {
+  type FlightPlan,
+  flightPlanSchema,
+} from "../../packages/plan/src/schema.ts";
 import type { RuntimeOutcome } from "../../packages/runner/src/runtime-types.ts";
 import { privateRunRepository } from "./git-context.ts";
 import type {
@@ -11,21 +14,16 @@ import type {
   TelemetryResult,
 } from "./types.ts";
 
-function readPlan(root: string): FlightPlan {
+function readPlan(root: string, repo: string): FlightPlan {
   const content = readFileSync(
     join(root, "flightchecks/flightplan.json"),
     "utf8",
   );
-  const plan: unknown = JSON.parse(content);
-  if (
-    typeof plan !== "object" ||
-    plan === null ||
-    !("claims" in plan) ||
-    !Array.isArray(plan.claims)
-  ) {
-    throw new TypeError("Flight plan has no claims array");
-  }
-  return plan as FlightPlan;
+  const parsed = flightPlanSchema.safeParse(JSON.parse(content) as unknown);
+  if (!parsed.success) throw new TypeError("Flight plan is invalid");
+  if (parsed.data.repo !== repo)
+    throw new TypeError("Flight plan repository does not match checkout");
+  return parsed.data;
 }
 
 function deepLink(
@@ -86,8 +84,9 @@ export async function loadPrivateRunner(
   | { ok: true; value: FlightRunner }
   | { ok: false; error: { code: "private_repository_required" } }
 > {
-  if (!privateRunRepository(event, repo))
+  if (!repo || !privateRunRepository(event, repo))
     return { ok: false, error: { code: "private_repository_required" } };
+  readPlan(root, repo);
   return { ok: true, value: await loadRunner(root) };
 }
 
@@ -98,7 +97,7 @@ export async function runFlightChecks(
   runner: FlightRunner,
   metadata: ChangeMetadata = {},
 ): Promise<Telemetry> {
-  const plan = readPlan(root);
+  const plan = readPlan(root, repo);
   const results = await runner(plan, root);
   const telemetry: Telemetry = {
     repo,

@@ -16,11 +16,20 @@ export interface CommitStatusPort {
   post(run: RunRecord): Promise<boolean>;
 }
 
+export type CommitAuthorResult =
+  | { ok: true; login: string | null }
+  | { ok: false; error: "github_unavailable" };
+
+export interface CommitAuthorPort {
+  lookup(repo: string, commitSha: string): Promise<CommitAuthorResult>;
+}
+
 export interface ApiDeps {
   store: AppStore;
   auth: AuthService;
   scanner?: PublicScanPort;
   status?: CommitStatusPort;
+  commitAuthor?: CommitAuthorPort;
   prComments?: PrCommentPort;
   messaging?: Pick<MessagingHub, "alert"> &
     Partial<Pick<MessagingHub, "requestLink" | "confirmCorrection">>;

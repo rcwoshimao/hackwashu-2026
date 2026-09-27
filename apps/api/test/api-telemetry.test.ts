@@ -110,7 +110,7 @@ describe("telemetry and messaging API", () => {
     expect((await dropped.json()).latestVerdict).toBe("success");
   });
 
-  test("telemetry passes author and changed-code flags to messaging", async () => {
+  test("telemetry passes verified author and changed-code flags to messaging", async () => {
     const { store, auth, events } = setup();
     const calls: { author: string; codeChanged: boolean }[] = [];
     const app = createApi({
@@ -119,6 +119,11 @@ describe("telemetry and messaging API", () => {
       events,
       now: () => new Date(),
       publicUrl: "http://localhost:8787",
+      commitAuthor: {
+        async lookup() {
+          return { ok: true, login: "navi" };
+        },
+      },
       messaging: {
         async alert(_run, author, codeChanged) {
           calls.push({ author, codeChanged });

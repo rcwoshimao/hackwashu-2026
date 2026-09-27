@@ -7,9 +7,12 @@ import {
 } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import {
+  ClaudeModel,
   extractFlightPlan,
   GeminiModel,
   HeuristicModel,
+  type ModelCache,
+  type ModelPort,
   SqliteModelCache,
 } from "@ground-control/ai";
 import { planToTests } from "@ground-control/plan";
@@ -82,7 +85,9 @@ function localDocs(
 
 async function runnerBundle(): Promise<string> {
   const result = await Bun.build({
-    entrypoints: [resolve("packages/runner/src/embedded.ts")],
+    entrypoints: [
+      resolve(import.meta.dir, "../packages/runner/src/embedded.ts"),
+    ],
     target: "node",
     format: "esm",
   });
@@ -91,21 +96,60 @@ async function runnerBundle(): Promise<string> {
   return `// Ground Control 0.1.0; generated from packages/runner.\n${await result.outputs[0].text()}`;
 }
 
+export type SeedOptions = { model?: ModelPort; cache?: ModelCache };
+
+export function selectSeedModel(settings: {
+  choice?: string;
+  claudeKey?: string;
+  geminiKey?: string;
+}): ModelPort {
+  if (settings.choice === "claude") {
+    if (!settings.claudeKey) throw new Error("anthropic_key_required");
+    return new ClaudeModel(settings.claudeKey);
+  }
+  if (settings.choice === "heuristic") return new HeuristicModel();
+  if (settings.choice && settings.choice !== "gemini")
+    throw new Error("invalid_extraction_model");
+  if (settings.geminiKey) return new GeminiModel(settings.geminiKey);
+  if (settings.choice === "gemini") throw new Error("gemini_key_required");
+  return new HeuristicModel();
+}
+
+function seedCache(options: SeedOptions): {
+  cache: ModelCache;
+  close?: () => void;
+} {
+  if (options.cache) return { cache: options.cache };
+  const dbPath = resolve(process.env.DATABASE_PATH || "data/groundcontrol.db");
+  mkdirSync(dirname(dbPath), { recursive: true });
+  const cache = new SqliteModelCache(dbPath);
+  return { cache, close: () => cache.close() };
+}
+
 export async function seedPlan(
   checkout: string,
   repo: string,
+  options: SeedOptions = {},
 ): Promise<object> {
   if (!/^[^/\s]+\/[^/\s]+$/.test(repo)) throw new Error("invalid_repo");
   const root = resolve(checkout);
   const { docs, linked } = localDocs(root, repo);
   if (docs.length === 0) throw new Error("no_local_docs");
-  const dbPath = resolve(process.env.DATABASE_PATH || "data/groundcontrol.db");
-  mkdirSync(dirname(dbPath), { recursive: true });
-  const cache = new SqliteModelCache(dbPath);
+  const { cache, close } = seedCache(options);
   try {
-    const model = process.env.GEMINI_API_KEY
-      ? new GeminiModel(process.env.GEMINI_API_KEY)
-      : new HeuristicModel();
+    const model =
+      options.model ??
+      selectSeedModel({
+        ...(process.env.EXTRACTION_MODEL
+          ? { choice: process.env.EXTRACTION_MODEL }
+          : {}),
+        ...(process.env.ANTHROPIC_API_KEY
+          ? { claudeKey: process.env.ANTHROPIC_API_KEY }
+          : {}),
+        ...(process.env.GEMINI_API_KEY
+          ? { geminiKey: process.env.GEMINI_API_KEY }
+          : {}),
+      });
     const result = await extractFlightPlan(repo, docs, model, cache);
     if (!result.ok) throw new Error(result.error.code);
     const runner = await runnerBundle();
@@ -130,6 +174,6 @@ export async function seedPlan(
       tier: model.model === "local-static" ? "static" : "ai",
     };
   } finally {
-    cache.close();
+    close?.();
   }
 }
