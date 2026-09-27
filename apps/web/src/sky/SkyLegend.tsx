@@ -27,6 +27,10 @@ export function SkyLegend() {
           <span aria-hidden="true">◌</span>
           {copy.skyLegendHolding}
         </p>
+        <p>
+          <span aria-hidden="true">○</span>
+          {copy.skyLegendNoChecks}
+        </p>
       </div>
       <div className="topic-key">
         {[

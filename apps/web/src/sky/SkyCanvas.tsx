@@ -8,6 +8,7 @@ import {
   useVisibility,
 } from "./canvasHooks.ts";
 import { layoutBlimps, layoutSky, pickBlimp, pickSatellite } from "./layout.ts";
+import { selectMapBlimps, selectMapSatellites } from "./mapSelection.ts";
 import { placePoint } from "./motion.ts";
 import { useSkyView } from "./useSkyView.ts";
 import { viewBlimps, viewLayout, zoomLevels } from "./view.ts";
@@ -116,13 +117,21 @@ export function SkyCanvas({
   const sceneRef = useRef<CanvasScene | null>(null);
   const reducedMotion = useReducedMotion();
   const { width, height } = useCanvasSize(containerRef);
+  const visibleSatellites = useMemo(
+    () => selectMapSatellites(satellites),
+    [satellites],
+  );
+  const visibleUnscanned = useMemo(
+    () => selectMapBlimps(unscanned),
+    [unscanned],
+  );
   const layout = useMemo(
-    () => layoutSky(satellites, width, height),
-    [satellites, width, height],
+    () => layoutSky(visibleSatellites, width, height, satellites),
+    [visibleSatellites, width, height, satellites],
   );
   const blimps = useMemo(
-    () => layoutBlimps(unscanned, layout),
-    [unscanned, layout],
+    () => layoutBlimps(visibleUnscanned, layout),
+    [visibleUnscanned, layout],
   );
   const { view, zoomIn, zoomOut, handlers } = useSkyView(layout, (event) => {
     const bounds = event.currentTarget.getBoundingClientRect();
@@ -143,7 +152,7 @@ export function SkyCanvas({
     [layout, view, blimps, width, height],
   );
   sceneRef.current = scene;
-  const arrivals = useArrivals(satellites);
+  const arrivals = useArrivals(visibleSatellites);
   const visible = useVisibility(containerRef);
   useCanvasRender(
     canvasRef,
@@ -166,6 +175,10 @@ export function SkyCanvas({
       />
       <ZoomControls zoom={view.zoom} zoomIn={zoomIn} zoomOut={zoomOut} />
       {view.zoom > 1 && <p className="sky-zoom-hint">{copy.skyZoomHint}</p>}
+      <p className="sky-map-count">
+        {`${copy.skyShowing} ${visibleSatellites.length + visibleUnscanned.length} ${copy.skyMapShown}. ${copy.skyMapBrowse}.`}
+      </p>
+      <p className="sky-map-guide">{copy.skyMapGuide}</p>
     </div>
   );
 }

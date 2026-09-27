@@ -1,7 +1,11 @@
 import { copy } from "@ground-control/copy";
 import { useEffect } from "react";
 import { useMe } from "../auth/useMe.ts";
-import type { RepoData, RunData, SourceData } from "../data.ts";
+import {
+  canOpenDeepChecks,
+  DeepCheckLink,
+} from "../components/DeepCheckLink.tsx";
+import type { MeData, RepoData, RunData, SourceData } from "../data.ts";
 import { readableDate, safeExternalUrl } from "../presentation.ts";
 import { SourceSync } from "../sources/SourceSync.tsx";
 import { RepoChecklist } from "./RepoChecklist.tsx";
@@ -158,20 +162,21 @@ function RepoDetails({ data, run }: { data: RepoData; run: RunData | null }) {
   );
 }
 
-function OwnerPrompt() {
+/** Only owners (or connected private repos) get the deep-check setup offer. */
+function OwnerPrompt({ data, me }: { data: RepoData; me: MeData | null }) {
+  if (!canOpenDeepChecks(data, me)) return null;
   return (
     <aside className="repo-owner">
       <p>
         <strong>{copy.repoOwnerTitle}</strong> {copy.repoOwnerBody}
       </p>
-      <a className="button" href="/connect">
-        {copy.repoOwnerAction}
-      </a>
+      <DeepCheckLink data={data} me={me} />
     </aside>
   );
 }
 
 function RepoContent({ data }: { data: RepoData }) {
+  const { me } = useMe();
   const { run, loading } = useLatestRun(data.latestRunId);
   const github = safeExternalUrl(`https://github.com/${data.repo}`);
   return (
@@ -200,7 +205,7 @@ function RepoContent({ data }: { data: RepoData }) {
           {run && <RepoChecklist run={run} />}
         </>
       )}
-      {data.visibility === "public" && !data.runtimeEnabled && <OwnerPrompt />}
+      <OwnerPrompt data={data} me={me} />
       <RepoDetails data={data} run={run} />
     </>
   );

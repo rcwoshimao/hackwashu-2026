@@ -1,6 +1,6 @@
 # Local API contract
 
-The API serves the web app from `http://localhost:8787` in Docker. JSON fields below are stable through the local build. Private repo routes return 401 without a signed-in GitHub session and 403 when that user cannot read the connected repo.
+The API serves the web app and extension from `http://localhost:8787` in Docker. JSON fields below are stable through the local build. Private repo routes return 401 without a signed-in GitHub session and 403 when that user cannot read the connected repo.
 
 ## Read routes
 
@@ -8,6 +8,7 @@ The API serves the web app from `http://localhost:8787` in Docker. JSON fields b
 - `GET /api/sky` returns `{ mode, updatedAt, satellites, findings }`. `mode` is `empty`, `live`, or `cached` in the normal view. Each measured satellite has `{ repo, stars, topicCluster, readmeLagDays, label, driftDegrees, commitSha, scannedAt, tiersRun, simulated }`; findings has `{ realCount, driftingCount, medianLagDays }`. Persisted demo satellites are hidden. `?demo=1` exposes simulated marks only when there are no real scans and sets mode `simulated`; those marks never contribute to findings.
 - `GET /api/repos/:owner/:name` returns `{ repo, visibility, runtimeEnabled, label, driftDegrees, latestRunId, scan, sources, runs }`. `scan` is null until a public README scan completes, then contains `{ commitSha, scannedAt, tiersRun }`. Sources have `{ id, kind, title, url, claimCount }`; duplicate records for the same repository file are collapsed in this view. Runs have `{ id, commitSha, createdAt, verdict, origin, failingCount }`, where `origin` is `public_scan`, `ci`, or `unknown` for older stored runs.
 - `GET /api/runs/:id` returns `{ id, repo, commitSha, createdAt, verdict, results, evidence }`. A result has `{ claimId, state, status, quote, sourceId, expected, actual }`. Evidence groups facts by kind and canonical parameters.
+- `GET /api/page-claims?url=<encoded>` returns `{ known, canCheck, repo?, claims }`. A claim has `{ id, quote, state, deepLink, tooltip }`; `state` is `verified`, `drifting`, `unconfirmed`, or `disputed`. Unknown pages return `claims: []`.
 - `GET /api/me` returns `{ signedIn, login?, connectedRepos }`.
 - `GET /api/account/repos` requires a GitHub session and returns `{ repos, truncated }`, with up to 500 recently updated accessible repositories. Each repo contains `repo`, `visibility`, `canAdmin`, `description`, `language`, `updatedAt`, `archived`, `fork`, `connected`, `runtimeEnabled`, `checked`, `label`, and `scanned`. `checked` and `label` reflect a saved run when one exists; `scanned` reflects a saved public satellite. Listing never connects or scans a repo. The response has `Cache-Control: private, no-store` because private repository names may appear.
 - `GET /api/events` streams changes with Server-Sent Events.
@@ -21,4 +22,4 @@ The API serves the web app from `http://localhost:8787` in Docker. JSON fields b
 - `POST /api/runs/:id/claims/:claimId/confirm` and `/drop` require access to the connected repo.
 - `POST /api/telemetry` accepts a scoped token from a connected private repo or an opted-in personal public repo and run results from CI; the runner job itself has no secret. The Action checks repository identity and the committed plan before importing the checkout runner. Same-repo PR reports verify the head commit and PR number; fork PR jobs are skipped. The server requires `GITHUB_WRITE_TOKEN` to resolve the actual commit author's GitHub login before routing an iMessage and never trusts the PR opener or telemetry's `authorLogin` as a substitute.
 
-The ordinary public scanner remains static and optional AI only, including for an opted-in personal repo. Deep results arrive separately from that repo's own CI Action or an owner-approved local checkout. `bun ops sky:load snapshots/sky-snapshot.json` restores Rebecca's measured public snapshot while preserving newer local scans and connections.
+The extension sends only the normalized URL to `page-claims`; it never uploads page text. The ordinary public scanner remains static and optional AI only, including for an opted-in personal repo. Deep results arrive separately from that repo's own CI Action or an owner-approved local checkout. `bun ops sky:load snapshots/sky-snapshot.json` restores Rebecca's measured public snapshot while preserving newer local scans and connections.

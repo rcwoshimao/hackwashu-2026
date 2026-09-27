@@ -23,6 +23,11 @@ export const webCopy = {
   reportsAddDocument: "Add a document",
   reportsOpenRepo: "Open repository",
   reportsBack: "Back to my reports",
+  deepScanAddAction: "Add deep scan",
+  deepChecksSetupAction: "Set up deep checks",
+  deepScanTitle: "Add deep scan",
+  deepScanIntro:
+    "Choose a repository you own, then enable deep checks and add the Ground Control Action in its GitHub Actions settings.",
   navMenu: "Menu",
   navHome: "Back to the Sky",
   navSkip: "Skip to content",
@@ -49,14 +54,18 @@ export const webCopy = {
   skyLegendSummary: "How this map works",
   skyLegendTopic: "Angle groups repositories by topic.",
   skyLegendLag:
-    "Farther from center means more days since the README changed relative to code, on a log scale.",
-  skyLegendStars: "Larger marks mean more GitHub stars, on a log scale.",
-  skyLegendDrift: "Amber and a broken ring mean drifting checks.",
+    "Farther from center means more days since the README changed relative to code. Distance uses a compressed scale.",
+  skyLegendStars:
+    "Larger dots mean more GitHub stars. Crowded dots shrink to make room for every repo.",
+  skyLegendDrift:
+    "An amber outline means a possible mismatch to review; a broken amber ring means confirmed drift.",
   skyLegendSimulated: "Dashed hollow marks are simulated.",
   skyLegendHolding:
     "Outlined ovals in the outer orbit are your unscanned repos. Their position has no measured meaning.",
+  skyLegendNoChecks:
+    "Hollow circles are scanned READMEs with no checkable results yet. The scan did not fail.",
   skyCanvasAlt:
-    "Star chart of scanned public repositories by topic, README lag, stars, and check status, with unscanned account repositories in an outer holding orbit. Use the repository list below for keyboard access.",
+    "Star chart showing every filtered repository by topic, README lag, stars, and check status, with unscanned account repositories in an outer holding orbit. The list below provides keyboard access.",
   skyZoomIn: "Zoom in",
   skyZoomOut: "Zoom out",
   skyZoomHint: "Drag to pan when zoomed in.",
@@ -67,6 +76,10 @@ export const webCopy = {
   skyTopicOther: "Other",
   skyShowing: "Showing",
   skyOf: "of",
+  skyMapShown: "repositories on the map",
+  skyMapBrowse: "Browse every repository in the list below",
+  skyMapGuide:
+    "Bigger dot: more stars · Hollow circle: no checkable result · Outer oval: unscanned repo",
   skyFindingsTitle: "Measured findings",
   skyRealCount: "Real repos scanned",
   skyDriftingCount: "Repos with drift",
@@ -74,7 +87,6 @@ export const webCopy = {
   skyMedianLag: "Median README lag",
   skyNoFindings: "No measured findings yet. Simulated points are excluded.",
   skyBrowseTitle: "Repositories",
-  skyBrowseSampleTitle: "100 sample repositories",
   skyPreviewAction: "Preview",
   skyScopeLabel: "Repository scope",
   skyScopeMine: "My repos",
@@ -168,7 +180,7 @@ export const webCopy = {
   statusDrifting: "Drifting",
   statusCorrected: "Corrected",
   statusLostSignal: "Lost signal",
-  statusNoTelemetry: "No telemetry",
+  statusNoTelemetry: "No verified checks",
   statusPossibleDrift: "Possible drift",
   statusUnknown: "Status unavailable",
   statusSymbolOnCourse: "●",
@@ -203,6 +215,8 @@ export const webCopy = {
   repoSubPrivate:
     "Results show up here after the Ground Control Action runs in this repo's CI.",
   repoCheckedOn: "Checked",
+  repoScanLimited:
+    "The README was scanned, but no claim could be checked with the available tiers. This is not a scan failure.",
   repoCheckAgain: "Check again",
   repoCheckNow: "Check this README",
   repoChecking: "Checking…",
@@ -338,7 +352,20 @@ export const webCopy = {
     "Repository admin access is needed to refresh this source.",
   connectTitle: "Connect a repository",
   connectIntro:
-    "Any public repo can receive static and optional AI checks. Repositories you own can also run deep checks after an explicit Actions setup.",
+    "Connect a repository you administer, or check a public GitHub README and add its result to the Sky. Public checks never run repository code.",
+  connectBackToRepos: "Back to my repos",
+  connectChooseSource: "Where is the repository?",
+  connectMineOption: "One of my repositories",
+  connectMineSearch: "Find one of your repositories",
+  connectMineSelect: "Choose a repository",
+  connectMinePlaceholder: "Select a repository",
+  connectMineEmpty: "No repositories you can administer were found.",
+  connectPublicOption: "Check a public GitHub repository",
+  connectPublicLabel: "Public GitHub repository",
+  connectPublicPlaceholder: "https://github.com/owner/repo",
+  connectPublicHint:
+    "Paste the repository URL or enter owner/repo. Its README result joins the Sky; this check does not connect the repo to your account.",
+  connectPublicOpenSky: "See this repository in the Sky",
   connectRuntimeOption: "Enable deep checks for a public repository I own",
   connectRuntimeHint:
     "Deep checks run repository code only in the repo's GitHub Action or an owner-approved local checkout.",
@@ -353,9 +380,15 @@ export const webCopy = {
     "Deep checks enabled for your public repository. Save its Actions token now; it will not be shown again.",
   connectDonePublicRuntimeExisting:
     "Deep checks are already enabled for your public repository. Keep using its existing Actions token; reconnecting does not show it again.",
-  connectTokenTitle: "Set up GitHub Actions",
+  connectTokenTitle: "Save your Actions token",
   connectTokenOnce:
-    "This telemetry token is shown only once. Store it as an Actions secret before leaving this page.",
+    "This token appears only once. Save it as a repository Actions secret before leaving this page.",
+  connectTokenExisting:
+    "Keep the existing Actions secret. If it is lost, open deep-check setup to issue a new token.",
+  connectRotateTitle: "Lost the Actions token?",
+  connectRotateHint:
+    "Issue a new one-time token only if needed. This replaces the current token, so update the repository's GROUND_CONTROL_TOKEN secret before its next CI report.",
+  connectRotateAction: "Issue new token",
   connectTokenLabel: "One-time telemetry token",
   connectTokenCopy: "Copy token",
   connectTokenCopied: "Token copied. Add it as the repository Actions secret.",
@@ -363,10 +396,31 @@ export const webCopy = {
     "Clipboard access is unavailable. The token is selected for manual copying.",
   connectTokenShow: "Show token",
   connectTokenHide: "Hide token",
-  connectTokenSecret: "Repository Actions secret:",
-  connectServerVariable: "Repository Actions variable:",
-  connectHostedActionHint:
-    "GitHub-hosted Actions need an HTTPS tunnel to this server. Open Ground Control through that HTTPS origin before copying the URL.",
+  connectSecretPrompt:
+    "Copy the token, run this command anywhere with GitHub CLI, then paste the token at its prompt. It never appears in the command or shell history.",
+  connectSecretCommand: "gh secret set GROUND_CONTROL_TOKEN -R {repo}",
+  connectSecretGitHub: "Use GitHub settings instead",
+  connectStepsTitle: "Set up deep checks",
+  connectStepsIntro:
+    "Ground Control publishes the generated flight checks to your repository. Add one small GitHub workflow to run them on pull requests and default-branch pushes.",
+  connectChecksTitle: "Add the workflow",
+  connectStepPlan:
+    "Download this short workflow. It calls Ground Control's maintained workflow, which runs the checks and sends the report.",
+  connectDefaultBranchLabel: "Default branch for push checks",
+  connectHostedUrl: "Ground Control server URL is already filled in:",
+  connectHostedUrlMissing:
+    "Open this page on your hosted HTTPS Ground Control server to download a workflow with its URL filled in.",
+  connectStepWorkflow: "Add the downloaded file to your repository at",
+  connectWorkflowDownload: "Download workflow",
+  connectVerifyTitle: "Open a test pull request",
+  connectStepRun:
+    "Open a pull request in this repository. The Ground Control check and report appear in Actions; the first passing run establishes a baseline.",
+  connectCommandCopy: "Copy command",
+  connectCommandCopied: "Command copied.",
+  connectCommandCopyFailed:
+    "Clipboard access is unavailable. Select the command to copy it.",
+  connectCommentExpectation:
+    "A PR comment appears for confirmed drift when a previously passing check fails. It shows cited evidence; the Action does not write a suggested change to your PR. The current iMessage FIX flow can draft a correction for a supported server-port change.",
   connectFailed:
     "The repository could not be connected. Check administrator access and try again.",
   connectVisibilityChanged:
@@ -427,7 +481,9 @@ export const webCopy = {
   accountReposConnecting: "Connecting",
   accountReposScan: "Check README",
   accountReposScanning: "Requesting scan",
-  accountReposScanAll: "Scan all public READMEs",
+  accountReposScanAll: "Scan all personal projects",
+  accountReposScanAllHint:
+    "Static checks, plus AI when configured. Only your public projects are included. Deep checks run in an owner-approved local checkout or after you add the GitHub Action; this button never runs repository code.",
   accountReposScanAllProgress: "Public scans requested",
   accountReposScanAllDone: "Public scan requests finished",
   accountReposScanAllFailed: "Some public scans could not start",
@@ -439,12 +495,12 @@ export const webCopy = {
     "Private repositories need an explicit connection and GitHub Action for runtime checks.",
   accountReposPublicHint:
     "Ordinary public scans inspect documentation and metadata only. Your own public repositories can opt into deep checks in their GitHub Action.",
-  accountReposManual: "Add a repository by name",
+  accountReposManual: "Connect another repository",
   formRepoHint: "Use owner/repo from GitHub.",
   formUrlHint: "Paste an https page address.",
   formUrlPlaceholder: "https://docs.example.com/page",
   formInvalidRepo:
-    "Enter a GitHub repository as owner/repo, or paste its link.",
+    "Choose a repository, or enter owner/repo or any GitHub link to it.",
   formInvalidUrl: "Enter a valid https URL.",
   commonRetry: "Try again",
   commonBack: "Back",

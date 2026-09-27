@@ -15,3 +15,4 @@ export const githubRetryBaseMs = 250;
 export const githubSecondaryLimitWaitMs = 60_000;
 export const githubRateLimitMaxWaitMs = 90_000;
 export const minCheckableClaims = 1;
+export const skyMobileWidthPx = 540;

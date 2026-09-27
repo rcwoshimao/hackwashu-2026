@@ -57,10 +57,119 @@ export function topicKey(value: string): TopicKey {
   return "other";
 }
 
+type Slot = { start: number; span: number; spread: number; sizeFactor: number };
+
+function topicBands(
+  satellites: Satellite[],
+  key: TopicKey,
+  lagScale: (value: number) => number,
+  innerRadius: number,
+): Map<number, Satellite[]> {
+  const bands = new Map<number, Satellite[]>();
+  for (const item of satellites.filter(
+    (satellite) => topicKey(satellite.topicCluster) === key,
+  )) {
+    const distance = lagScale(Math.max(0, item.readmeLagDays));
+    const band = Math.floor((distance - innerRadius) / 20);
+    const items = bands.get(band) ?? [];
+    items.push(item);
+    bands.set(band, items);
+  }
+  return bands;
+}
+
+function skySlots(
+  satellites: Satellite[],
+  lagScale: (value: number) => number,
+  starScale: (value: number) => number,
+  innerRadius: number,
+): Map<string, Slot> {
+  const sector = (Math.PI * 2) / topicKeys.length;
+  const slots = new Map<string, Slot>();
+  for (const [group, key] of topicKeys.entries()) {
+    for (const [band, items] of topicBands(
+      satellites,
+      key,
+      lagScale,
+      innerRadius,
+    )) {
+      items.sort((left, right) => left.repo.localeCompare(right.repo));
+      const sliceStart = -Math.PI / 2 + group * sector + 0.1;
+      const slotWidth = (sector - 0.2) / items.length;
+      const minDistance = innerRadius + band * 20;
+      const maxRadius = Math.max(
+        ...items.map((item) => starScale(Math.max(1, item.stars))),
+      );
+      const sizeFactor = Math.min(
+        1,
+        (slotWidth * minDistance - 2) / (2 * maxRadius),
+      );
+      for (const [index, item] of items.entries()) {
+        const span = slotWidth * 0.08;
+        const center = sliceStart + (index + 0.5) * slotWidth;
+        slots.set(item.repo, {
+          start: center - span / 2,
+          span,
+          spread: stableFraction(item.repo),
+          sizeFactor: Math.max(0.15, sizeFactor),
+        });
+      }
+    }
+  }
+  return slots;
+}
+
+function skyPoint(
+  satellite: Satellite,
+  slot: Slot,
+  center: { x: number; y: number },
+  lagScale: (value: number) => number,
+  starScale: (value: number) => number,
+): SkyPoint {
+  const angle = slot.start + slot.spread * slot.span;
+  const distance = lagScale(Math.max(0, satellite.readmeLagDays));
+  return {
+    satellite,
+    x: center.x + Math.cos(angle) * distance,
+    y: center.y + Math.sin(angle) * distance,
+    radius: starScale(Math.max(1, satellite.stars)) * slot.sizeFactor,
+    angle,
+    distance,
+    sectorStart: slot.start,
+    sectorSpan: slot.span,
+    spread: slot.spread,
+  };
+}
+
+function spacePointRadii(points: SkyPoint[]): SkyPoint[] {
+  const radii = points.map((point) => point.radius);
+  for (let pass = 0; pass < 2; pass += 1) {
+    for (let left = 0; left < points.length; left += 1) {
+      const first = points[left];
+      if (!first) continue;
+      for (let right = left + 1; right < points.length; right += 1) {
+        const second = points[right];
+        if (!second) continue;
+        const distance = Math.hypot(first.x - second.x, first.y - second.y);
+        const combined = (radii[left] ?? 0) + (radii[right] ?? 0);
+        if (combined + 1 <= distance) continue;
+        const factor = Math.max(0, (distance - 1) / combined);
+        radii[left] = (radii[left] ?? 0) * factor;
+        radii[right] = (radii[right] ?? 0) * factor;
+      }
+    }
+  }
+  return points.map((point, index) => ({
+    ...point,
+    radius: radii[index] ?? point.radius,
+  }));
+}
+
 export function layoutSky(
   satellites: Satellite[],
   width: number,
   height: number,
+  reference: Satellite[] = satellites,
 ): SkyLayout {
   const centerX = width / 2;
   const centerY = height / 2;
@@ -68,14 +177,14 @@ export function layoutSky(
     0,
     Math.min(width, height) / 2 - (width < 540 ? 34 : 55),
   );
-  const innerRadius = outerRadius * 0.18;
+  const innerRadius = outerRadius * (width < 540 ? 0.42 : 0.32);
   const maxLagDays = Math.max(
     0,
-    ...satellites.map((satellite) => satellite.readmeLagDays),
+    ...reference.map((satellite) => satellite.readmeLagDays),
   );
   const maxStars = Math.max(
     0,
-    ...satellites.map((satellite) => satellite.stars),
+    ...reference.map((satellite) => satellite.stars),
   );
   // README lag is long-tailed: one repo years behind would pin every other
   // mark to the inner ring on a linear scale.
@@ -87,26 +196,20 @@ export function layoutSky(
     .domain([1, Math.max(2, maxStars)])
     .range([1.8, width < 540 ? 4.5 : 6.5])
     .clamp(true);
-  const sector = (Math.PI * 2) / topicKeys.length;
-  const points = satellites.map((satellite): SkyPoint => {
-    const group = topicKeys.indexOf(topicKey(satellite.topicCluster));
-    const sectorStart = -Math.PI / 2 + group * sector + 0.08;
-    const sectorSpan = sector - 0.16;
-    const spread = stableFraction(satellite.repo);
-    const angle = sectorStart + spread * sectorSpan;
-    const distance = lagScale(satellite.readmeLagDays);
-    return {
-      satellite,
-      x: centerX + Math.cos(angle) * distance,
-      y: centerY + Math.sin(angle) * distance,
-      radius: starScale(Math.max(1, satellite.stars)),
-      angle,
-      distance,
-      sectorStart,
-      sectorSpan,
-      spread,
-    };
-  });
+  const slots = skySlots(satellites, lagScale, starScale, innerRadius);
+  const points = spacePointRadii(
+    satellites.map((satellite): SkyPoint => {
+      const slot = slots.get(satellite.repo);
+      if (!slot) throw new Error("Missing Sky position");
+      return skyPoint(
+        satellite,
+        slot,
+        { x: centerX, y: centerY },
+        lagScale,
+        starScale,
+      );
+    }),
+  );
   return {
     points,
     centerX,
@@ -145,18 +248,21 @@ export function layoutBlimps(
   const sorted = [...repos].sort((left, right) =>
     left.repo.localeCompare(right.repo),
   );
-  const ringCount = 3;
+  const ringCount = Math.min(4, Math.max(1, Math.ceil(sorted.length / 40)));
+  const mobile = layout.centerX * 2 < 540;
   return sorted.map((repo, index) => {
     const ring = index % ringCount;
     const position = Math.floor(index / ringCount);
     const count = Math.ceil((sorted.length - ring) / ringCount);
-    const angle = -Math.PI / 2 + (position * Math.PI * 2) / Math.max(1, count);
-    const distance = layout.outerRadius + 9 + ring * 10;
+    const angle = -Math.PI / 2 + ((position + 0.5) * Math.PI * 2) / count;
+    const distance =
+      layout.outerRadius + (mobile ? 5 + ring * 9 : 8 + ring * 12);
+    const spacing = (Math.PI * 2 * distance) / count;
     return {
       repo,
       x: layout.centerX + Math.cos(angle) * distance,
       y: layout.centerY + Math.sin(angle) * distance,
-      radius: 3.5,
+      radius: Math.max(0.8, Math.min(3.5, (spacing - 2) / 2)),
     };
   });
 }

@@ -9198,7 +9198,7 @@ var require_CSSKeyframesRule = __commonJS(function(exports) {
       for (var i = 0, length = this.cssRules.length;i < length; i++) {
         cssTexts.push("  " + this.cssRules[i].cssText);
       }
-      return "@" + (this._vendorPrefix || "") + "keyframes " + this.name + ` {
+      return "@" + (this._vendorPrefix || "") + "keyframes " + this.name + ` { 
 ` + cssTexts.join(`
 `) + `
 }`;
@@ -10031,7 +10031,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // action/src/limits.ts
-var reportTimeoutMs = 1e4;
+var reportTimeoutMs = 60000;
 var reportRetryDelayMs = 500;
 var reportAttempts = 2;
 var maxTelemetryBytes = 2000000;

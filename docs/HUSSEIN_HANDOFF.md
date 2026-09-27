@@ -8,7 +8,7 @@ This is the merge contract for Hussein's engine work and the web/Sky and iMessag
 | --- | --- | --- |
 | Hussein | `packages/claims`, `packages/ai`, `packages/plan`, `packages/runner`, `apps/cli`, `action/`, `demo/orbit-app/.github/workflows/ground-control.yml` | Produces a grounded flight plan, deterministic checks, and Action telemetry. |
 | iMessage teammate | `packages/messaging`, `apps/api/src/messaging.ts`, Photon configuration | Receives a stored, confirmed `RunRecord` through `MessagingHub.alert`; uses repo/commit/author and grouped evidence. |
-| Web/Sky teammate | `apps/web`, `packages/scanner` | Reads `/api/repos`, `/api/runs`, `/api/sky`, and `/api/events`. Public scan never calls the runtime runner. |
+| Web/Sky teammate | `apps/web`, `apps/extension`, `packages/scanner` | Reads `/api/repos`, `/api/runs`, `/api/sky`, `/api/page-claims`, and `/api/events`. Public scan never calls the runtime runner. |
 | Shared server boundary | `apps/api/src/telemetry.ts`, `routes-write.ts`, `routes-read.ts` | Validates and stores telemetry, applies trust, posts PR evidence/status, routes a drift alert. Coordinate API changes before merging. |
 
 ## Engine sequence

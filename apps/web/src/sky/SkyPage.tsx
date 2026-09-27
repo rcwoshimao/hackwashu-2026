@@ -43,9 +43,17 @@ export function SkyPage() {
   const [accountFailed, setAccountFailed] = useState(false);
   const [accountLoading, setAccountLoading] = useState(true);
   const [scope, setScope] = useState<SkyScope>("public");
+  const explicitPublicScope =
+    new URLSearchParams(window.location.search).get("scope") === "public";
   useEffect(() => {
-    if (me?.signedIn) setScope("mine");
-  }, [me?.signedIn]);
+    if (me?.signedIn && !explicitPublicScope) setScope("mine");
+  }, [me?.signedIn, explicitPublicScope]);
+  const changeScope = (next: SkyScope) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("scope", next);
+    window.history.replaceState(null, "", url);
+    setScope(next);
+  };
   const inspect = (repo: string) => {
     select(repo);
     if (window.matchMedia("(max-width: 1050px)").matches) {
@@ -143,7 +151,7 @@ export function SkyPage() {
         )}
       {data && entries.length > 0 && (
         <>
-          <SkyFilters scope={scope} onScope={setScope} />
+          <SkyFilters scope={scope} onScope={changeScope} />
           <p className="sky-scope-hint">
             {scope === "mine" ? copy.skyScopeMineHint : copy.skyScopePublicHint}
           </p>
@@ -189,11 +197,7 @@ export function SkyPage() {
               {scope === "public" && <ScanForm />}
               <SkyCatalog
                 key={scope}
-                title={
-                  scope === "public"
-                    ? copy.skyBrowseSampleTitle
-                    : copy.skyBrowseTitle
-                }
+                title={copy.skyBrowseTitle}
                 entries={filtered}
                 selectedRepo={selectedRepo}
                 onSelect={inspect}

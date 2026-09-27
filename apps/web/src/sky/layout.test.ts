@@ -119,3 +119,64 @@ test("unscanned account marks stay in the holding orbit without invented scan me
   assert.ok(first);
   assert.equal(pickBlimp(points, first.x, first.y)?.repo, first.repo.repo);
 });
+
+test("a month of README lag stays visibly outside the inner orbit", () => {
+  const near = { ...satellite(1), readmeLagDays: 30 };
+  const far = { ...satellite(2), readmeLagDays: 2_918 };
+  const layout = layoutSky([near, far], 960, 720);
+  const point = layout.points.find((item) => item.satellite.repo === near.repo);
+  assert.ok(point);
+  assert.ok(
+    point.distance >
+      layout.innerRadius + (layout.outerRadius - layout.innerRadius) * 0.3,
+  );
+});
+
+test("four marks with the same topic and lag have separate positions", () => {
+  const inputs = Array.from({ length: 4 }, (_, index) => ({
+    ...satellite(index),
+    topicCluster: "TypeScript",
+    readmeLagDays: 0,
+    stars: 250_000,
+  }));
+  const points = layoutSky(inputs, 960, 720).points;
+  for (const [index, point] of points.entries())
+    for (const other of points.slice(index + 1))
+      assert.ok(
+        Math.hypot(point.x - other.x, point.y - other.y) >
+          point.radius + other.radius + 4,
+      );
+});
+
+test("54 measured repos remain distinct even when several share low lag", () => {
+  const inputs = Array.from({ length: 54 }, (_, index) => ({
+    ...satellite(index),
+    topicCluster: ["UI libraries", "TypeScript", "Other"][index % 3] ?? "Other",
+    readmeLagDays: index < 12 ? 0 : Math.floor((index - 12) ** 1.7),
+    stars: 10 ** (index % 6),
+  }));
+  for (const [width, height] of [
+    [960, 720],
+    [320, 340],
+  ] as const) {
+    const points = layoutSky(inputs, width, height).points;
+    assert.equal(points.length, 54);
+    for (const [index, point] of points.entries())
+      for (const other of points.slice(index + 1))
+        assert.ok(
+          Math.hypot(point.x - other.x, point.y - other.y) >=
+            point.radius + other.radius + 1,
+          `${point.satellite.repo} overlaps ${other.satellite.repo} at ${width}px`,
+        );
+  }
+});
+
+test("changing displayed marks does not change the lag scale", () => {
+  const near = { ...satellite(1), readmeLagDays: 30 };
+  const zero = { ...satellite(2), readmeLagDays: 0 };
+  const far = { ...satellite(3), readmeLagDays: 2_918 };
+  const reference = [near, zero, far];
+  const first = layoutSky([near, zero], 960, 720, reference);
+  const second = layoutSky([near, far], 960, 720, reference);
+  assert.equal(first.points[0]?.distance, second.points[0]?.distance);
+});

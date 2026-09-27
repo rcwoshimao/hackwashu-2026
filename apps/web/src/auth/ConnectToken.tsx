@@ -1,5 +1,6 @@
 import { copy } from "@ground-control/copy";
 import { useRef, useState } from "react";
+import { CopyCommand } from "./CopyCommand.tsx";
 
 function TokenControls({ token }: { token: string }) {
   const [revealed, setRevealed] = useState(false);
@@ -44,24 +45,31 @@ function TokenControls({ token }: { token: string }) {
 
 export function ConnectToken({
   token,
-  serverUrl,
+  repo,
 }: {
-  token: string;
-  serverUrl: string;
+  token: string | undefined;
+  repo: string;
 }) {
   return (
     <section className="connect-token" aria-label={copy.connectTokenTitle}>
-      <h2>{copy.connectTokenTitle}</h2>
-      <p>{copy.connectTokenOnce}</p>
-      <TokenControls token={token} />
+      <h3>{copy.connectTokenTitle}</h3>
+      {token ? (
+        <>
+          <p>{copy.connectTokenOnce}</p>
+          <TokenControls token={token} />
+          <p>{copy.connectSecretPrompt}</p>
+          <CopyCommand
+            command={copy.connectSecretCommand.replace("{repo}", repo)}
+          />
+        </>
+      ) : (
+        <p>{copy.connectTokenExisting}</p>
+      )}
       <p>
-        {copy.connectTokenSecret} <code>GROUND_CONTROL_TOKEN</code>
+        <a href={`https://github.com/${repo}/settings/secrets/actions`}>
+          {copy.connectSecretGitHub}
+        </a>
       </p>
-      <p>
-        {copy.connectServerVariable} <code>GROUND_CONTROL_URL</code> ={" "}
-        <code>{serverUrl}</code>
-      </p>
-      <p className="form-hint">{copy.connectHostedActionHint}</p>
     </section>
   );
 }

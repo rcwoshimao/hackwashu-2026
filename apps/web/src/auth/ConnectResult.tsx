@@ -1,6 +1,6 @@
 import { copy } from "@ground-control/copy";
 import type { Connection } from "../api.ts";
-import { ConnectToken } from "./ConnectToken.tsx";
+import { ConnectActionSteps } from "./ConnectActionSteps.tsx";
 
 export function ConnectResult({
   connection,
@@ -20,8 +20,12 @@ export function ConnectResult({
               ? copy.connectDonePublicRuntimeExisting
               : copy.connectDonePublic}
       </p>
-      {connection.telemetryToken && (
-        <ConnectToken token={connection.telemetryToken} serverUrl={serverUrl} />
+      {connection.runtimeEnabled && (
+        <ConnectActionSteps
+          repo={connection.repo}
+          serverUrl={serverUrl}
+          token={connection.telemetryToken}
+        />
       )}
       <a href={`/sources/new?repo=${encodeURIComponent(connection.repo)}`}>
         {copy.repoAddSource}

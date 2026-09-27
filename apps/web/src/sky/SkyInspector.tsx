@@ -157,6 +157,10 @@ export function SkyInspector({
       {satellite.simulated && <p>{copy.skySimulatedNotice}</p>}
       {!satellite.simulated && loading && <p>{copy.skyEvidenceLoading}</p>}
       {!satellite.simulated && run && <RunPreview run={run} />}
+      {!satellite.simulated &&
+        satellite.label.toLowerCase() === "no telemetry" && (
+          <p className="quiet-copy">{copy.repoScanLimited}</p>
+        )}
       {!satellite.simulated && !loading && !run && (
         <p className="quiet-copy">{copy.skyNoEvidence}</p>
       )}

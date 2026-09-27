@@ -35,6 +35,78 @@ describe("local API", () => {
     expect(real.satellites.map((item: { repo: string }) => item.repo)).toEqual([
       "owner/real",
     ]);
+    const page = await (
+      await app.request("/api/page-claims?url=https%3A%2F%2Fexample.com")
+    ).json();
+    expect(page).toEqual({ known: false, canCheck: false, claims: [] });
+    const githubPage = await (
+      await app.request(
+        "/api/page-claims?url=https%3A%2F%2Fgithub.com%2Fowner%2Fnew-project",
+      )
+    ).json();
+    expect(githubPage).toEqual({ known: false, canCheck: true, claims: [] });
+  });
+
+  test("GitHub landing and README paths return stored public README claims", async () => {
+    const { app, store } = setup();
+    store.putRepo({
+      repo: "owner/project",
+      visibility: "public",
+      connected: false,
+      tokenHash: null,
+      label: "On course",
+      driftDegrees: 0,
+      latestRunId: "run_1",
+    });
+    store.putSource({
+      id: "readme",
+      repo: "owner/project",
+      kind: "readme",
+      title: "README.md",
+      url: "https://github.com/owner/project/blob/abcdef0/README.md",
+      claimCount: 1,
+    });
+    store.putRun({
+      id: "run_1",
+      repo: "owner/project",
+      commitSha: "abcdef0",
+      createdAt: "2026-09-26T12:00:00Z",
+      verdict: "success",
+      evidence: [],
+      results: [
+        {
+          claimId: "c_1234567890",
+          sourceId: "readme",
+          quote: "Install setup.sh",
+          kind: "file_exists",
+          params: { path: "setup.sh" },
+          state: "confirmed",
+          status: "pass",
+          expected: "exists",
+          actual: "exists",
+          deepLink: null,
+        },
+      ],
+    });
+    for (const page of [
+      "https://github.com/owner/project",
+      "https://github.com/owner/project/blob/main/README.md",
+    ]) {
+      const result = await (
+        await app.request(`/api/page-claims?url=${encodeURIComponent(page)}`)
+      ).json();
+      expect(result).toMatchObject({
+        known: true,
+        canCheck: true,
+        repo: "owner/project",
+      });
+      expect(result.claims[0]).toMatchObject({
+        id: "c_1234567890",
+        state: "verified",
+      });
+      expect(result.claims[0].tooltip).toContain("Verified at abcdef0");
+      expect(result.claims[0].tooltip).toContain("Expected: exists");
+    }
   });
 
   test("connected public repo reports an unscanned state before a README check", async () => {
@@ -125,7 +197,7 @@ describe("local API", () => {
     ).toBe(401);
   });
 
-  test("connect requires admin and source requires access", async () => {
+  test("connect requires admin, source requires access, and page sends URL only", async () => {
     const { app, github, store } = setup();
     const cookie = await login(app);
     github.permission = {
@@ -184,6 +256,16 @@ describe("local API", () => {
       { cookie: secondCookie },
     );
     expect(source.status).toBe(201);
+    const page = await (
+      await app.request(
+        "/api/page-claims?url=https%3A%2F%2Fexample.com%2Fguide%23fragment",
+      )
+    ).json();
+    expect(page).toMatchObject({
+      known: true,
+      repo: "owner/project",
+      claims: [],
+    });
   });
 
   test("private connection stays private when GitHub visibility changes", async () => {

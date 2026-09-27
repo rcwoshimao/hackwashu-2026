@@ -15,8 +15,8 @@ export function SignInPage() {
         {failed && <p role="alert">{copy.signInUnavailable}</p>}
         {me?.signedIn ? (
           <div className="account-state">
-            <AccountRepos login={me.login ?? ""} />
             <IMessageLink />
+            <AccountRepos login={me.login ?? ""} />
           </div>
         ) : (
           <a className="button" href="/auth/github">
