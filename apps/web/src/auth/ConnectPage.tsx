@@ -1,7 +1,7 @@
 import { copy } from "@ground-control/copy";
 import { type FormEvent, useState } from "react";
 import { api, type Connection } from "../api.ts";
-import { validRepo } from "../presentation.ts";
+import { repoFromInput } from "../presentation.ts";
 import { ConnectResult } from "./ConnectResult.tsx";
 import { IMessageLink } from "./IMessageLink.tsx";
 import { useMe } from "./useMe.ts";
@@ -16,13 +16,14 @@ function ConnectForm() {
   const [connection, setConnection] = useState<Connection | null>(null);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!validRepo(repo)) {
+    const parsed = repoFromInput(repo);
+    if (!parsed) {
       setState("invalid");
       return;
     }
     setState("pending");
     setConnection(null);
-    const result = await api.connect(repo.trim(), runtime);
+    const result = await api.connect(parsed, runtime);
     if (result.ok) setConnection(result.value);
     setState(
       result.ok

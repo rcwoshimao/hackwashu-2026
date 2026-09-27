@@ -1,7 +1,7 @@
 import { copy } from "@ground-control/copy";
 import { type FormEvent, useState } from "react";
 import { api } from "../api.ts";
-import { validRepo } from "../presentation.ts";
+import { repoFromInput, repoPath } from "../presentation.ts";
 
 type State =
   | "idle"
@@ -15,14 +15,18 @@ type State =
 export function ScanForm() {
   const [repo, setRepo] = useState("");
   const [state, setState] = useState<State>("idle");
+  const [checked, setChecked] = useState<string | null>(null);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!validRepo(repo)) {
+    const parsed = repoFromInput(repo);
+    if (!parsed) {
       setState("invalid");
       return;
     }
     setState("pending");
-    const result = await api.scan(repo.trim());
+    setChecked(null);
+    const result = await api.scan(parsed);
+    if (result.ok) setChecked(parsed);
     setState(
       result.ok
         ? result.value.state === "cached"
@@ -63,7 +67,12 @@ export function ScanForm() {
       </div>
       {feedback && (
         <p className="form-feedback" role="status">
-          {feedback}
+          {feedback}{" "}
+          {checked && (
+            <a href={repoPath(checked)}>
+              {copy.skyScanSeeResult} {checked}
+            </a>
+          )}
         </p>
       )}
     </form>
