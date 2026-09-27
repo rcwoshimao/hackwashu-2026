@@ -46,13 +46,7 @@ const github = new GitHubHttp(
 );
 const secret = process.env.SESSION_SECRET || randomBytes(32).toString("hex");
 const sessions = new Sessions(store, secret, Date.now);
-const auth = new AuthService(
-  github,
-  sessions,
-  publicUrl,
-  Date.now,
-  process.env.EXTENSION_ID,
-);
+const auth = new AuthService(github, sessions, publicUrl, Date.now);
 const events = new EventHub();
 const planWriter = process.env.GITHUB_WRITE_TOKEN
   ? new OctokitPlanWriter(process.env.GITHUB_WRITE_TOKEN)

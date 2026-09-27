@@ -1,16 +1,13 @@
-import { renderMessage } from "@ground-control/messaging";
 import { sourceStatus } from "@ground-control/source-sync";
 import type {
   AppStore,
   RepoRecord,
-  RunClaim,
   RunRecord,
   SourceRecord,
 } from "@ground-control/store";
 import type { Hono } from "hono";
 import { accessRepo, sessionToken } from "./access.ts";
 import { eventStream } from "./events.ts";
-import { sameSourcePage } from "./page-source-match.ts";
 import type { ApiDeps } from "./types.ts";
 
 function error(code: string, status: 401 | 403 | 404 | 502) {
@@ -80,110 +77,6 @@ function repoView(
   };
 }
 
-function normalizeUrl(raw: string): string | null {
-  try {
-    const url = new URL(raw);
-    if (url.protocol !== "https:" && url.protocol !== "http:") return null;
-    url.hash = "";
-    return url.toString();
-  } catch {
-    return null;
-  }
-}
-
-function sourceMatches(store: AppStore, url: string): readonly SourceRecord[] {
-  return store
-    .listRepos()
-    .flatMap((repo) => store.listSources(repo.repo))
-    .filter((source) => sameSourcePage(source, url));
-}
-
-function githubRepoFromPage(url: string): string | null {
-  const page = new URL(url);
-  if (page.hostname !== "github.com") return null;
-  const parts = page.pathname.split("/").filter(Boolean);
-  if (parts.length < 2) return null;
-  const landing = parts.length === 2;
-  const readme =
-    parts.length === 5 &&
-    parts[2] === "blob" &&
-    parts[4]?.toLowerCase() === "readme.md";
-  return landing || readme ? `${parts[0]}/${parts[1]}` : null;
-}
-
-function pageState(
-  item: RunClaim,
-): "verified" | "drifting" | "unconfirmed" | "disputed" {
-  if (item.state === "disputed") return "disputed";
-  if (item.state !== "confirmed") return "unconfirmed";
-  return item.status === "fail" ? "drifting" : "verified";
-}
-
-function pageClaims(
-  store: AppStore,
-  repo: RepoRecord,
-  sources: readonly SourceRecord[],
-) {
-  const run = repo.latestRunId === null ? null : store.getRun(repo.latestRunId);
-  const ids = new Set(sources.map((source) => source.id));
-  const claims = (run?.results ?? [])
-    .filter((item) => ids.has(item.sourceId))
-    .map((item) => ({
-      id: item.claimId,
-      quote: item.quote,
-      state: pageState(item),
-      deepLink: item.deepLink,
-      tooltip: renderMessage(
-        (
-          {
-            verified: "claimVerified",
-            drifting: "claimDrifting",
-            unconfirmed: "claimUnconfirmed",
-            disputed: "claimDisputed",
-          } as const
-        )[pageState(item)],
-        {
-          sha: run?.commitSha.slice(0, 7) ?? "",
-          quote: item.quote.slice(0, 200),
-          expected: item.expected.slice(0, 200),
-          actual: item.actual.slice(0, 200),
-          url: run ? `/runs/${encodeURIComponent(run.id)}` : "",
-        },
-      ),
-    }));
-  return {
-    known: true,
-    canCheck: repo.visibility === "public" || repo.connected,
-    repo: repo.repo,
-    claims,
-  };
-}
-
-async function pagePayload(deps: ApiDeps, request: Request, raw: string) {
-  const url = normalizeUrl(raw);
-  const unknown = { known: false, canCheck: false, claims: [] };
-  if (url === null) return unknown;
-  const matches = sourceMatches(deps.store, url);
-  for (const source of matches) {
-    const repo = deps.store.getRepo(source.repo);
-    if (repo === null || !(await accessRepo(deps, request, repo)).ok) continue;
-    return pageClaims(
-      deps.store,
-      repo,
-      matches.filter((item) => item.repo === repo.repo),
-    );
-  }
-  const githubRepo = githubRepoFromPage(url);
-  if (githubRepo === null) return unknown;
-  const repo = deps.store.getRepo(githubRepo);
-  if (repo === null) return { ...unknown, canCheck: true };
-  if (!(await accessRepo(deps, request, repo)).ok) return unknown;
-  const readmes = deps.store
-    .listSources(repo.repo)
-    .filter((source) => source.kind === "readme");
-  return pageClaims(deps.store, repo, readmes);
-}
-
 function registerRepoReadRoutes(app: Hono, deps: ApiDeps): void {
   app.get("/api/repos/:owner/:name", async (c) => {
     const name = `${c.req.param("owner")}/${c.req.param("name")}`;
@@ -223,10 +116,6 @@ function registerRepoReadRoutes(app: Hono, deps: ApiDeps): void {
 }
 
 function registerOtherReadRoutes(app: Hono, deps: ApiDeps): void {
-  app.get("/api/page-claims", async (c) => {
-    return c.json(await pagePayload(deps, c.req.raw, c.req.query("url") ?? ""));
-  });
-
   app.get("/api/me", async (c) => {
     const session = deps.auth.session(sessionToken(c.req.raw));
     if (session === null)

@@ -22,7 +22,7 @@ The first command is a useful key check before starting all 500. `bun ops sky:si
 
 After the container is running, use `docker compose exec -T groundcontrol bun ops fly` for the keyless drift rehearsal. This explicit command copies Ground Control's bundled `demo/orbit-app` fixture to a disposable checkout, runs its flight checks, applies a one-line port change, and reports the resulting drift. It never fetches a public repository to execute. It chooses an available loopback port in the copy so another host service cannot affect the result. The original demo files are untouched. To run it on the host instead, install Bun and Node.js, run `bun install` in this repository, and run `npm ci` in `demo/orbit-app` if its `node_modules` directory is absent. Then run `bun ops fly` from the repository root.
 
-Use `bun run check` for TypeScript, lint, unit tests, copy checks, and golden tests. See [SELF_HOST.md](docs/SELF_HOST.md) for keys, private repositories, the extension, and troubleshooting.
+Use `bun run check` for TypeScript, lint, unit tests, copy checks, and golden tests. See [SELF_HOST.md](docs/SELF_HOST.md) for keys, private repositories, and troubleshooting.
 
 For an owner-selected private checkout, `bun run gc scan --private <checkout>` generates and runs its flight checks; `bun run gc check --private <checkout>` reruns the saved plan. The commands work without a Git repository. `--private` records your explicit choice to execute that local checkout; it does not look up GitHub visibility. This CLI is available from this workspace and has not been published to npm. See [HUSSEIN_HANDOFF.md](docs/HUSSEIN_HANDOFF.md) for the engine and teammate integration contract.
 
