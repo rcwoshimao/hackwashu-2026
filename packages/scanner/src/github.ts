@@ -1,4 +1,9 @@
 import { Octokit } from "@octokit/rest";
+import {
+  githubSearchIntervalMs,
+  githubSearchPageSize,
+} from "../../../config/limits.ts";
+import { githubStatus, retry, sleep } from "./github-retry.ts";
 
 export type PublicRepo = {
   repo: string;
@@ -34,28 +39,6 @@ export interface PublicGitHubPort {
   ): Promise<RepoResult<readonly RankedRepo[]>>;
 }
 
-function githubStatus(error: unknown): number | null {
-  if (typeof error !== "object" || error === null || !("status" in error))
-    return null;
-  return typeof error.status === "number" ? error.status : null;
-}
-
-async function retry<T>(operation: () => Promise<T>): Promise<T> {
-  let last: unknown;
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    try {
-      return await operation();
-    } catch (error) {
-      last = error;
-      const status = githubStatus(error);
-      if (status !== null && status < 500 && status !== 429) throw error;
-      if (attempt < 2)
-        await new Promise((resolve) => setTimeout(resolve, 250 * 2 ** attempt));
-    }
-  }
-  throw last;
-}
-
 function decodeContent(data: unknown): string | null {
   if (typeof data !== "object" || data === null || !("content" in data))
     return null;
@@ -66,6 +49,7 @@ function decodeContent(data: unknown): string | null {
 
 export class OctokitPublicGitHub implements PublicGitHubPort {
   private readonly octokit: Octokit;
+  private nextSearchAtMs = 0;
   constructor(token?: string) {
     this.octokit = new Octokit({
       ...(token ? { auth: token } : {}),
@@ -180,17 +164,26 @@ export class OctokitPublicGitHub implements PublicGitHubPort {
     }
   }
 
+  // GitHub's secondary rate limit rejects bursts of search calls even when
+  // quota remains, so searches are spaced out rather than fired back to back.
+  private async searchSlot(): Promise<void> {
+    const waitMs = this.nextSearchAtMs - Date.now();
+    if (waitMs > 0) await sleep(waitMs);
+    this.nextSearchAtMs = Date.now() + githubSearchIntervalMs;
+  }
+
   async topRepos(
     language: "JavaScript" | "TypeScript",
     page: number,
   ): Promise<RepoResult<readonly RankedRepo[]>> {
+    await this.searchSlot();
     try {
       const result = await retry(() =>
         this.octokit.rest.search.repos({
           q: `language:${language} fork:false archived:false`,
           sort: "stars",
           order: "desc",
-          per_page: 100,
+          per_page: githubSearchPageSize,
           page,
         }),
       );
