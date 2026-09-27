@@ -21,9 +21,9 @@ export const extractionInstruction = [
   "Return paramsJson as a JSON object with only that kind's fields.",
   "Static shapes: file_exists {path}; script_exists {script}; code_reference {name}; env_var {name}; version {range}; cli_flag {flag}.",
   "Runtime shapes: command_succeeds {command,timeoutMs?}; port_listens {port,startScript,timeoutMs?}; http_example {method,path,expectedStatus,expectedKeys}.",
-  "Package scripts, Node requirements, environment names, named exports, files and flags must be explicit in the quoted text.",
-  "A code_reference checks that a name exists in source; it cannot prove export semantics or a default value.",
-  "Never invent a command, start script, status, response key, or default value.",
+  "Package scripts, Node requirements, environment names, files and flags must be explicit in the quoted text.",
+  "Only propose checks for claims grounded in the supplied source documentation; repository code is evidence for those claims, not a source of new claims.",
+  "Never invent a command, start script, status, or response key.",
   "Use command_succeeds only for a verbatim command in a code block.",
   "Return claims: [] if the text has no checkable statements.",
 ].join("\n");

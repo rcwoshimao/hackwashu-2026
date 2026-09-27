@@ -19,7 +19,7 @@ This is the merge contract for Hussein's engine work and the web/Sky and iMessag
 4. A first passing run confirms a claim. A first failure disputes it without failing the verdict or alerting anyone. A later failure of a previously confirmed claim is drift. The server groups repeated claims of the same fact for a single alert and PR comment.
 5. The public scanner uses `runClaims` on fetched README/package metadata and leaves runtime kinds `unverified`. It does not clone or start public repository code.
 
-The current nine-kind schema cannot assert an arbitrary default value or prove that a named symbol is exported rather than merely declared. Do not mark either claim verified from a partial check; use an `unverified` result until a reviewed schema/runner change is agreed in an ADR. `ClaudeModel` and `GeminiModel` are model adapters; neither model may add check kinds or run its proposed commands. Gemini remains the default AI adapter. Setting `EXTRACTION_MODEL=claude` and `ANTHROPIC_API_KEY` opts connected-source and local seed/scan extraction into Claude Sonnet 5; the public Sky remains on Gemini or keyless static inspection.
+Flight-plan claims must be grounded in the source documentation. Repository code and metadata are evidence used to evaluate those documented claims; they do not introduce new claims. `ClaudeModel` and `GeminiModel` are model adapters; neither model may add check kinds or run its proposed commands. Gemini remains the default AI adapter. Setting `EXTRACTION_MODEL=claude` and `ANTHROPIC_API_KEY` opts connected-source and local seed/scan extraction into Claude Sonnet 5; the public Sky remains on Gemini or keyless static inspection.
 
 ## Local entry points
 
