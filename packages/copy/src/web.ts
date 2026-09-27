@@ -262,6 +262,15 @@ export const webCopy = {
     "findings had no safe correction and were left out of the pull request.",
   findingIgnore: "Ignore",
   findingIgnorePending: "Ignoring…",
+  findingIgnoredTitle: "Ignored findings",
+  findingIgnoredIntro:
+    "These findings don't count toward drift or send alerts. Restore one to check it again.",
+  findingIgnoredTag: "Ignored",
+  findingIgnoredMark: "–",
+  findingRestore: "Restore",
+  findingRestorePending: "Restoring…",
+  findingRestoreFailed:
+    "The finding could not be restored. Check your access and try again.",
   findingIgnoreFailed:
     "The finding could not be ignored. Check your access and try again.",
   repoSourceDetails: "Source sync details",

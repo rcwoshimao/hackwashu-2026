@@ -177,7 +177,7 @@ function triageable(
 async function trustAction(
   c: Context,
   deps: ApiDeps,
-  state: "confirmed" | "dropped",
+  action: "confirmed" | "dropped" | "restore",
 ) {
   const run = deps.store.getRun(c.req.param("id") ?? "");
   if (run === null) return fail(c, "run_not_found", 404);
@@ -187,8 +187,22 @@ async function trustAction(
   const allowed = await accessRepo(deps, c.req.raw, repo, true);
   if (!allowed.ok) return fail(c, "repo_access_denied", allowed.status);
   const claimId = c.req.param("claimId") ?? "";
-  if (!run.results.some((item) => item.claimId === claimId))
-    return fail(c, "claim_not_found", 404);
+  const result = run.results.find((item) => item.claimId === claimId);
+  if (!result) return fail(c, "claim_not_found", 404);
+  if (
+    action === "restore" &&
+    (run.origin !== "public_scan" ||
+      deps.store.getTrust(repo.repo, claimId) !== "dropped")
+  )
+    return fail(c, "claim_not_ignored", 409);
+  // A restored scan finding returns to the state a fresh scan would give it.
+  const state =
+    action === "restore"
+      ? result.status === "pass"
+        ? "confirmed"
+        : "disputed"
+      : action;
+  if (action === "restore") deps.messaging?.restoreClaim?.(repo.repo, claimId);
   const refreshed = refreshTrust(deps.store, repo.repo, claimId, state);
   const latest = refreshed?.origin === "public_scan" ? null : refreshed;
   const statusPosted =
@@ -338,6 +352,9 @@ export function registerWriteRoutes(app: Hono, deps: ApiDeps): void {
   );
   app.post("/api/runs/:id/claims/:claimId/drop", (c) =>
     trustAction(c, deps, "dropped"),
+  );
+  app.post("/api/runs/:id/claims/:claimId/restore", (c) =>
+    trustAction(c, deps, "restore"),
   );
   app.post("/api/runs/:id/fix", (c) => fixAction(c, deps));
   app.post("/api/telemetry", (c) => telemetry(c, deps));

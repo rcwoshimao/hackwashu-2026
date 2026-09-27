@@ -2,7 +2,12 @@ import { copy } from "@ground-control/copy";
 import { useMe } from "../auth/useMe.ts";
 import type { RunData } from "../data.ts";
 import { safeExternalUrl } from "../presentation.ts";
-import { canTriage, FindingActions, FixAllButton } from "./FindingActions.tsx";
+import {
+  canTriage,
+  FindingActions,
+  FixAllButton,
+  IgnoredFindings,
+} from "./FindingActions.tsx";
 import {
   type ChecklistItem,
   type ClaimVerdict,
@@ -80,7 +85,8 @@ export function RepoChecklist({
   const { me } = useMe();
   const canAct = canTriage(run, me);
   const items = checklist(run);
-  if (items.length === 0) return null;
+  const anyIgnored = run.results.some((item) => item.state === "dropped");
+  if (items.length === 0 && !anyIgnored) return null;
   return (
     <section className="repo-checklist" aria-labelledby="repo-checklist-title">
       <h2 id="repo-checklist-title">{copy.repoChecklistTitle}</h2>
@@ -106,6 +112,7 @@ export function RepoChecklist({
           {copy.repoSeeAllResults} ({items.length.toLocaleString()})
         </a>
       )}
+      <IgnoredFindings run={run} canAct={canAct} onChange={onChange} />
     </section>
   );
 }

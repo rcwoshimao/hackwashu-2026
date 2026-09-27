@@ -178,3 +178,101 @@ export function FixAllButton({
     </div>
   );
 }
+
+export function RestoreButton({
+  run,
+  result,
+  canAct,
+  onChange,
+}: {
+  run: RunData;
+  result: CheckResult;
+  canAct: boolean;
+  onChange: () => Promise<void> | void;
+}) {
+  const [pending, setPending] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  if (!canAct || result.state !== "dropped") return null;
+  const restore = async () => {
+    setPending(true);
+    const response = await api.restore(run.id, result.claimId);
+    setPending(false);
+    if (!response.ok) {
+      setFeedback(copy.findingRestoreFailed);
+      return;
+    }
+    await onChange();
+  };
+  return (
+    <div className="finding-actions">
+      <button
+        type="button"
+        className="finding-ignore"
+        disabled={pending}
+        onClick={() => void restore()}
+      >
+        {pending ? copy.findingRestorePending : copy.findingRestore}
+      </button>
+      {feedback && (
+        <p className="form-feedback" role="status">
+          {feedback}
+        </p>
+      )}
+    </div>
+  );
+}
+
+export function IgnoredFindings({
+  run,
+  canAct,
+  onChange,
+}: {
+  run: RunData;
+  canAct: boolean;
+  onChange: () => Promise<void> | void;
+}) {
+  const ignored = run.results.filter((item) => item.state === "dropped");
+  if (run.origin !== "public_scan" || ignored.length === 0) return null;
+  return (
+    <details className="ignored-findings">
+      <summary>
+        {copy.findingIgnoredTitle} ({ignored.length})
+      </summary>
+      <p className="ignored-findings-intro">{copy.findingIgnoredIntro}</p>
+      <ul>
+        {ignored.map((item) => {
+          const link = item.deepLink ? safeExternalUrl(item.deepLink) : null;
+          return (
+            <li className="repo-claim claim-ignored" key={item.claimId}>
+              <span className="repo-claim-mark" aria-hidden="true">
+                {copy.findingIgnoredMark}
+              </span>
+              <div>
+                <p className="repo-claim-quote">{item.quote}</p>
+                <p className="repo-claim-meta">
+                  <span className="repo-claim-label">
+                    {copy.findingIgnoredTag}
+                  </span>
+                  {link && (
+                    <>
+                      {" · "}
+                      <a href={link} target="_blank" rel="noreferrer">
+                        {copy.repoSeeInReadme}
+                      </a>
+                    </>
+                  )}
+                </p>
+                <RestoreButton
+                  run={run}
+                  result={item}
+                  canAct={canAct}
+                  onChange={onChange}
+                />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </details>
+  );
+}
