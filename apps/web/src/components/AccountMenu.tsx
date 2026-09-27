@@ -1,5 +1,6 @@
 import { copy } from "@ground-control/copy";
 import { useState } from "react";
+import { api } from "../api.ts";
 import { useMe } from "../auth/useMe.ts";
 
 function DefaultAvatar() {
@@ -32,6 +33,7 @@ function Avatar({ login }: { login: string }) {
 
 export function AccountMenu() {
   const { me, loading } = useMe();
+  const [signingOut, setSigningOut] = useState(false);
   if (loading) return <span className="account-slot" aria-hidden="true" />;
   if (!me?.signedIn || !me.login)
     return (
@@ -40,14 +42,33 @@ export function AccountMenu() {
         <span className="visually-hidden">{copy.navSignIn}</span>
       </a>
     );
+  const signout = async () => {
+    setSigningOut(true);
+    const result = await api.signout();
+    if (result.ok) window.location.assign("/");
+    else setSigningOut(false);
+  };
   return (
-    <a
-      className="account-slot"
-      href="/signin"
-      aria-label={`${copy.navSignedInAs} @${me.login}. ${copy.navMyRepos}`}
-    >
-      <Avatar login={me.login} />
-      <span className="account-login">@{me.login}</span>
-    </a>
+    <details className="account-menu">
+      <summary
+        className="account-slot"
+        aria-label={`${copy.navSignedInAs} @${me.login}. ${copy.navAccount}`}
+      >
+        <Avatar login={me.login} />
+        <span className="account-login">@{me.login}</span>
+      </summary>
+      <div className="account-popover">
+        <p>
+          {copy.signInConnected} <strong>{me.login}</strong>
+        </p>
+        <button
+          type="button"
+          onClick={() => void signout()}
+          disabled={signingOut}
+        >
+          {copy.navSignOut}
+        </button>
+      </div>
+    </details>
   );
 }

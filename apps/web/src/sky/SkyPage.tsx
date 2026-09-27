@@ -43,7 +43,6 @@ export function SkyPage() {
   const [accountFailed, setAccountFailed] = useState(false);
   const [accountLoading, setAccountLoading] = useState(true);
   const [scope, setScope] = useState<SkyScope>("public");
-  const [search, setSearch] = useState("");
   const explicitPublicScope =
     new URLSearchParams(window.location.search).get("scope") === "public";
   useEffect(() => {
@@ -99,8 +98,8 @@ export function SkyPage() {
     [data, accountRepos],
   );
   const filtered = useMemo(
-    () => filterEntries(entries, scope, search, me?.login ?? null),
-    [entries, scope, search, me?.login],
+    () => filterEntries(entries, scope, me?.login ?? null),
+    [entries, scope, me?.login],
   );
   const scanned = filtered.flatMap((entry) =>
     entry.kind === "scanned" ? [entry.satellite] : [],
@@ -152,12 +151,7 @@ export function SkyPage() {
         )}
       {data && entries.length > 0 && (
         <>
-          <SkyFilters
-            scope={scope}
-            search={search}
-            onScope={changeScope}
-            onSearch={setSearch}
-          />
+          <SkyFilters scope={scope} onScope={changeScope} />
           <p className="sky-scope-hint">
             {scope === "mine" ? copy.skyScopeMineHint : copy.skyScopePublicHint}
           </p>
@@ -202,7 +196,7 @@ export function SkyPage() {
               </div>
               {scope === "public" && <ScanForm />}
               <SkyCatalog
-                key={`${scope}:${search}`}
+                key={scope}
                 title={copy.skyBrowseTitle}
                 entries={filtered}
                 selectedRepo={selectedRepo}

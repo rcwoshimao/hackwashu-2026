@@ -1,13 +1,17 @@
 import { copy } from "@ground-control/copy";
 import { useEffect } from "react";
 import { useMe } from "../auth/useMe.ts";
-import { StatusBadge } from "../components/StatusBadge.tsx";
-import type { RepoData, SourceData } from "../data.ts";
+import {
+  canOpenDeepChecks,
+  DeepCheckLink,
+} from "../components/DeepCheckLink.tsx";
+import type { MeData, RepoData, RunData, SourceData } from "../data.ts";
 import { readableDate, safeExternalUrl } from "../presentation.ts";
 import { SourceSync } from "../sources/SourceSync.tsx";
-import { RepoFindings } from "./RepoFindings.tsx";
-import { RepoScanStatus } from "./RepoScanStatus.tsx";
+import { RepoChecklist } from "./RepoChecklist.tsx";
+import { RepoSummary } from "./RepoSummary.tsx";
 import { Trajectory } from "./Trajectory.tsx";
+import { useLatestRun } from "./useLatestRun.ts";
 import { useRepo } from "./useRepo.ts";
 
 function SourceRow({
@@ -46,9 +50,9 @@ function SourceList({ data }: { data: RepoData }) {
   const { me } = useMe();
   const canRefresh = me?.signedIn && me.connectedRepos.includes(data.repo);
   return (
-    <section className="panel repo-sources">
+    <section className="repo-sources">
       <div className="panel-heading">
-        <h2>{copy.repoSources}</h2>
+        <h3>{copy.repoOtherDocs}</h3>
         <a href={`/sources/new?repo=${encodeURIComponent(data.repo)}`}>
           {copy.repoAddSource}
         </a>
@@ -124,43 +128,85 @@ export function RunList({ data }: { data: RepoData }) {
   );
 }
 
+const methodNames: Record<string, string> = {
+  static: copy.repoMethodStatic,
+  ai: copy.repoMethodAi,
+  runtime: copy.repoMethodDeep,
+};
+
+function RepoDetails({ data, run }: { data: RepoData; run: RunData | null }) {
+  const tiers = data.scan?.tiersRun ?? [];
+  return (
+    <details className="repo-details">
+      <summary>{copy.repoDetailsTitle}</summary>
+      {run && (
+        <dl className="repo-details-facts">
+          <div>
+            <dt>{copy.repoDetailsCommit}</dt>
+            <dd className="mono">{run.commitSha.slice(0, 10)}</dd>
+          </div>
+          {tiers.length > 0 && (
+            <div>
+              <dt>{copy.repoDetailsMethods}</dt>
+              <dd>
+                {tiers.map((tier) => methodNames[tier] ?? tier).join(", ")}
+              </dd>
+            </div>
+          )}
+        </dl>
+      )}
+      <SourceList data={data} />
+      {data.runs.length > 1 && <Trajectory repo={data} />}
+      {data.runs.length > 0 && <RunList data={data} />}
+    </details>
+  );
+}
+
+/** Only owners (or connected private repos) get the deep-check setup offer. */
+function OwnerPrompt({ data, me }: { data: RepoData; me: MeData | null }) {
+  if (!canOpenDeepChecks(data, me)) return null;
+  return (
+    <aside className="repo-owner">
+      <p>
+        <strong>{copy.repoOwnerTitle}</strong> {copy.repoOwnerBody}
+      </p>
+      <DeepCheckLink data={data} me={me} />
+    </aside>
+  );
+}
+
 function RepoContent({ data }: { data: RepoData }) {
+  const { me } = useMe();
+  const { run, loading, refresh } = useLatestRun(data.latestRunId);
+  const github = safeExternalUrl(`https://github.com/${data.repo}`);
   return (
     <>
       <a className="repo-back-link" href="/sky">
         {copy.repoBackToSky}
       </a>
       <header className="repo-heading">
-        <div>
-          <p className="eyebrow">
-            {data.visibility === "private" ? copy.repoPrivate : copy.repoPublic}
-          </p>
-          <h1>{data.repo}</h1>
-          {data.visibility === "public" &&
-          data.scan === null &&
-          data.runs.length === 0 ? (
-            <span className="status-badge no-telemetry">
-              {copy.repoNotScanned}
-            </span>
-          ) : (
-            <StatusBadge label={data.label} />
-          )}
-        </div>
+        <p className="eyebrow">
+          {data.visibility === "private" ? copy.repoPrivate : copy.repoPublic}
+        </p>
+        <h1>{data.repo}</h1>
+        {github && (
+          <a href={github} target="_blank" rel="noreferrer">
+            {copy.repoOpenGithub}
+          </a>
+        )}
       </header>
-      <RepoFindings data={data} />
-      <RepoScanStatus data={data} />
-      <SourceList data={data} />
-      {data.runs.length > 0 && (
-        <details className="repo-technical panel">
-          <summary>{copy.repoTechnicalDetails}</summary>
-          {data.runs.length > 1 ? (
-            <Trajectory repo={data} />
-          ) : (
-            <p>{copy.repoTrajectoryShort}</p>
-          )}
-          <RunList data={data} />
-        </details>
+      {loading ? (
+        <p className="state-panel" role="status">
+          {copy.repoFindingLoading}
+        </p>
+      ) : (
+        <>
+          <RepoSummary data={data} run={run} />
+          {run && <RepoChecklist run={run} onChange={refresh} />}
+        </>
       )}
+      <OwnerPrompt data={data} me={me} />
+      <RepoDetails data={data} run={run} />
     </>
   );
 }

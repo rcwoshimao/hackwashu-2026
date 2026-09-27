@@ -1,0 +1,45 @@
+name: Ground Control deep checks
+on:
+  workflow_call:
+    inputs:
+      server:
+        required: true
+        type: string
+    secrets:
+      token:
+        required: true
+permissions: {}
+jobs:
+  flight-checks:
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v6
+        with: { node-version: 24 }
+      - if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm ci
+      - uses: rcwoshimao/hackwashu-2026/action@main
+        with: { mode: run }
+      - if: always()
+        uses: actions/upload-artifact@v5
+        with: { name: telemetry, path: .groundcontrol/telemetry.json }
+  report:
+    needs: flight-checks
+    if: ${{ always() && needs.flight-checks.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/download-artifact@v5
+        with: { name: telemetry, path: .groundcontrol }
+      - uses: rcwoshimao/hackwashu-2026/action@main
+        with:
+          mode: report
+          server: ${{ inputs.server }}
+          token: ${{ secrets.token }}

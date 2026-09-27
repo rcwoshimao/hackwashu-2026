@@ -65,6 +65,26 @@ export function validRepo(value: string): boolean {
   return /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(value.trim());
 }
 
+const repoPart = /^[A-Za-z0-9_.-]+$/;
+
+/**
+ * Accepts `owner/repo` or any GitHub link people paste (a subfolder, a file,
+ * `.git`, a query or fragment, an SSH remote) and returns just `owner/repo`.
+ */
+export function repoFromInput(value: string): string | null {
+  const text = value.trim();
+  const path =
+    /^git@github\.com:(.+)$/i.exec(text)?.[1] ??
+    /^(?:https?:\/\/)?(?:www\.)?github\.com\/(.+)$/i.exec(text)?.[1] ??
+    (text.includes(":") ? null : text);
+  if (!path) return null;
+  const [owner, rawName] = path.split(/[/?#]/);
+  const name = rawName?.replace(/\.git$/i, "");
+  if (!owner || !name || !repoPart.test(owner) || !repoPart.test(name))
+    return null;
+  return `${owner}/${name}`;
+}
+
 export function repoPath(value: string): string {
   const [owner, name] = value.split("/");
   return `/repos/${encodeURIComponent(owner ?? "")}/${encodeURIComponent(name ?? "")}`;

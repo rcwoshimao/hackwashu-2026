@@ -17,6 +17,9 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+.account-menu {
+  position: relative;
+}
 .account-slot {
   display: inline-flex;
   align-items: center;
@@ -25,11 +28,15 @@
   height: 44px;
   gap: 0.5rem;
   cursor: pointer;
+  list-style: none;
 }
 .account-login {
   color: var(--paper);
   font-size: 0.85rem;
   font-weight: 600;
+}
+.account-slot::-webkit-details-marker {
+  display: none;
 }
 .account-avatar {
   width: 34px;
@@ -39,7 +46,8 @@
   background: var(--hull);
 }
 .account-slot:hover .account-avatar,
-.account-slot:focus-visible .account-avatar {
+.account-slot:focus-visible .account-avatar,
+.account-menu[open] .account-avatar {
   border-color: var(--paper);
 }
 .avatar-ring {
@@ -47,6 +55,29 @@
 }
 .avatar-figure {
   fill: var(--mist);
+}
+.account-popover {
+  position: absolute;
+  z-index: 30;
+  right: 0;
+  top: calc(100% + 0.4rem);
+  min-width: 230px;
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.8rem;
+  background: var(--hull);
+  border: 1px solid var(--rule);
+}
+.account-popover p {
+  margin: 0 0 0.4rem;
+  color: var(--mist);
+  overflow-wrap: anywhere;
+}
+.account-popover p strong {
+  color: var(--paper);
+}
+.account-popover button {
+  margin-top: 0.4rem;
 }
 .back-link {
   display: inline-block;
@@ -86,6 +117,21 @@
 }
 .report-head h2 a {
   text-decoration: none;
+}
+.report-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+.deep-check-link {
+  background: transparent;
+  color: var(--paper);
+}
+.deep-check-link:hover {
+  background: var(--paper);
+  color: var(--night);
 }
 .report-meta {
   display: flex;

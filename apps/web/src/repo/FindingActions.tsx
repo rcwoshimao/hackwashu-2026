@@ -238,27 +238,37 @@ export function IgnoredFindings({
       <summary>
         {copy.findingIgnoredTitle} ({ignored.length})
       </summary>
-      <p>{copy.findingIgnoredIntro}</p>
-      <ul className="repo-finding-list">
+      <p className="ignored-findings-intro">{copy.findingIgnoredIntro}</p>
+      <ul>
         {ignored.map((item) => {
           const link = item.deepLink ? safeExternalUrl(item.deepLink) : null;
           return (
-            <li className="repo-finding-card" key={item.claimId}>
-              <span className="finding-ignored-tag">
-                {copy.findingIgnoredTag}
+            <li className="repo-claim claim-ignored" key={item.claimId}>
+              <span className="repo-claim-mark" aria-hidden="true">
+                {copy.findingIgnoredMark}
               </span>
-              <blockquote>{item.quote}</blockquote>
-              {link && (
-                <a href={link} target="_blank" rel="noreferrer">
-                  {copy.repoFindingOpenSource}
-                </a>
-              )}
-              <RestoreButton
-                run={run}
-                result={item}
-                canAct={canAct}
-                onChange={onChange}
-              />
+              <div>
+                <p className="repo-claim-quote">{item.quote}</p>
+                <p className="repo-claim-meta">
+                  <span className="repo-claim-label">
+                    {copy.findingIgnoredTag}
+                  </span>
+                  {link && (
+                    <>
+                      {" · "}
+                      <a href={link} target="_blank" rel="noreferrer">
+                        {copy.repoSeeInReadme}
+                      </a>
+                    </>
+                  )}
+                </p>
+                <RestoreButton
+                  run={run}
+                  result={item}
+                  canAct={canAct}
+                  onChange={onChange}
+                />
+              </div>
             </li>
           );
         })}

@@ -1,7 +1,12 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
-import type { RunData } from "../data.ts";
-import { summarizeRun } from "./findingSummary.ts";
+import type { CheckResult, RunData } from "../data.ts";
+import {
+  checklist,
+  claimVerdict,
+  repoHeadline,
+  summarizeRun,
+} from "./findingSummary.ts";
 
 const run: RunData = {
   id: "run-1",
@@ -70,4 +75,62 @@ test("only unverified checks do not claim an on-course verdict", () => {
     results: run.results.filter((item) => item.status === "unverified"),
   });
   assert.equal(summary.outcome, "unverified");
+});
+
+const dropped: CheckResult = {
+  claimId: "gone",
+  state: "dropped",
+  status: "fail",
+  quote: "old claim",
+  sourceId: "README.md",
+  expected: "{}",
+  actual: "fail",
+};
+
+test("the checklist puts problems first and leaves out dropped claims", () => {
+  const items = checklist({
+    ...run,
+    results: [...run.results, dropped],
+  });
+  assert.deepEqual(
+    items.map((item) => [item.result.claimId, item.verdict]),
+    [
+      ["review", "maybe"],
+      ["unverified", "unchecked"],
+      ["pass", "ok"],
+    ],
+  );
+});
+
+test("a confirmed failure reads as wrong, an unconfirmed one as maybe", () => {
+  const [failure] = run.results.filter((item) => item.status === "fail");
+  assert.ok(failure);
+  assert.equal(claimVerdict(failure), "maybe");
+  assert.equal(claimVerdict({ ...failure, state: "confirmed" }), "wrong");
+});
+
+test("the headline separates nothing found from nothing checkable", () => {
+  assert.equal(
+    repoHeadline(summarizeRun({ ...run, results: [] })),
+    "nothing_found",
+  );
+  assert.equal(
+    repoHeadline(
+      summarizeRun({
+        ...run,
+        results: run.results.filter((item) => item.status === "unverified"),
+      }),
+    ),
+    "unchecked",
+  );
+  assert.equal(repoHeadline(summarizeRun(run)), "maybe");
+  assert.equal(
+    repoHeadline(
+      summarizeRun({
+        ...run,
+        results: run.results.filter((item) => item.status === "pass"),
+      }),
+    ),
+    "ok",
+  );
 });

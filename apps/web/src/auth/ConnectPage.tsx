@@ -1,8 +1,9 @@
 import { copy } from "@ground-control/copy";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useCallback, useState } from "react";
 import { api, type Connection } from "../api.ts";
 import type { AccountRepoData } from "../data.ts";
 import { validRepo } from "../presentation.ts";
+import { ConnectActionSteps } from "./ConnectActionSteps.tsx";
 import { ConnectRepoPicker } from "./ConnectRepoPicker.tsx";
 import { ConnectResult } from "./ConnectResult.tsx";
 import { normalizeGitHubRepo } from "./connectRepo.ts";
@@ -47,6 +48,28 @@ function useConnectDraft() {
   const [draft, setDraft] = useState(initialDraft);
   const update: Update = (patch) =>
     setDraft((current) => ({ ...current, ...patch }));
+  const selectMine = useCallback((selectedMine: AccountRepoData | null) => {
+    setDraft((current) => ({
+      ...current,
+      selectedMine,
+      repo: selectedMine?.repo ?? "",
+      runtime: selectedMine?.repo === current.repo ? current.runtime : false,
+      connection: null,
+      state: "idle",
+    }));
+  }, []);
+  const connectOwn = async (repo: string, runtime: boolean) => {
+    update({ state: "pending", connection: null });
+    const result = await api.connect(repo, runtime);
+    update({
+      connection: result.ok ? result.value : null,
+      state: result.ok
+        ? "idle"
+        : result.error.status === 409
+          ? "visibility_changed"
+          : "error",
+    });
+  };
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const chosen =
@@ -57,8 +80,8 @@ function useConnectDraft() {
       update({ state: "invalid" });
       return;
     }
-    update({ state: "pending", connection: null });
     if (draft.mode === "public") {
+      update({ state: "pending", connection: null });
       const scan = await api.scan(chosen);
       update({
         state: scan.ok
@@ -69,17 +92,9 @@ function useConnectDraft() {
       });
       return;
     }
-    const result = await api.connect(chosen.trim(), draft.runtime);
-    update({
-      connection: result.ok ? result.value : null,
-      state: result.ok
-        ? "idle"
-        : result.error.status === 409
-          ? "visibility_changed"
-          : "error",
-    });
+    await connectOwn(chosen.trim(), draft.runtime);
   };
-  return { draft, update, submit };
+  return { draft, update, selectMine, connectOwn, submit };
 }
 
 function SourceChoice({ draft, update }: Fields) {
@@ -101,21 +116,14 @@ function SourceChoice({ draft, update }: Fields) {
   );
 }
 
-function OwnFields({ draft, update }: Fields) {
-  return (
-    <ConnectRepoPicker
-      value={draft.repo}
-      onSelect={(selectedMine) =>
-        update({
-          selectedMine,
-          repo: selectedMine?.repo ?? "",
-          runtime: false,
-          connection: null,
-          state: "idle",
-        })
-      }
-    />
-  );
+function OwnFields({
+  draft,
+  onSelect,
+}: {
+  draft: Draft;
+  onSelect: (repo: AccountRepoData | null) => void;
+}) {
+  return <ConnectRepoPicker value={draft.repo} onSelect={onSelect} />;
 }
 
 function PublicFields({ draft, update }: Fields) {
@@ -205,34 +213,75 @@ function ConnectOutcome({ draft, login }: { draft: Draft; login: string }) {
 }
 
 function ConnectForm({ login }: { login: string }) {
-  const { draft, update, submit } = useConnectDraft();
+  const { draft, update, selectMine, connectOwn, submit } = useConnectDraft();
+  const setupRepo =
+    draft.mode === "mine" &&
+    draft.selectedMine?.runtimeEnabled &&
+    !draft.connection
+      ? draft.selectedMine
+      : null;
   return (
-    <form onSubmit={(event) => void submit(event)}>
-      <SourceChoice draft={draft} update={update} />
-      {draft.mode === "mine" ? (
-        <OwnFields draft={draft} update={update} />
-      ) : (
-        <PublicFields draft={draft} update={update} />
+    <>
+      <form
+        onSubmit={(event) => {
+          if (setupRepo) event.preventDefault();
+          else void submit(event);
+        }}
+      >
+        <SourceChoice draft={draft} update={update} />
+        {draft.mode === "mine" ? (
+          <OwnFields draft={draft} onSelect={selectMine} />
+        ) : (
+          <PublicFields draft={draft} update={update} />
+        )}
+        {!setupRepo && !draft.connection?.runtimeEnabled && (
+          <>
+            <DeepCheckOption draft={draft} update={update} login={login} />
+            <button type="submit" disabled={draft.state === "pending"}>
+              {draft.mode === "public"
+                ? copy.skyScanAction
+                : copy.connectAction}
+            </button>
+          </>
+        )}
+      </form>
+      {setupRepo && (
+        <>
+          <ConnectActionSteps
+            repo={setupRepo.repo}
+            serverUrl={window.location.origin}
+            token={undefined}
+          />
+          <details className="disclosure connect-rotate">
+            <summary>{copy.connectRotateTitle}</summary>
+            <p>{copy.connectRotateHint}</p>
+            <button
+              type="button"
+              disabled={draft.state === "pending"}
+              onClick={() => void connectOwn(setupRepo.repo, true)}
+            >
+              {copy.connectRotateAction}
+            </button>
+          </details>
+        </>
       )}
-      <DeepCheckOption draft={draft} update={update} login={login} />
-      <button type="submit" disabled={draft.state === "pending"}>
-        {draft.mode === "public" ? copy.skyScanAction : copy.connectAction}
-      </button>
       <ConnectOutcome draft={draft} login={login} />
-    </form>
+    </>
   );
 }
 
 export function ConnectPage() {
   const { me, loading, failed } = useMe();
+  const deepEntry =
+    new URLSearchParams(window.location.search).get("runtime") === "1";
   return (
     <main className="page form-page">
       <section className="form-panel panel">
         <a className="back-link" href="/signin">
           {copy.connectBackToRepos}
         </a>
-        <h1>{copy.connectTitle}</h1>
-        <p>{copy.connectIntro}</p>
+        <h1>{deepEntry ? copy.deepScanTitle : copy.connectTitle}</h1>
+        <p>{deepEntry ? copy.deepScanIntro : copy.connectIntro}</p>
         {loading ? (
           <p role="status">{copy.commonLoading}</p>
         ) : failed ? (

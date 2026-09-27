@@ -33,16 +33,18 @@ test("public GitHub URL entry resolves to owner/repo", () => {
   );
 });
 
-test("public GitHub URL entry rejects other sites and subpaths", () => {
+test("public GitHub URL entry rejects other sites", () => {
   assert.equal(normalizeGitHubRepo("https://example.com/owner/repo"), null);
-  assert.equal(
-    normalizeGitHubRepo("https://github.com/owner/repo/tree/main"),
-    null,
-  );
-  assert.equal(
-    normalizeGitHubRepo("https://github.com/owner/repo?tab=readme"),
-    null,
-  );
+  assert.equal(normalizeGitHubRepo("https://github.com/owner"), null);
+});
+
+test("public GitHub URL entry accepts subpaths, queries and fragments", () => {
+  for (const input of [
+    "https://github.com/owner/repo/tree/main",
+    "https://github.com/owner/repo?tab=readme",
+    "https://github.com/owner/repo#readme",
+  ])
+    assert.equal(normalizeGitHubRepo(input), "owner/repo", input);
 });
 
 test("personal picker lists accessible repos with admin access", () => {

@@ -36,16 +36,9 @@ For an owner-selected checkout, `bun run gc scan --owned <checkout>` generates a
 
 ## Connect a repository to CI
 
-Sign in through the web app and open **My repos**. Choose **Connect** on a private repo or **Enable deep checks** on a public repo owned by your signed-in account. Save the one-time telemetry token as that repository's Actions secret `GROUND_CONTROL_TOKEN`. From the Ground Control root, generate the first committed flight checks against a separate checkout of that repository:
+Open the [hosted Ground Control app](https://ground-control-washu26.azurewebsites.net), sign in with GitHub, and choose **Connect** on a private repo or **Enable deep checks** on a public repo you own. Ground Control publishes the generated `flightchecks/` files when its GitHub write token has Contents permission. Review those files in your repository.
 
-```sh
-bun ops seed-plan <checkout> <owner/repo>
-```
-
-Review and commit the three generated files in `<checkout>/flightchecks/` before enabling the [sample two-job workflow](demo/orbit-app/.github/workflows/ground-control.yml). In a checkout you own, you may explicitly install its dependencies and run `node --test flightchecks` after reviewing the plan. The workflow skips fork PRs, runs code in a job without the telemetry secret, and sends results from a separate report job. Replace its `YOUR_GITHUB_USER` Action reference with a published, accessible copy of this repository. GitHub-hosted Actions need an HTTPS tunnel to this local Docker server; use that origin for `PUBLIC_URL`, the OAuth callback, and the repository Actions variable `GROUND_CONTROL_URL`. With a `GITHUB_WRITE_TOKEN` that has Contents write access, default-branch source changes in an opted-in repo schedule a flightchecks commit. Verify that commit before relying on it; if publication fails or a PR branch changes documentation, run `seed-plan` against that branch, review the generated files, and commit them there. Report mode checks the repository, commit SHA, and PR number against the workflow context. Treat its status as advisory for branches whose authors can edit the runner until trusted attestation is added. Private GitHub wiki sync is unavailable. [SELF_HOST.md](docs/SELF_HOST.md) has the full sequence.
-
-To use Claude for connected-source and local seed/scan claim extraction, set `EXTRACTION_MODEL=claude` and `ANTHROPIC_API_KEY` in `.env`. Gemini remains the default AI path and the public Sky continues to use Gemini or static checks. Without either model key, local heuristic extraction works.
-
+Copy the one-time telemetry token and run the displayed `gh secret set GROUND_CONTROL_TOKEN -R <owner/repo>` command. GitHub CLI prompts for the token, so the command does not contain it. Download the short workflow with the Azure HTTPS URL already filled in and add it to the target repo at `.github/workflows/ground-control.yml`. It calls this repository's [reusable workflow](.github/workflows/ground-control-reusable.yml), which runs checks in a secret-free job and sends the report separately. Open a same-repo PR to establish a baseline. [SELF_HOST.md](docs/SELF_HOST.md) has the full setup and optional local fallback.
 ## Link iMessage for drift alerts
 
 Create a Photon Spectrum project with a cloud iMessage line, then set `SPECTRUM_PROJECT_ID` and `SPECTRUM_PROJECT_SECRET` in the ignored `.env` and recreate the container. Sign in with GitHub, open **Connect a repo**, enter your iMessage phone number in international `+` format, and choose **Send linking message**. Reply to the one-time `LINK` code in the received iMessage. Confirmed drift from your connected repositories can then reach your phone as one grouped alert; reply `FIX`, `KEEP`, or `IGNORE` to act on it. A Mac is not required for the cloud provider. With no Spectrum credentials, the web app and keyless drift rehearsal still run; the linking form reports that messaging is unavailable.
@@ -57,4 +50,6 @@ Create a Photon Spectrum project with a cloud iMessage line, then set `SPECTRUM_
 - Source text sent through the AI tier goes to Gemini. A self-hosted company can leave `GEMINI_API_KEY` unset and use only local static checks.
 - The normal Sky shows actual saved scans and signed-in account inventory. Demo marks require an explicit `?demo=1` API request and never count toward findings. Every real result records its commit SHA and tiers run.
 
-Azure deployment is intentionally deferred.
+The server deploys automatically from `main` to Azure App Service. The hosted address and deployment details are in [SELF_HOST.md](docs/SELF_HOST.md).
+
+Brainstorm document: https://docs.google.com/document/d/1Tvvr4aTonTk0JwStcXxoIpkWb_T_BNyADP1SHW2quwo/edit?usp=sharing

@@ -7,13 +7,10 @@
   margin-bottom: 1.5rem;
 }
 .sky-catalog-controls {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.7fr);
-  gap: 1rem;
-  align-items: end;
   margin-bottom: 0.65rem;
 }
 .sky-scope-control {
+  max-width: 28rem;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.25rem;
@@ -36,13 +33,6 @@
 .sky-scope-control button[aria-pressed="true"]:hover {
   background: var(--paper);
   color: var(--night);
-}
-.sky-catalog-controls label {
-  display: block;
-  margin-bottom: 0.35rem;
-}
-.sky-search-control input {
-  width: 100%;
 }
 .sky-scope-hint {
   margin: 0 0 1.2rem;

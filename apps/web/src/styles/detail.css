@@ -1,145 +1,182 @@
-.repo-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  margin: 0.8rem 0 1.2rem;
-}
 .repo-back-link {
   display: inline-block;
   margin-top: 0.7rem;
 }
-.repo-scan-status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1.4rem;
-}
-.repo-scan-status h2 {
-  margin-bottom: 0.4rem;
-}
-.repo-scan-status p {
-  color: var(--mist);
-  margin-bottom: 0.3rem;
+.repo-heading {
+  margin: 1.2rem 0 1.6rem;
 }
 .repo-heading h1 {
   overflow-wrap: anywhere;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.4rem;
 }
-.repo-result {
-  margin-bottom: 1.4rem;
+.repo-answer {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 1.2rem;
+  border: 1px solid var(--rule);
+  border-left-width: 4px;
+  background: var(--hull);
+  padding: clamp(1.1rem, 2.4vw, 1.8rem);
+  margin-bottom: 2rem;
   scroll-margin-top: 1rem;
 }
-.repo-result h2 {
-  margin-bottom: 0.5rem;
+.repo-answer.tone-wrong,
+.repo-answer.tone-maybe {
+  border-left-color: var(--drift);
 }
-.repo-result > p:not(.eyebrow) {
-  color: var(--mist);
+.repo-answer.tone-ok {
+  border-left-color: var(--paper);
 }
-.repo-result-counts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.2rem 2rem;
-  margin: 1.2rem 0;
-}
-.repo-result-counts div {
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-}
-.repo-result-counts dt {
-  color: var(--mist);
-  font-size: 0.85rem;
-}
-.repo-result-counts dd {
-  font-family: "IBM Plex Mono", monospace;
-  font-size: 1.25rem;
-}
-.repo-finding-list {
-  list-style: none;
-  margin: 1rem 0;
-  padding: 0;
+.repo-answer-mark {
   display: grid;
-  gap: 0.8rem;
-}
-.repo-finding-card {
-  border: 1px solid var(--rule);
-  padding: 1rem;
-}
-.repo-finding-card blockquote {
-  font-size: 1.1rem;
-  margin: 0.6rem 0;
-  overflow-wrap: anywhere;
-}
-.repo-finding-card p {
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  font-size: 1.3rem;
+  font-weight: 600;
   color: var(--mist);
 }
-.finding-review-tag {
+.tone-wrong .repo-answer-mark,
+.tone-maybe .repo-answer-mark {
   color: var(--drift);
 }
-.finding-actions,
-.finding-fix-all {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
-  margin-top: 0.8rem;
+.tone-ok .repo-answer-mark {
+  color: var(--paper);
 }
-.finding-fix-all {
-  margin: 0.4rem 0 1rem;
+.repo-answer h2 {
+  margin: 0.2rem 0 0.45rem;
 }
-.finding-actions .form-feedback,
-.finding-fix-all .form-feedback {
-  flex-basis: 100%;
+.repo-answer-text p {
   margin: 0;
+  color: var(--mist);
 }
-.finding-actions button.finding-ignore {
+.repo-answer-date {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+}
+.repo-answer-action {
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+}
+.repo-answer-action .button-secondary {
   background: transparent;
   color: var(--paper);
   border-color: var(--rule);
 }
-.finding-actions button.finding-ignore:hover {
-  background: var(--paper);
-  color: var(--night);
+.repo-answer-action .button-secondary:hover {
+  background: var(--rule);
 }
-.ignored-findings {
-  margin-top: 1rem;
+.repo-answer-feedback {
+  margin: 0;
+  color: var(--mist);
+  font-size: 0.85rem;
+  max-width: 16rem;
+  text-align: right;
+}
+.repo-checklist {
+  margin-bottom: 2rem;
+}
+.repo-checklist h2 {
+  font-size: 1.15rem;
+  margin-bottom: 0.6rem;
+}
+.repo-checklist ul {
+  list-style: none;
+  margin: 0 0 0.8rem;
+  padding: 0;
+}
+.repo-claim {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr);
+  gap: 0.8rem;
+  padding: 0.85rem 0;
   border-top: 1px solid var(--rule);
-  padding-top: 0.8rem;
 }
-.ignored-findings summary {
-  cursor: pointer;
-  color: var(--mist);
-}
-.ignored-findings .repo-finding-card {
-  opacity: 0.75;
-}
-.finding-ignored-tag {
-  color: var(--mist);
-}
-.finding-pr-link {
+.repo-claim-mark {
   font-weight: 600;
+  text-align: center;
+  color: var(--mist);
 }
-.repo-sources {
-  margin-bottom: 1.4rem;
+.claim-wrong .repo-claim-mark,
+.claim-maybe .repo-claim-mark,
+.claim-wrong .repo-claim-label,
+.claim-maybe .repo-claim-label {
+  color: var(--drift);
+}
+.claim-ok .repo-claim-mark {
+  color: var(--paper);
+}
+.repo-claim p {
+  margin: 0;
+}
+.repo-claim-quote {
+  overflow-wrap: anywhere;
+}
+.repo-claim-meta {
+  margin-top: 0.25rem;
+  color: var(--mist);
+  font-size: 0.88rem;
+}
+.repo-owner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem 1.4rem;
+  border: 1px dashed var(--rule);
+  padding: 1rem 1.2rem;
+  margin-bottom: 2rem;
+}
+.repo-owner p {
+  margin: 0;
+  color: var(--mist);
+}
+.repo-owner strong {
+  color: var(--paper);
 }
 .repo-source-details {
   margin-top: 0.8rem;
 }
-.repo-source-details summary,
-.repo-technical > summary {
+.repo-source-details summary {
   cursor: pointer;
   font-weight: 600;
 }
-.repo-technical > summary {
-  font-size: 1.1rem;
+.repo-details {
+  border-top: 1px solid var(--rule);
+  padding-top: 1rem;
 }
-.repo-technical[open] > summary {
+.repo-details > summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--mist);
+}
+.repo-details[open] > summary {
   margin-bottom: 1.2rem;
 }
-.repo-technical .repo-runs {
+.repo-details-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 2.4rem;
+  margin: 0 0 1.4rem;
+}
+.repo-details-facts dt {
+  color: var(--mist);
+  font-size: 0.8rem;
+}
+.repo-details-facts dd {
+  margin: 0.2rem 0 0;
+}
+.repo-sources {
+  margin-bottom: 1.4rem;
+}
+.repo-sources h3 {
+  margin-bottom: 0.6rem;
+}
+.repo-details .repo-runs {
   margin-top: 1.2rem;
 }
 .trajectory {
@@ -357,8 +394,15 @@ th {
   }
 }
 @media (max-width: 760px) {
-  .repo-heading {
-    align-items: start;
+  .repo-answer {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .repo-answer-action {
+    grid-column: 1 / -1;
+    justify-items: start;
+  }
+  .repo-answer-feedback {
+    text-align: left;
   }
   .evidence-claim dl,
   .check-card dl {
