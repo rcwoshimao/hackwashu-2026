@@ -1,0 +1,31 @@
+name: Deploy Ground Control to Azure
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+      - name: Build image in Azure Container Registry
+        run: az acr build --registry gcwashu26acr --image ground-control:${{ github.sha }} --no-logs .
+      - name: Deploy image
+        run: |
+          az webapp config container set --resource-group rg-ground-control-washu26 --name ground-control-washu26 --container-image-name gcwashu26acr.azurecr.io/ground-control:${{ github.sha }}
+          az webapp restart --resource-group rg-ground-control-washu26 --name ground-control-washu26
+      - name: Check health
+        run: |
+          for attempt in {1..30}; do
+            if curl --fail --silent https://ground-control-washu26.azurewebsites.net/healthz | grep -qx ok; then exit 0; fi
+            sleep 10
+          done
+          exit 1

@@ -1,0 +1,24 @@
+diff --git a/bin/orbit.js b/bin/orbit.js
+--- a/bin/orbit.js
++++ b/bin/orbit.js
+@@ -3,13 +3,13 @@
+ 
+ const args = process.argv.slice(2);
+ if (args.includes("--help")) {
+-  process.stdout.write("Usage: orbit --format json|table\n");
+-  process.exit(0);
+-}
+-const formatIndex = args.indexOf("--format");
+-const format = formatIndex >= 0 ? args[formatIndex + 1] : "table";
+-if (format !== "json" && format !== "table") {
+-  process.stderr.write("Choose --format json or --format table\n");
++  process.stdout.write("Usage: orbit --output json|table\n");
++  process.exit(0);
++}
++const formatIndex = args.indexOf("--output");
++const format = formatIndex >= 0 ? args[formatIndex + 1] : "table";
++if (format !== "json" && format !== "table") {
++  process.stderr.write("Choose --output json or --output table\n");
+   process.exit(2);
+ }
+ if (format === "json") {

@@ -1,0 +1,16 @@
+{
+  "name": "@ground-control/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "ground-control": "./src/main.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ground-control/local-git": "workspace:*",
+    "@ground-control/plan": "workspace:*"
+  }
+}

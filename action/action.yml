@@ -1,0 +1,15 @@
+name: Ground Control
+description: Run committed flight checks or report their telemetry
+inputs:
+  mode:
+    description: run or report
+    required: true
+  server:
+    description: Ground Control server URL, used only in report mode
+    required: false
+  token:
+    description: Repository telemetry token, used only in report mode
+    required: false
+runs:
+  using: node24
+  main: dist/index.js

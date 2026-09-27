@@ -1,0 +1,12 @@
+diff --git a/package.json b/package.json
+--- a/package.json
++++ b/package.json
+@@ -11,7 +11,7 @@
+   },
+   "scripts": {
+     "dev": "node src/server.js",
+-    "start": "node src/server.js",
++    "launch": "node src/server.js",
+     "test": "node --test test/app.test.js"
+   },
+   "dependencies": {

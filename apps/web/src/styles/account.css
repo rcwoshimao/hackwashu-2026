@@ -1,0 +1,128 @@
+.header-end {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 2.2rem);
+}
+.desktop-nav a[aria-current="page"] {
+  color: var(--paper);
+  text-decoration: underline;
+  text-underline-offset: 0.45em;
+  text-decoration-thickness: 1px;
+}
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.account-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 44px;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+.account-login {
+  color: var(--paper);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.account-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--rule);
+  background: var(--hull);
+}
+.account-slot:hover .account-avatar,
+.account-slot:focus-visible .account-avatar {
+  border-color: var(--paper);
+}
+.avatar-ring {
+  fill: var(--hull);
+}
+.avatar-figure {
+  fill: var(--mist);
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 0.8rem;
+  color: var(--mist);
+}
+.reports-header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem 2rem;
+  margin-bottom: 1.5rem;
+}
+.reports-header p {
+  color: var(--mist);
+  max-width: 60ch;
+}
+.report-list {
+  display: grid;
+  gap: 1.5rem;
+}
+.report-card {
+  border: 1px solid var(--rule);
+  padding: clamp(1rem, 2vw, 1.6rem);
+}
+.report-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+}
+.report-head h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.report-head h2 a {
+  text-decoration: none;
+}
+.report-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+.deep-check-link {
+  background: transparent;
+  color: var(--paper);
+}
+.deep-check-link:hover {
+  background: var(--paper);
+  color: var(--night);
+}
+.report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.2rem;
+  color: var(--mist);
+  margin: 0.8rem 0 1.2rem;
+}
+.report-card .repo-runs {
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+.report-card .repo-runs h2 {
+  font-size: 1rem;
+  color: var(--mist);
+}
+@media (max-width: 760px) {
+  .header-end {
+    gap: 0.6rem;
+  }
+  .account-login {
+    display: none;
+  }
+}

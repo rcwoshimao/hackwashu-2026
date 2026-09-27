@@ -1,0 +1,17 @@
+{
+  "name": "@ground-control/sources",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "@types/mdast": "^4.0.4",
+    "linkedom": "^0.18.12",
+    "mdast-util-from-markdown": "^2.0.2",
+    "yaml": "^2.8.1",
+    "zod": "4.6.5"
+  }
+}

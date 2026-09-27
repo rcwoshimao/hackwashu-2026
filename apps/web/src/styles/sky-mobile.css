@@ -1,0 +1,36 @@
+@media (max-width: 760px) {
+  .sky-catalog-controls {
+    grid-template-columns: 1fr;
+  }
+  .sky-heading {
+    align-items: start;
+    gap: 0.9rem;
+  }
+  .provenance {
+    justify-content: flex-start;
+  }
+  .sky-grid,
+  .sky-side {
+    display: flex;
+    flex-direction: column;
+  }
+  .sky-main,
+  .sky-side {
+    width: 100%;
+  }
+  .legend-grid {
+    grid-template-columns: 1fr;
+  }
+  .findings-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .metric-list {
+    grid-template-columns: 1fr 1fr;
+  }
+  .scan-form {
+    display: block;
+  }
+  .inline-fields {
+    flex-direction: column;
+  }
+}

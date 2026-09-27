@@ -1,0 +1,410 @@
+{
+  "repo": "demo/orbit-app",
+  "sourceHashes": {
+    "readme": "5715c1072c0c5ed95f9396819c6c3bbac6765c9cd028b203818656ea863e3804"
+  },
+  "claims": [
+    {
+      "kind": "file_exists",
+      "params": {
+        "path": ".env.example"
+      },
+      "id": "c_13d2e74663",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "Copy `.env.example` to `.env`",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 208,
+            "endOffset": 237,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 9,
+            "lineEnd": 9
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "file_exists",
+      "params": {
+        "path": "man/orbit.1"
+      },
+      "id": "c_cac85d18e9",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "The man page is `man/orbit.1`",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 283,
+            "endOffset": 312,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 9,
+            "lineEnd": 9
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "file_exists",
+      "params": {
+        "path": "package-lock.json"
+      },
+      "id": "c_0751486fc7",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "The committed `package-lock.json` keeps installs reproducible.",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 144,
+            "endOffset": 206,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 7,
+            "lineEnd": 7
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "script_exists",
+      "params": {
+        "script": "dev"
+      },
+      "id": "c_a26bdaa04d",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "The `dev` script starts the server",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 378,
+            "endOffset": 412,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 18,
+            "lineEnd": 18
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "script_exists",
+      "params": {
+        "script": "start"
+      },
+      "id": "c_51051afdbd",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "the `start` script runs the same entry point",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 418,
+            "endOffset": 462,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 18,
+            "lineEnd": 18
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "script_exists",
+      "params": {
+        "script": "test"
+      },
+      "id": "c_d416c4c514",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "The `test` script runs Node's built-in tests",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 946,
+            "endOffset": 990,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 34,
+            "lineEnd": 34
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "code_reference",
+      "params": {
+        "name": "createApp"
+      },
+      "id": "c_1313e0340c",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "The code exports `createApp` from `src/server.js`",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 464,
+            "endOffset": 513,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 18,
+            "lineEnd": 18
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "code_reference",
+      "params": {
+        "name": "listPlanets"
+      },
+      "id": "c_b57b549b5c",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "`listPlanets` from `src/catalog.js`",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 518,
+            "endOffset": 553,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 18,
+            "lineEnd": 18
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "env_var",
+      "params": {
+        "name": "PORT"
+      },
+      "id": "c_eee3e48260",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "`PORT` can override the default",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 623,
+            "endOffset": 654,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 24,
+            "lineEnd": 24
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "env_var",
+      "params": {
+        "name": "ORBIT_GREETING"
+      },
+      "id": "c_3c2b61a911",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "`ORBIT_GREETING` changes the home-page text",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 660,
+            "endOffset": 703,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 24,
+            "lineEnd": 24
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "version",
+      "params": {
+        "range": ">=24"
+      },
+      "id": "c_a2893cb25c",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "The project requires Node.js 24 or newer (`>=24`).",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 93,
+            "endOffset": 143,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 7,
+            "lineEnd": 7
+          }
+        }
+      ],
+      "tier": "static"
+    },
+    {
+      "kind": "cli_flag",
+      "params": {
+        "flag": "--format"
+      },
+      "id": "c_b9a1380685",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "The `orbit` CLI supports the `--format` flag",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 1068,
+            "endOffset": 1112,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 42,
+            "lineEnd": 42
+          }
+        }
+      ],
+      "tier": "runtime"
+    },
+    {
+      "kind": "command_succeeds",
+      "params": {
+        "command": "npm test",
+        "timeoutMs": 120000
+      },
+      "id": "c_8a3639df0a",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "npm test",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 1038,
+            "endOffset": 1046,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 37,
+            "lineEnd": 37
+          }
+        }
+      ],
+      "tier": "runtime"
+    },
+    {
+      "kind": "port_listens",
+      "params": {
+        "port": 3000,
+        "startScript": "dev",
+        "timeoutMs": 5000
+      },
+      "id": "c_8ce6190173",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "The server listens on port 3000 by default.",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 579,
+            "endOffset": 622,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 24,
+            "lineEnd": 24
+          }
+        }
+      ],
+      "tier": "runtime"
+    },
+    {
+      "kind": "port_listens",
+      "params": {
+        "port": 3000,
+        "startScript": "dev",
+        "timeoutMs": 5000
+      },
+      "id": "c_6eef036f77",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "Open `http://localhost:3000/` after the server starts.",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 736,
+            "endOffset": 790,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 30,
+            "lineEnd": 30
+          }
+        }
+      ],
+      "tier": "runtime"
+    },
+    {
+      "kind": "http_example",
+      "params": {
+        "method": "GET",
+        "path": "/api/health",
+        "expectedStatus": 200,
+        "expectedKeys": ["status", "version"]
+      },
+      "id": "c_29405cdffb",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "`GET /api/health` returns status 200 with JSON keys `status` and `version`",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 791,
+            "endOffset": 865,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 30,
+            "lineEnd": 30
+          }
+        }
+      ],
+      "tier": "runtime"
+    },
+    {
+      "kind": "http_example",
+      "params": {
+        "method": "GET",
+        "path": "/api/planets",
+        "expectedStatus": 200,
+        "expectedKeys": ["planets"]
+      },
+      "id": "c_864a49bfa1",
+      "sourceId": "readme",
+      "occurrences": [
+        {
+          "quote": "`GET /api/planets` returns status 200 with a `planets` key",
+          "location": {
+            "sourceId": "readme",
+            "startOffset": 867,
+            "endOffset": 925,
+            "kind": "file",
+            "path": "README.md",
+            "lineStart": 30,
+            "lineEnd": 30
+          }
+        }
+      ],
+      "tier": "runtime"
+    }
+  ]
+}

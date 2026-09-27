@@ -1,0 +1,260 @@
+.form-page {
+  display: flex;
+  justify-content: center;
+  padding-top: clamp(2rem, 8vh, 6rem);
+}
+.form-panel {
+  width: min(620px, 100%);
+}
+.account-page .form-panel {
+  width: min(1160px, 100%);
+}
+.form-panel h1 {
+  font-size: clamp(2.1rem, 4vw, 3.5rem);
+}
+.form-panel > p {
+  color: var(--mist);
+}
+.form-panel form {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 2rem;
+}
+.form-panel label {
+  margin-top: 0.8rem;
+  font-weight: 500;
+}
+.form-panel .form-hint {
+  margin-bottom: 0.1rem;
+  font-size: 0.85rem;
+}
+.connect-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.2rem;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+.connect-mode legend {
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+.connect-mode label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+}
+.connect-mode input[type="radio"],
+.checkbox-row input[type="checkbox"] {
+  width: 1.15rem;
+  min-height: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  margin: 0;
+  flex: none;
+  accent-color: var(--paper);
+}
+.connect-repo-picker {
+  display: grid;
+  gap: 0.45rem;
+}
+.form-panel button {
+  justify-self: start;
+  margin-top: 0.8rem;
+}
+.form-feedback {
+  color: var(--paper);
+  border-left: 2px solid var(--paper);
+  padding-left: 0.8rem;
+  margin: 0.5rem 0 0;
+}
+.disclosure {
+  border: 1px solid var(--rule);
+  padding: 0.8rem;
+  margin: 0.7rem 0;
+  color: var(--mist);
+}
+.account-state {
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+  padding-top: 1rem;
+}
+.account-repos {
+  margin-top: 2rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 2rem;
+}
+.account-repo-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+.account-repo-toolbar > div {
+  flex: 1 1 16rem;
+}
+.account-repo-toolbar label {
+  display: block;
+  margin: 0 0 0.45rem;
+}
+.account-repo-toolbar button {
+  margin: 0;
+}
+.account-repo-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 25rem), 1fr));
+  gap: 0.8rem;
+}
+.account-repo-item {
+  min-width: 0;
+  border: 1px solid var(--rule);
+  padding: 1rem;
+  background: var(--night);
+}
+.account-repo-item > p {
+  color: var(--mist);
+  margin: 0.7rem 0;
+}
+.account-repo-topline {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem;
+  overflow-wrap: anywhere;
+}
+.account-repo-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.account-repo-tags span {
+  border: 1px solid var(--rule);
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+  color: var(--mist);
+}
+.account-repo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+.account-repo-actions button {
+  margin: 0;
+}
+.account-repo-actions .button-secondary {
+  background: transparent;
+  color: var(--paper);
+}
+.account-repo-actions .button-secondary:hover {
+  background: var(--hull);
+}
+.account-repo-pages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.3rem;
+}
+.account-repo-pages button {
+  margin: 0;
+}
+
+.imessage-link p {
+  color: var(--mist);
+}
+
+.imessage-link button {
+  margin-top: 0.8rem;
+}
+
+.connect-token {
+  border: 1px solid var(--rule);
+  padding: 1rem;
+  margin-top: 1rem;
+  min-width: 0;
+}
+
+.connect-token h2 {
+  margin: 0 0 0.5rem;
+}
+
+.connect-token-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.connect-token-row input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.connect-token-row button {
+  margin: 0;
+}
+
+.connect-token code {
+  overflow-wrap: anywhere;
+}
+.connect-setup {
+  margin-top: 1.5rem;
+}
+.connect-rotate {
+  margin-top: 1.5rem;
+}
+.connect-rotate button {
+  margin-top: 0.25rem;
+}
+.connect-setup ol {
+  padding-left: 1.5rem;
+}
+.connect-setup li {
+  padding: 0.15rem 0 1rem 0.4rem;
+}
+.connect-setup li + li {
+  border-top: 1px solid var(--rule);
+  padding-top: 1rem;
+}
+.connect-setup li h3 {
+  margin: 0.3rem 0 0.5rem;
+}
+.connect-setup input[type="url"],
+.connect-setup input#connect-checkout,
+.connect-setup input#connect-default-branch {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+.connect-command {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+}
+.connect-command code {
+  flex: 1 1 18rem;
+  overflow-wrap: anywhere;
+}
+.connect-command button {
+  margin: 0;
+}
+.connect-command [role="status"] {
+  flex-basis: 100%;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 760px) {
+  .form-page {
+    padding-top: 1rem;
+  }
+}

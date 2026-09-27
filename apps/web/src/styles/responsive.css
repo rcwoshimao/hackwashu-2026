@@ -1,0 +1,73 @@
+@media (max-width: 760px) {
+  .site-header {
+    align-items: flex-start;
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+  .brand small {
+    font-size: 0.75rem;
+  }
+  .desktop-nav {
+    display: none;
+  }
+  .mobile-nav {
+    display: block;
+    position: relative;
+  }
+  .mobile-nav summary {
+    cursor: pointer;
+    min-height: 44px;
+    max-width: 34vw;
+    padding: 0.65rem;
+    border: 1px solid var(--rule);
+    list-style: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .mobile-nav nav {
+    position: absolute;
+    z-index: 20;
+    right: 0;
+    top: calc(100% + 0.2rem);
+    min-width: 210px;
+    background: var(--hull);
+    border: 1px solid var(--rule);
+    padding: 0.5rem;
+    display: grid;
+  }
+  .mobile-nav nav a {
+    padding: 0.8rem;
+  }
+  .page {
+    padding: 1rem;
+  }
+  h1 {
+    font-size: clamp(2rem, 9vw, 3.2rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.stage {
+  font-size: 1.5rem;
+}
+.stage .eyebrow,
+.stage .status-badge,
+.stage .sky-legend,
+.stage .provenance,
+.stage .brand a,
+.stage .desktop-nav {
+  font-size: 1.5rem;
+}
+.stage h2 {
+  font-size: 2rem;
+}
+.stage .page :is(p, dt, dd, label, button, input, a, li, span, small, h3, h4),
+.stage .site-header :is(a, small, summary) {
+  font-size: 1.5rem;
+}

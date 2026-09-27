@@ -1,0 +1,15 @@
+{
+  "name": "@ground-control/fixes",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@ground-control/messaging": "workspace:*",
+    "@ground-control/plan": "workspace:*",
+    "@ground-control/store": "workspace:*",
+    "@octokit/rest": "22.0.1"
+  }
+}
