@@ -225,4 +225,7 @@ const sourceRefreshError = () => {
   events.publish(event);
 };
 sourceSync.start(sourceRefreshError);
-void sourceSync.refreshDue().catch(sourceRefreshError);
+void sourceSync
+  .refreshDue()
+  .then(() => sourceSync.repairPlans())
+  .catch(sourceRefreshError);
