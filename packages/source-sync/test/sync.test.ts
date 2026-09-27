@@ -1,5 +1,9 @@
 import { describe, expect, test } from "bun:test";
-import { HeuristicModel, MemoryModelCache } from "@ground-control/ai";
+import {
+  HeuristicModel,
+  MemoryModelCache,
+  type ModelPort,
+} from "@ground-control/ai";
 import { FixtureConfluence, FixtureWebPage } from "@ground-control/sources";
 import type { SourceRecord } from "@ground-control/store";
 import { MemoryStore } from "@ground-control/store";
@@ -256,4 +260,56 @@ describe("connected source sync", () => {
       discovered.value.find((source) => source.kind === "docs")?.url,
     ).toContain("/blob/fixture-sha/docs/setup.md");
   });
+});
+
+test("refresh can return before the model finishes the flight plan", async () => {
+  const store = new MemoryStore();
+  store.putRepo({
+    repo,
+    visibility: "public",
+    connected: true,
+    tokenHash: null,
+    label: "No telemetry",
+    driftDegrees: 0,
+    latestRunId: null,
+  });
+  store.putSource(file);
+  let release = () => {};
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const heuristic = new HeuristicModel();
+  const slowModel: ModelPort = {
+    model: "slow-fixture",
+    async extract(input) {
+      await gate;
+      return heuristic.extract(input);
+    },
+  };
+  const sync = new SourceSync({
+    store,
+    files: new FixtureRepositoryFiles(
+      new Map([
+        [`${repo}:README.md`, { text: "Run `npm run dev`", version: "1" }],
+      ]),
+    ),
+    web: new FixtureWebPage(new Map()),
+    confluence: new FixtureConfluence(new Map()),
+    model: slowModel,
+    cache: new MemoryModelCache(),
+    now: () => new Date("2026-09-26T12:00:00Z"),
+  });
+  const status = await sync.refresh("readme", undefined, {
+    waitForPlan: false,
+  });
+  expect(status).toMatchObject({ ok: true, value: { status: "fresh" } });
+  expect(store.getFlightPlan(repo)).toBeNull();
+  release();
+  for (
+    let attempt = 0;
+    attempt < 50 && !store.getFlightPlan(repo);
+    attempt += 1
+  )
+    await Bun.sleep(5);
+  expect(store.getFlightPlan(repo)).not.toBeNull();
 });

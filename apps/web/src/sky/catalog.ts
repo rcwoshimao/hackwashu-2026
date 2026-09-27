@@ -9,8 +9,7 @@ export type SkyEntry =
     }
   | { kind: "unscanned"; repo: string; account: AccountRepoData }
   | { kind: "checked"; repo: string; account: AccountRepoData };
-export type SkyScope = "all" | "mine" | "public" | "private";
-export type SkyScanFilter = "all" | "scanned" | "unscanned";
+export type SkyScope = "mine" | "public";
 
 export function catalogEntries(
   satellites: Satellite[],
@@ -41,20 +40,18 @@ export function catalogEntries(
 export function filterEntries(
   entries: SkyEntry[],
   scope: SkyScope,
-  status: SkyScanFilter,
   search: string,
+  login: string | null = null,
 ): SkyEntry[] {
   const term = search.trim().toLowerCase();
   return entries.filter((entry) => {
-    const own = entry.account !== null;
-    const visibility = entry.account?.visibility ?? "public";
+    const own =
+      entry.account !== null ||
+      (login !== null &&
+        entry.repo.split("/")[0]?.toLowerCase() === login.toLowerCase());
     return (
       entry.repo.toLowerCase().includes(term) &&
-      (scope === "all" || (scope === "mine" && own) || scope === visibility) &&
-      (status === "all" ||
-        (status === "scanned"
-          ? entry.kind !== "unscanned"
-          : entry.kind === "unscanned"))
+      (scope === "mine" ? own : !own && entry.kind === "scanned")
     );
   });
 }

@@ -8,29 +8,46 @@
 }
 .sky-catalog-controls {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(190px, 0.8fr);
-  gap: 0.8rem;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 0.7fr);
+  gap: 1rem;
   align-items: end;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.65rem;
 }
-.sky-filter-options summary {
-  min-height: 44px;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid var(--rule);
-  cursor: pointer;
-}
-.sky-filter-fields {
+.sky-scope-control {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.8rem;
-  margin-top: 0.8rem;
+  gap: 0.25rem;
+  padding: 0.25rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--hull);
 }
-.sky-filter-options[open] {
-  grid-column: 1 / -1;
+.sky-scope-control button {
+  min-height: 44px;
+  padding: 0.55rem 0.8rem;
+  border: 0;
+  background: transparent;
+  color: var(--paper);
+}
+.sky-scope-control button:hover {
+  background: var(--rule);
+}
+.sky-scope-control button[aria-pressed="true"],
+.sky-scope-control button[aria-pressed="true"]:hover {
+  background: var(--paper);
+  color: var(--night);
 }
 .sky-catalog-controls label {
   display: block;
   margin-bottom: 0.35rem;
+}
+.sky-search-control input {
+  width: 100%;
+}
+.sky-scope-hint {
+  margin: 0 0 1.2rem;
+  color: var(--mist);
+  font-size: 0.92rem;
 }
 .sky-catalog-pages {
   display: flex;

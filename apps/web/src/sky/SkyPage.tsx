@@ -10,12 +10,7 @@ import {
 } from "../data.ts";
 import { readableDate } from "../presentation.ts";
 import { accountEventNames, watchEvents } from "../realtime.ts";
-import {
-  catalogEntries,
-  filterEntries,
-  type SkyScanFilter,
-  type SkyScope,
-} from "./catalog.ts";
+import { catalogEntries, filterEntries, type SkyScope } from "./catalog.ts";
 import { ScanForm } from "./ScanForm.tsx";
 import { ScanTiers } from "./ScanTiers.tsx";
 import { SkyBulkScan } from "./SkyBulkScan.tsx";
@@ -135,9 +130,11 @@ export function SkyPage() {
   const [accountRepos, setAccountRepos] = useState<AccountRepoData[]>([]);
   const [accountFailed, setAccountFailed] = useState(false);
   const [accountLoading, setAccountLoading] = useState(true);
-  const [scope, setScope] = useState<SkyScope>("all");
-  const [scanFilter, setScanFilter] = useState<SkyScanFilter>("all");
+  const [scope, setScope] = useState<SkyScope>("public");
   const [search, setSearch] = useState("");
+  useEffect(() => {
+    if (me?.signedIn) setScope("mine");
+  }, [me?.signedIn]);
   const inspect = (repo: string) => {
     select(repo);
     if (window.matchMedia("(max-width: 1050px)").matches) {
@@ -182,8 +179,8 @@ export function SkyPage() {
     [data, accountRepos],
   );
   const filtered = useMemo(
-    () => filterEntries(entries, scope, scanFilter, search),
-    [entries, scope, scanFilter, search],
+    () => filterEntries(entries, scope, search, me?.login ?? null),
+    [entries, scope, search, me?.login],
   );
   const scanned = filtered.flatMap((entry) =>
     entry.kind === "scanned" ? [entry.satellite] : [],
@@ -193,6 +190,13 @@ export function SkyPage() {
   );
   const selected =
     filtered.find((entry) => entry.repo === selectedRepo) ?? null;
+  const canEnableDeep = Boolean(
+    selected?.account?.visibility === "public" &&
+      selected.account.canAdmin &&
+      !selected.account.runtimeEnabled &&
+      me?.login &&
+      selected.repo.split("/")[0]?.toLowerCase() === me.login.toLowerCase(),
+  );
   return (
     <main className="page sky-page">
       <SkyHeader data={data} state={state} refresh={refresh} />
@@ -228,59 +232,75 @@ export function SkyPage() {
         )}
       {data && entries.length > 0 && (
         <>
-          <SkyFindings satellites={data.satellites} />
           <SkyFilters
             scope={scope}
-            status={scanFilter}
             search={search}
             onScope={setScope}
-            onStatus={setScanFilter}
             onSearch={setSearch}
           />
-          <div className="sky-grid">
-            <div className="sky-main">
-              <SkyCanvas
-                satellites={scanned}
-                unscanned={unscanned}
+          <p className="sky-scope-hint">
+            {scope === "mine" ? copy.skyScopeMineHint : copy.skyScopePublicHint}
+          </p>
+          {scope === "mine" && !me?.signedIn ? (
+            <div className="state-panel panel">
+              <p>{copy.skyMyReposSignIn}</p>
+              <a className="button" href="/signin">
+                {copy.navSignIn}
+              </a>
+            </div>
+          ) : (
+            <>
+              <SkyFindings satellites={scanned} />
+              <div className="sky-grid">
+                <div className="sky-main">
+                  <SkyCanvas
+                    satellites={scanned}
+                    unscanned={unscanned}
+                    selectedRepo={selectedRepo}
+                    onSelect={inspect}
+                  />
+                  <SkyLegend />
+                </div>
+                <div className="sky-side">
+                  {selected && selected.kind !== "scanned" ? (
+                    <UnscannedInspector
+                      repo={selected.account}
+                      canEnableDeep={canEnableDeep}
+                    />
+                  ) : (
+                    <SkyInspector
+                      satellite={
+                        selected?.kind === "scanned" ? selected.satellite : null
+                      }
+                      account={
+                        selected?.kind === "scanned" ? selected.account : null
+                      }
+                      canEnableDeep={canEnableDeep}
+                    />
+                  )}
+                </div>
+              </div>
+              <SkyCatalog
+                key={`${scope}:${search}`}
+                entries={filtered}
                 selectedRepo={selectedRepo}
                 onSelect={inspect}
               />
-              <SkyLegend />
-            </div>
-            <div className="sky-side">
-              {selected && selected.kind !== "scanned" ? (
-                <UnscannedInspector repo={selected.account} />
-              ) : (
-                <SkyInspector
-                  satellite={
-                    selected?.kind === "scanned" ? selected.satellite : null
-                  }
-                  account={
-                    selected?.kind === "scanned" ? selected.account : null
-                  }
+              {scope === "mine" && me?.signedIn && (
+                <SkyBulkScan
+                  repos={entries.flatMap((entry) =>
+                    entry.kind === "unscanned" ? [entry.account] : [],
+                  )}
                 />
               )}
-            </div>
-          </div>
-          <SkyCatalog
-            key={`${scope}:${scanFilter}:${search}`}
-            entries={filtered}
-            selectedRepo={selectedRepo}
-            onSelect={inspect}
-          />
-          {me?.signedIn && (
-            <SkyBulkScan
-              repos={entries.flatMap((entry) =>
-                entry.kind === "unscanned" ? [entry.account] : [],
-              )}
-            />
+              <div className="sky-help">
+                <ScanTiers />
+              </div>
+            </>
           )}
-          <div className="sky-help">
-            <ScanTiers />
-          </div>
         </>
       )}
-      <ScanForm />
+      {scope === "public" && <ScanForm />}
     </main>
   );
 }

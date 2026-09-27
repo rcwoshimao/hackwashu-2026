@@ -18,7 +18,8 @@ import {
   labelFor,
   runClaims,
 } from "./assessment.ts";
-import type { PublicGitHubPort, PublicRepo, RankedRepo } from "./github.ts";
+import type { PublicGitHubPort, PublicRepo } from "./github.ts";
+import { starRanking } from "./ranking.ts";
 
 export type ScanResult =
   | { state: "queued"; repo: string }
@@ -102,7 +103,13 @@ function reusePublicScan(
   const run = store.getRun(runId(repo.repo, repo.sha));
   if (!run || run.repo !== repo.repo || run.commitSha !== repo.sha)
     return false;
-  savePublicRecord(store, repo.repo, cached.label, cached.driftDegrees, run.id);
+  // Relabel from the saved results so a changed labelling rule applies to
+  // cached scans without another GitHub or model call.
+  const label = labelFor(run.results);
+  const degrees = driftDegrees(run.results);
+  if (label !== cached.label || degrees !== cached.driftDegrees)
+    store.putSatellite({ ...cached, label, driftDegrees: degrees });
+  savePublicRecord(store, repo.repo, label, degrees, run.id);
   return true;
 }
 
@@ -168,24 +175,13 @@ export class PublicScanner {
   async scanTop(
     count: number,
   ): Promise<{ requested: number; scanned: number; failed: number }> {
-    const ranked: RankedRepo[] = [];
-    for (const language of ["JavaScript", "TypeScript"] as const) {
-      for (let page = 1; page <= 10; page += 1) {
-        const response = await this.github.topRepos(language, page);
-        if (!response.ok) throw new Error(response.error.code);
-        ranked.push(...response.value);
-        if (response.value.length < 100) break;
-      }
-    }
-    const names = [
-      ...new Map(ranked.map((entry) => [entry.repo, entry])).values(),
-    ]
-      .sort((left, right) => right.stars - left.stars)
-      .map((entry) => entry.repo);
     let scanned = 0;
     let requested = 0;
-    for (const repo of names) {
-      if (scanned >= count) break;
+    const ranking = starRanking(this.github);
+    while (scanned < count) {
+      const next = await ranking.next();
+      if (next.done) break;
+      const repo = next.value;
       requested += 1;
       if (this.store.getRepo(repo)?.visibility === "private") continue;
       const fetched = await this.github.getRepo(repo);

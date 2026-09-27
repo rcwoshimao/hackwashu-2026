@@ -65,10 +65,20 @@ export class SourceSync {
       : { ok: false, error: { code: "not_found" } };
   }
 
-  refresh(sourceId: string, userToken?: string): Promise<Result<SyncStatus>> {
+  /**
+   * `waitForPlan: false` returns once the fetch is stored and lets the model
+   * rebuild the flight plan in the background, so a browser request is not
+   * held open for the whole extraction.
+   */
+  refresh(
+    sourceId: string,
+    userToken?: string,
+    options: { waitForPlan?: boolean } = {},
+  ): Promise<Result<SyncStatus>> {
     const running = this.inFlight.get(sourceId);
     if (running) return running;
-    const task = this.refreshOne(sourceId, userToken).finally(() =>
+    const waitForPlan = options.waitForPlan ?? true;
+    const task = this.refreshOne(sourceId, userToken, waitForPlan).finally(() =>
       this.inFlight.delete(sourceId),
     );
     this.inFlight.set(sourceId, task);
@@ -97,7 +107,8 @@ export class SourceSync {
 
   private async refreshOne(
     sourceId: string,
-    userToken?: string,
+    userToken: string | undefined,
+    waitForPlan: boolean,
   ): Promise<Result<SyncStatus>> {
     const source = this.deps.store.getSource(sourceId);
     if (!source) return { ok: false, error: { code: "not_found" } };
@@ -132,7 +143,10 @@ export class SourceSync {
     };
     this.deps.store.putSourceSnapshot(snapshot);
     this.deps.onUpdate?.(snapshot, changed);
-    if (changed) await this.queuePlan(source.repo);
+    if (changed) {
+      const plan = this.queuePlan(source.repo);
+      if (waitForPlan) await plan;
+    }
     return { ok: true, value: sourceStatus(snapshot) };
   }
 

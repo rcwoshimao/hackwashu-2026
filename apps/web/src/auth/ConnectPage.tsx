@@ -9,8 +9,9 @@ import { useMe } from "./useMe.ts";
 type State = "idle" | "pending" | "invalid" | "error" | "visibility_changed";
 
 function ConnectForm() {
-  const [repo, setRepo] = useState("");
-  const [runtime, setRuntime] = useState(false);
+  const params = new URLSearchParams(window.location.search);
+  const [repo, setRepo] = useState(params.get("repo") ?? "");
+  const [runtime, setRuntime] = useState(params.get("runtime") === "1");
   const [state, setState] = useState<State>("idle");
   const [connection, setConnection] = useState<Connection | null>(null);
   const submit = async (event: FormEvent<HTMLFormElement>) => {
@@ -85,7 +86,9 @@ export function ConnectPage() {
   return (
     <main className="page form-page">
       <section className="form-panel panel">
-        <p className="eyebrow">{copy.brand}</p>
+        <a className="back-link" href="/reports">
+          {copy.reportsBack}
+        </a>
         <h1>{copy.connectTitle}</h1>
         <p>{copy.connectIntro}</p>
         {loading ? (

@@ -5,7 +5,13 @@ import { StatusBadge } from "../components/StatusBadge.tsx";
 import type { AccountRepoData } from "../data.ts";
 import { repoPath } from "../presentation.ts";
 
-export function UnscannedInspector({ repo }: { repo: AccountRepoData }) {
+export function UnscannedInspector({
+  repo,
+  canEnableDeep,
+}: {
+  repo: AccountRepoData;
+  canEnableDeep: boolean;
+}) {
   const [requesting, setRequesting] = useState(false);
   const [feedback, setFeedback] = useState("");
   const canScan = repo.visibility === "public" && !repo.archived && !repo.fork;
@@ -53,6 +59,11 @@ export function UnscannedInspector({ repo }: { repo: AccountRepoData }) {
           {copy.skyHoldingConnect}
         </a>
       ) : null}
+      {canEnableDeep && (
+        <a href={`/connect?repo=${encodeURIComponent(repo.repo)}&runtime=1`}>
+          {copy.accountReposEnableRuntime}
+        </a>
+      )}
       {feedback && <p role="status">{feedback}</p>}
     </aside>
   );

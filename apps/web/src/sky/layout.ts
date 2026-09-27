@@ -17,6 +17,9 @@ export type SkyPoint = {
   radius: number;
   angle: number;
   distance: number;
+  sectorStart: number;
+  sectorSpan: number;
+  spread: number;
 };
 export type SkyLayout = {
   points: SkyPoint[];
@@ -85,11 +88,10 @@ export function layoutSky(
   const sector = (Math.PI * 2) / topicKeys.length;
   const points = satellites.map((satellite): SkyPoint => {
     const group = topicKeys.indexOf(topicKey(satellite.topicCluster));
-    const angle =
-      -Math.PI / 2 +
-      group * sector +
-      0.08 +
-      stableFraction(satellite.repo) * (sector - 0.16);
+    const sectorStart = -Math.PI / 2 + group * sector + 0.08;
+    const sectorSpan = sector - 0.16;
+    const spread = stableFraction(satellite.repo);
+    const angle = sectorStart + spread * sectorSpan;
     const distance = lagScale(satellite.readmeLagDays);
     return {
       satellite,
@@ -98,6 +100,9 @@ export function layoutSky(
       radius: starScale(Math.max(1, satellite.stars)),
       angle,
       distance,
+      sectorStart,
+      sectorSpan,
+      spread,
     };
   });
   return {
@@ -115,11 +120,13 @@ export function pickSatellite(
   layout: SkyLayout,
   x: number,
   y: number,
+  place: (point: SkyPoint) => { x: number; y: number } = (point) => point,
 ): Satellite | null {
   let picked: SkyPoint | null = null;
   let best = Number.POSITIVE_INFINITY;
   for (const point of layout.points) {
-    const distance = Math.hypot(point.x - x, point.y - y);
+    const at = place(point);
+    const distance = Math.hypot(at.x - x, at.y - y);
     const hitRadius = Math.max(16, point.radius + 8);
     if (distance <= hitRadius && distance < best) {
       picked = point;

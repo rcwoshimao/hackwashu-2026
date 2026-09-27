@@ -2,7 +2,7 @@ import { expect, test } from "bun:test";
 import type { IncomingMessage } from "node:http";
 import { PassThrough } from "node:stream";
 import { maxSourceHtmlBytes } from "../../../config/limits.ts";
-import { readBody } from "../src/web.ts";
+import { pinnedLookup, readBody } from "../src/web.ts";
 
 function fakeResponse(
   statusCode: number,
@@ -37,4 +37,19 @@ test("web source bounds advertised and streaming response size", async () => {
     ok: false,
     error: { code: "too_large" },
   });
+});
+
+test("pinned lookup answers both single and all-address requests", () => {
+  const lookup = pinnedLookup("140.82.112.3");
+  const answers: unknown[] = [];
+  lookup("github.com", {}, (_error, address, family) =>
+    answers.push([address, family]),
+  );
+  lookup("github.com", { all: true }, (_error, addresses) =>
+    answers.push(addresses),
+  );
+  expect(answers).toEqual([
+    ["140.82.112.3", 4],
+    [{ address: "140.82.112.3", family: 4 }],
+  ]);
 });

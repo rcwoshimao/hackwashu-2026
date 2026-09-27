@@ -1,7 +1,7 @@
 import { copy } from "@ground-control/copy";
 import { useState } from "react";
 import { StatusBadge } from "../components/StatusBadge.tsx";
-import type { SkyEntry, SkyScanFilter, SkyScope } from "./catalog.ts";
+import type { SkyEntry, SkyScope } from "./catalog.ts";
 
 const rowsPerPage = 20;
 
@@ -13,18 +13,32 @@ type Props = {
 
 type FilterProps = {
   scope: SkyScope;
-  status: SkyScanFilter;
   search: string;
   onScope: (value: SkyScope) => void;
-  onStatus: (value: SkyScanFilter) => void;
   onSearch: (value: string) => void;
 };
 
 export function SkyFilters(props: FilterProps) {
-  const active = props.scope !== "all" || props.status !== "all";
   return (
     <div className="sky-catalog-controls">
-      <div>
+      <fieldset className="sky-scope-control">
+        <legend className="visually-hidden">{copy.skyScopeLabel}</legend>
+        <button
+          type="button"
+          aria-pressed={props.scope === "mine"}
+          onClick={() => props.onScope("mine")}
+        >
+          {copy.skyScopeMine}
+        </button>
+        <button
+          type="button"
+          aria-pressed={props.scope === "public"}
+          onClick={() => props.onScope("public")}
+        >
+          {copy.skyScopePublic}
+        </button>
+      </fieldset>
+      <div className="sky-search-control">
         <label htmlFor="satellite-search">{copy.skyBrowseSearch}</label>
         <input
           id="satellite-search"
@@ -35,42 +49,6 @@ export function SkyFilters(props: FilterProps) {
           placeholder={copy.skyBrowsePlaceholder}
         />
       </div>
-      <details className="sky-filter-options">
-        <summary>
-          {active ? copy.skyFiltersActive : copy.skyFiltersTitle}
-        </summary>
-        <div className="sky-filter-fields">
-          <div>
-            <label htmlFor="sky-scope">{copy.skyScopeLabel}</label>
-            <select
-              id="sky-scope"
-              value={props.scope}
-              onChange={(event) =>
-                props.onScope(event.target.value as SkyScope)
-              }
-            >
-              <option value="all">{copy.skyScopeAll}</option>
-              <option value="mine">{copy.skyScopeMine}</option>
-              <option value="public">{copy.skyScopePublic}</option>
-              <option value="private">{copy.skyScopePrivate}</option>
-            </select>
-          </div>
-          <div>
-            <label htmlFor="sky-scan-filter">{copy.skyScanFilterLabel}</label>
-            <select
-              id="sky-scan-filter"
-              value={props.status}
-              onChange={(event) =>
-                props.onStatus(event.target.value as SkyScanFilter)
-              }
-            >
-              <option value="all">{copy.skyScanFilterAll}</option>
-              <option value="scanned">{copy.skyScanFilterScanned}</option>
-              <option value="unscanned">{copy.skyScanFilterUnscanned}</option>
-            </select>
-          </div>
-        </div>
-      </details>
     </div>
   );
 }

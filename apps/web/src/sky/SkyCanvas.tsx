@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { AccountRepoData, Satellite } from "../data.ts";
 import { useArrivals, useCanvasRender, useVisibility } from "./canvasHooks.ts";
 import { layoutBlimps, layoutSky, pickBlimp, pickSatellite } from "./layout.ts";
+import { placePoint } from "./motion.ts";
 
 type Props = {
   satellites: Satellite[];
@@ -71,7 +72,6 @@ export function SkyCanvas({
   useCanvasRender(
     canvasRef,
     layout,
-    satellites,
     selectedRepo,
     reducedMotion,
     arrivals,
@@ -86,7 +86,10 @@ export function SkyCanvas({
     const blimp = pickBlimp(blimps, x, y);
     if (blimp) onSelect(blimp.repo);
     else {
-      const picked = pickSatellite(layout, x, y);
+      const now = performance.now();
+      const picked = pickSatellite(layout, x, y, (point) =>
+        placePoint(layout, point, now, reducedMotion),
+      );
       if (picked) onSelect(picked.repo);
     }
   };

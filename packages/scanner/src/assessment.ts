@@ -1,6 +1,7 @@
 import type { Claim } from "@ground-control/plan";
 import { memorySnapshot, runStaticCheck } from "@ground-control/runner";
 import type { AppStore, RunClaim, RunRecord } from "@ground-control/store";
+import { minCheckableClaims } from "../../../config/limits.ts";
 import type { PublicRepo } from "./github.ts";
 
 function deepLink(repo: PublicRepo, claim: Claim): string | null {
@@ -68,7 +69,7 @@ export function labelFor(results: readonly RunClaim[]): string {
   const checkable = results.filter(
     (item) => item.status === "pass" || item.status === "fail",
   );
-  if (checkable.length < 3) return "No telemetry";
+  if (checkable.length < minCheckableClaims) return "No telemetry";
   const confirmedFailures = checkable.filter(
     (item) => item.state === "confirmed" && item.status === "fail",
   );

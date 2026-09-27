@@ -1,25 +1,24 @@
 import { copy } from "@ground-control/copy";
 import { ConnectPage } from "./auth/ConnectPage.tsx";
 import { SignInPage } from "./auth/SignInPage.tsx";
-import { useMe } from "./auth/useMe.ts";
-import type { MeData } from "./data.ts";
+import { AccountMenu } from "./components/AccountMenu.tsx";
 import { RepoPage } from "./repo/RepoPage.tsx";
+import { ReportsPage } from "./reports/ReportsPage.tsx";
 import { RunPage } from "./run/RunPage.tsx";
 import { SkyPage } from "./sky/SkyPage.tsx";
 import { SourcePage } from "./sources/SourcePage.tsx";
 
-function navigation(me: MeData | null) {
+function navigation(path: string) {
+  const reports =
+    path === "/reports" || path === "/connect" || path === "/sources/new";
+  const sky = path === "/" || path === "/sky";
   return (
     <>
-      <a href="/sky">{copy.navSky}</a>
-      <a href={me?.signedIn ? "/signin" : "/connect"}>
-        {me?.signedIn ? copy.navMyRepos : copy.navConnect}
+      <a href="/sky" aria-current={sky ? "page" : undefined}>
+        {copy.navSky}
       </a>
-      <a href="/sources/new">{copy.navSources}</a>
-      <a className={me?.signedIn ? "nav-account" : ""} href="/signin">
-        {me?.signedIn
-          ? `${copy.navSignedInAs} @${me.login ?? copy.commonUnknown}`
-          : copy.navSignIn}
+      <a href="/reports" aria-current={reports ? "page" : undefined}>
+        {copy.navReports}
       </a>
     </>
   );
@@ -27,6 +26,7 @@ function navigation(me: MeData | null) {
 
 function route(path: string) {
   if (path === "/" || path === "/sky") return <SkyPage />;
+  if (path === "/reports") return <ReportsPage />;
   if (path === "/connect") return <ConnectPage />;
   if (path === "/sources/new") return <SourcePage />;
   if (path === "/signin") return <SignInPage />;
@@ -58,9 +58,9 @@ function decodeSegment(value: string): string | null {
 }
 
 export function App() {
-  const { me } = useMe();
   const stage =
     new URLSearchParams(window.location.search).get("stage") === "1";
+  const path = window.location.pathname;
   return (
     <div className={`app-shell ${stage ? "stage" : ""}`}>
       <a className="skip-link" href="#main-content">
@@ -74,23 +74,18 @@ export function App() {
           </a>
           <small>{copy.appTagline}</small>
         </div>
-        <nav className="desktop-nav" aria-label={copy.navMenu}>
-          {navigation(me)}
-        </nav>
-        <details className="mobile-nav">
-          <summary
-            aria-label={
-              me?.signedIn
-                ? `${copy.navMenu}, ${copy.navSignedInAs} @${me.login ?? copy.commonUnknown}`
-                : copy.navMenu
-            }
-          >
-            {me?.signedIn ? `@${me.login ?? copy.commonUnknown}` : copy.navMenu}
-          </summary>
-          <nav aria-label={copy.navMenu}>{navigation(me)}</nav>
-        </details>
+        <div className="header-end">
+          <nav className="desktop-nav" aria-label={copy.navMenu}>
+            {navigation(path)}
+          </nav>
+          <details className="mobile-nav">
+            <summary>{copy.navMenu}</summary>
+            <nav aria-label={copy.navMenu}>{navigation(path)}</nav>
+          </details>
+          <AccountMenu />
+        </div>
       </div>
-      <div id="main-content">{route(window.location.pathname)}</div>
+      <div id="main-content">{route(path)}</div>
     </div>
   );
 }

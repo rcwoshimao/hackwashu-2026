@@ -123,9 +123,11 @@ function ScanDetails({ satellite }: { satellite: Satellite }) {
 export function SkyInspector({
   satellite,
   account,
+  canEnableDeep,
 }: {
   satellite: Satellite | null;
   account: AccountRepoData | null;
+  canEnableDeep: boolean;
 }) {
   const { run, loading } = useLatestRun(satellite);
   if (!satellite)
@@ -177,6 +179,13 @@ export function SkyInspector({
             >
               {copy.skyReadme}
             </a>
+            {canEnableDeep && (
+              <a
+                href={`/connect?repo=${encodeURIComponent(satellite.repo)}&runtime=1`}
+              >
+                {copy.accountReposEnableRuntime}
+              </a>
+            )}
           </div>
           <ScanDetails satellite={satellite} />
         </>

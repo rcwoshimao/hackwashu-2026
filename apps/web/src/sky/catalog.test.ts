@@ -47,14 +47,12 @@ test("catalog keeps measured satellites and unscanned account repos distinct", (
     ],
   );
   assert.deepEqual(
-    filterEntries(entries, "mine", "unscanned", "private").map(
-      (entry) => entry.repo,
-    ),
+    filterEntries(entries, "mine", "private").map((entry) => entry.repo),
     ["owner/private"],
   );
   assert.deepEqual(
-    filterEntries(entries, "public", "all", "").map((entry) => entry.repo),
-    ["owner/public"],
+    filterEntries(entries, "public", "").map((entry) => entry.repo),
+    [],
   );
 });
 
@@ -69,6 +67,35 @@ test("private saved checks appear as checked without becoming public satellites"
     entries.map((entry) => entry.kind),
     ["checked"],
   );
-  assert.equal(filterEntries(entries, "private", "scanned", "").length, 1);
-  assert.equal(filterEntries(entries, "private", "unscanned", "").length, 0);
+  assert.equal(filterEntries(entries, "mine", "").length, 1);
+});
+
+test("public view excludes public repos in the signed-in account inventory", () => {
+  const entries = catalogEntries(
+    [scan, { ...scan, repo: "community/library" }],
+    [account("owner/public", "public"), account("owner/private", "private")],
+  );
+  assert.deepEqual(
+    filterEntries(entries, "mine", "").map((entry) => entry.repo),
+    ["owner/public", "owner/private"],
+  );
+  assert.deepEqual(
+    filterEntries(entries, "public", "").map((entry) => entry.repo),
+    ["community/library"],
+  );
+  assert.deepEqual(
+    filterEntries(entries, "mine", "", "OWNER").map((entry) => entry.repo),
+    ["owner/public", "owner/private"],
+  );
+});
+
+test("public view excludes signed-in owner while account inventory loads", () => {
+  const entries = catalogEntries(
+    [scan, { ...scan, repo: "community/library" }],
+    [],
+  );
+  assert.deepEqual(
+    filterEntries(entries, "public", "", "OWNER").map((entry) => entry.repo),
+    ["community/library"],
+  );
 });
