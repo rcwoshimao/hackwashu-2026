@@ -75,9 +75,6 @@
 .account-popover p strong {
   color: var(--paper);
 }
-.account-popover a {
-  padding: 0.55rem 0;
-}
 .account-popover button {
   margin-top: 0.4rem;
 }

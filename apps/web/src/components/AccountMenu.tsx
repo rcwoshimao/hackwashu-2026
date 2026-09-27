@@ -61,8 +61,6 @@ export function AccountMenu() {
         <p>
           {copy.signInConnected} <strong>{me.login}</strong>
         </p>
-        <a href="/signin">{copy.navMyRepos}</a>
-        <a href="/reports">{copy.navReports}</a>
         <button
           type="button"
           onClick={() => void signout()}
