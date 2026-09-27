@@ -402,7 +402,22 @@ export const webCopy = {
   connectWorkflowDownload: "Download workflow",
   connectVerifyTitle: "Open a test pull request",
   connectStepRun:
-    "Open a pull request in this repository. The Ground Control check and report appear in Actions; the first passing run establishes a baseline.",
+    "Run this PowerShell command after the workflow and Actions secret are ready. It clones this repository into a temporary folder, creates an empty commit, pushes a test branch, and opens a pull request. The Ground Control check and report appear in Actions; the first passing run establishes a baseline.",
+  connectSmokeCommand: `$repo = '{repo}'
+$branch = 'ground-control-smoke-' + (Get-Date -Format 'yyyyMMddHHmmssfff')
+$checkout = Join-Path ([IO.Path]::GetTempPath()) $branch
+gh repo clone $repo $checkout
+if ($LASTEXITCODE -ne 0) { throw 'Clone failed' }
+$base = git -C $checkout branch --show-current
+if ($LASTEXITCODE -ne 0 -or -not $base) { throw 'Default branch lookup failed' }
+git -C $checkout switch -c $branch
+if ($LASTEXITCODE -ne 0) { throw 'Branch creation failed' }
+git -C $checkout commit --allow-empty -m 'Test Ground Control checks'
+if ($LASTEXITCODE -ne 0) { throw 'Empty commit failed' }
+git -C $checkout push --set-upstream origin $branch
+if ($LASTEXITCODE -ne 0) { throw 'Push failed' }
+gh pr create -R $repo --base $base --head $branch --title 'Test Ground Control checks' --body 'Smoke test with an empty commit and no file changes.'
+if ($LASTEXITCODE -ne 0) { throw 'Pull request creation failed' }`,
   connectCommandCopy: "Copy command",
   connectCommandCopied: "Command copied.",
   connectCommandCopyFailed:

@@ -244,6 +244,7 @@
 .connect-command code {
   flex: 1 1 18rem;
   overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 .connect-command button {
   margin: 0;

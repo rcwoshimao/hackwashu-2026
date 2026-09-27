@@ -1,6 +1,7 @@
 import { copy } from "@ground-control/copy";
 import { useState } from "react";
 import { ConnectToken } from "./ConnectToken.tsx";
+import { CopyCommand } from "./CopyCommand.tsx";
 import { publicHttpsOrigin, workflowForBranch } from "./workflow.ts";
 
 function downloadWorkflow(branch: string, serverUrl: string) {
@@ -77,6 +78,12 @@ export function ConnectActionSteps({
         <li>
           <h3>{copy.connectVerifyTitle}</h3>
           <p>{copy.connectStepRun}</p>
+          <CopyCommand
+            command={copy.connectSmokeCommand.replace(
+              "{repo}",
+              repo.replaceAll("'", "''"),
+            )}
+          />
         </li>
       </ol>
       <p className="form-hint">{copy.connectCommentExpectation}</p>

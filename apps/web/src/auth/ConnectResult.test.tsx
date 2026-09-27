@@ -22,6 +22,10 @@ test("private connection shows the Actions token and source link", () => {
   assert.match(markup, /GitHub workflow/);
   assert.match(markup, /gh secret set GROUND_CONTROL_TOKEN -R owner\/private/);
   assert.match(markup, /Download workflow/);
+  assert.match(markup, /gh repo clone \$repo \$checkout/);
+  assert.match(markup, /git -C \$checkout commit --allow-empty/);
+  assert.match(markup, /gh pr create -R \$repo --base \$base --head \$branch/);
+  assert.match(markup, /\$repo = &#x27;owner\/private&#x27;/);
   assert.match(markup, /Ground Control server URL is already filled in/);
   assert.doesNotMatch(markup, /Local checkout path|seed-plan|gh variable set/);
   assert.doesNotMatch(markup, /gh secret set[^<]*private-telemetry-token/);
