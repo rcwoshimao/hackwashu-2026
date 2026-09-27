@@ -1,4 +1,4 @@
-export const reportTimeoutMs = 10_000;
+export const reportTimeoutMs = 60_000;
 export const reportRetryDelayMs = 500;
 export const reportAttempts = 2;
 export const maxTelemetryBytes = 2_000_000;
