@@ -61,8 +61,10 @@ function startDrawing(input: DrawInput): () => void {
   const context = input.canvas.getContext("2d");
   if (!context) return () => undefined;
   const pixelRatio = Math.min(2, window.devicePixelRatio || 1);
-  input.canvas.width = Math.round(input.width * pixelRatio);
-  input.canvas.height = Math.round(input.height * pixelRatio);
+  const pixelWidth = Math.round(input.width * pixelRatio);
+  const pixelHeight = Math.round(input.height * pixelRatio);
+  if (input.canvas.width !== pixelWidth) input.canvas.width = pixelWidth;
+  if (input.canvas.height !== pixelHeight) input.canvas.height = pixelHeight;
   context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
   let frame = 0;
   const render = (timeMs: number) => {

@@ -2,6 +2,8 @@
 
 Ground Control runs locally with Docker Desktop. Add keys to the ignored `.env` file in this repository; never put a credential in Git, a README, an issue, or a screenshot. You can run the web app and the bundled Orbit drift fixture before creating any account. Ordinary public scans use static and optional AI checks without executing repository code. A private repo you connect or a public repo owned by your signed-in GitHub account can use deep checks after explicit Actions setup.
 
+The Sky uses steady dot brightness and slow position changes. Rebuild the Docker image after updating the app to receive the reduced-flicker map; no new key or account setup is required.
+
 | # | Action only you can take | Put the value here | Verify it |
 | --- | --- | --- | --- |
 | 1 | Start Docker Desktop. Install Bun and Node.js only if you want to run development commands directly on the host. | Local machine | `docker compose up --build -d` starts a healthy `groundcontrol` container; `docker compose exec -T groundcontrol bun ops fly` runs the keyless drift rehearsal. |
