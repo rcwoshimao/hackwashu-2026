@@ -91,7 +91,7 @@ function SourceList({ data }: { data: RepoData }) {
   );
 }
 
-function RunList({ data }: { data: RepoData }) {
+export function RunList({ data }: { data: RepoData }) {
   return (
     <section className="panel repo-runs">
       <h2>{copy.repoRuns}</h2>

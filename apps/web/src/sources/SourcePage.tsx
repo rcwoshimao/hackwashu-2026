@@ -123,7 +123,9 @@ export function SourcePage() {
   return (
     <main className="page form-page">
       <section className="form-panel panel">
-        <p className="eyebrow">{copy.brand}</p>
+        <a className="back-link" href="/reports">
+          {copy.reportsBack}
+        </a>
         <h1>{copy.sourceTitle}</h1>
         <p>{copy.sourceIntro}</p>
         {loading ? (

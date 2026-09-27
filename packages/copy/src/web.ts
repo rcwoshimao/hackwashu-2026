@@ -5,6 +5,22 @@ export const webCopy = {
   navSources: "Add a source",
   navSignIn: "Sign in",
   navSignOut: "Sign out",
+  navReports: "My reports",
+  navAccount: "Account menu",
+  navAvatarAlt: "GitHub profile picture",
+  navSignedOut: "Not signed in",
+  reportsTitle: "My reports",
+  reportsIntro:
+    "Every repository you have connected, with the documents it watches and each check run.",
+  reportsSignIn:
+    "Sign in with GitHub to see the repositories you have connected.",
+  reportsEmpty:
+    "No repositories connected yet. Connect one to start checking its documentation.",
+  reportsConnect: "Connect a repository",
+  reportsDocuments: "Watched documents",
+  reportsAddDocument: "Add a document",
+  reportsOpenRepo: "Open repository",
+  reportsBack: "Back to my reports",
   navMenu: "Menu",
   navHome: "Back to the Sky",
   navSkip: "Skip to content",

@@ -17,6 +17,9 @@ test("API serves built web assets and SPA routes without swallowing API", async 
   const page = await app.request("/runs/run_123");
   expect(page.status).toBe(200);
   expect(await page.text()).toContain("Ground Control fixture");
+  const reports = await app.request("/reports");
+  expect(reports.status).toBe(200);
+  expect(await reports.text()).toContain("Ground Control fixture");
   const asset = await app.request("/assets/app.js");
   expect(asset.status).toBe(200);
   expect(asset.headers.get("cache-control")).toContain("immutable");

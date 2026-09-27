@@ -75,7 +75,9 @@ export function ConnectPage() {
   return (
     <main className="page form-page">
       <section className="form-panel panel">
-        <p className="eyebrow">{copy.brand}</p>
+        <a className="back-link" href="/reports">
+          {copy.reportsBack}
+        </a>
         <h1>{copy.connectTitle}</h1>
         <p>{copy.connectIntro}</p>
         {loading ? (

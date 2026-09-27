@@ -15,6 +15,7 @@ function spaPath(path: string): boolean {
   return (
     path === "/" ||
     path === "/sky" ||
+    path === "/reports" ||
     path === "/connect" ||
     path === "/signin" ||
     path === "/sources/new" ||
