@@ -1,6 +1,6 @@
 import type { ModelCache, ModelPort } from "@ground-control/ai";
 import { extractFlightPlan } from "@ground-control/ai";
-import { sourceTextHash } from "@ground-control/sources";
+import { type DocText, sourceTextHash } from "@ground-control/sources";
 import type {
   AppStore,
   SourceRecord,
@@ -47,7 +47,7 @@ function planSourceKey(source: SourceRecord, site?: string): string {
   const resolved = resolveSource(source, site);
   if (!resolved.ok) return source.id;
   const value = resolved.value;
-  if ("path" in value) return `${source.kind}:${value.path}`;
+  if ("path" in value) return `file:${value.path}`;
   if ("pageId" in value) return `confluence:${value.site}:${value.pageId}`;
   if ("page" in value) return `wiki:${value.url}:${value.page}`;
   return `${source.kind}:${value.url}`;
@@ -168,10 +168,9 @@ export class SourceSync {
     if (this.planQueue.get(repo) === current) this.planQueue.delete(repo);
   }
 
-  private async regenerate(repo: string): Promise<void> {
-    if (!this.deps.model || !this.deps.cache) return;
+  private documentsForPlan(repo: string): DocText[] {
     const seen = new Set<string>();
-    const docs = this.deps.store.listSources(repo).flatMap((source) => {
+    return this.deps.store.listSources(repo).flatMap((source) => {
       const doc = this.deps.store.getSourceSnapshot(source.id)?.doc;
       if (!doc) return [];
       const key = planSourceKey(source, this.deps.confluenceSite);
@@ -179,6 +178,11 @@ export class SourceSync {
       seen.add(key);
       return [doc];
     });
+  }
+
+  private async regenerate(repo: string): Promise<void> {
+    if (!this.deps.model || !this.deps.cache) return;
+    const docs = this.documentsForPlan(repo);
     if (docs.length === 0) return;
     try {
       const extracted = await extractFlightPlan(
@@ -196,6 +200,26 @@ export class SourceSync {
     } catch {
       this.deps.onPlan?.(repo, null);
     }
+  }
+
+  async repairPlans(): Promise<number> {
+    let repaired = 0;
+    for (const repo of this.deps.store
+      .listRepos()
+      .filter((item) => item.connected)) {
+      const plan = this.deps.store.getFlightPlan(repo.repo);
+      const ids = this.documentsForPlan(repo.repo).map((doc) => doc.sourceId);
+      if (!plan || ids.length === 0) continue;
+      const storedIds = Object.keys(plan.sourceHashes);
+      if (
+        ids.length === storedIds.length &&
+        ids.every((id) => storedIds.includes(id))
+      )
+        continue;
+      await this.queuePlan(repo.repo);
+      repaired += 1;
+    }
+    return repaired;
   }
 
   async refreshDue(maxSources = 20): Promise<number> {

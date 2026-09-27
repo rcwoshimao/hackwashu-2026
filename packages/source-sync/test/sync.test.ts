@@ -113,6 +113,38 @@ function setup(visibility: "public" | "private" = "public") {
 }
 
 describe("connected source sync", () => {
+  test("identical content from distinct source records is checked once", async () => {
+    const f = setup();
+    f.store.putSource({
+      ...file,
+      id: "docs-copy",
+      kind: "docs",
+    });
+    await f.sync.refresh("readme");
+    const baseline = f.store.getFlightPlan(repo);
+    await f.sync.refresh("docs-copy");
+    const refreshed = f.store.getFlightPlan(repo);
+    expect(Object.keys(refreshed?.sourceHashes ?? {})).toEqual(["readme"]);
+    expect(refreshed?.claims).toEqual(baseline?.claims);
+  });
+
+  test("startup repair removes a source no longer in the plan", async () => {
+    const f = setup();
+    await f.sync.refreshDue();
+    const baseline = f.store.getFlightPlan(repo);
+    expect(baseline).not.toBeNull();
+    if (!baseline) return;
+    f.store.putFlightPlan({
+      ...baseline,
+      sourceHashes: {
+        ...baseline.sourceHashes,
+        "legacy-readme": baseline.sourceHashes.readme ?? "",
+      },
+    });
+    await f.sync.repairPlans();
+    expect(f.store.getFlightPlan(repo)).toEqual(baseline);
+  });
+
   test("a second README record does not duplicate generated checks", async () => {
     const f = setup();
     f.store.putSource({
