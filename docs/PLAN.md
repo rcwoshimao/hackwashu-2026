@@ -4,7 +4,7 @@ This plan follows `docs/CODEX_MASTER_PROMPT.md` and the user's later instruction
 
 ## Current implementation status
 
-- Live Action report follow-up: the first demo PR confirmed the reusable flight-checks job passes, but Azure telemetry processing exceeded the Action's 10-second request limit and produced duplicate ingests on retry. Extend the report request limit to 60 seconds, rebuild the committed Action bundle, and rerun the live PR until both jobs pass. Preserve the existing bounded retry behavior and verify the hosted database records the result.
+- Live Action report follow-up: the demo PR and its first default-branch push passed both reusable jobs after the Action request limit was extended to 60 seconds and its bundle rebuilt. Telemetry ingestion uses a stable run ID when the Action retries. The hosted database recorded the run and GitHub received a Ground Control success status.
 
 - Azure hosting and deep-check setup: the single-container server uses a Linux App Service Basic plan, persistent `/home` SQLite storage, managed-identity container pulls, and Key Vault references for configured credentials. A main-branch GitHub Actions workflow uses OIDC for automatic deployment. The public HTTPS origin is `PUBLIC_URL` and fills the downloaded workflow. Connected source refresh schedules flightcheck publication; normal onboarding has no local checkout path. A reusable workflow in this repository leaves target repositories with one short caller file and one Actions secret. Gates: `bun run check`, hosted health and migrated-data checks, and a live target-repo Actions run.
 
