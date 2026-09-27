@@ -59,7 +59,11 @@ export function RepoScanStatus({ data }: { data: RepoData }) {
         disabled={requesting}
         onClick={() => void request()}
       >
-        {requesting ? copy.skyScanPending : copy.skyScanAction}
+        {requesting
+          ? copy.skyScanPending
+          : data.scan
+            ? copy.repoRescanAction
+            : copy.skyScanAction}
       </button>
       {feedback && <p role="status">{feedback}</p>}
     </section>

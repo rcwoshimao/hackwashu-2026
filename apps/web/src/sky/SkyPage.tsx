@@ -95,9 +95,11 @@ function SkyHeader({
 
 function SkyFindings({ satellites }: { satellites: Satellite[] }) {
   const findings = measuredFindings(satellites);
+  const reviewCount = satellites.filter(
+    (item) => !item.simulated && item.label.toLowerCase() === "possible drift",
+  ).length;
   return (
-    <section className="sky-findings panel" aria-label={copy.skyFindingsTitle}>
-      <h2>{copy.skyFindingsTitle}</h2>
+    <section className="sky-findings" aria-label={copy.skyFindingsTitle}>
       {findings.realCount === 0 ? (
         <p>{copy.skyNoFindings}</p>
       ) : (
@@ -107,18 +109,17 @@ function SkyFindings({ satellites }: { satellites: Satellite[] }) {
             <dd>{findings.realCount.toLocaleString()}</dd>
           </div>
           <div>
+            <dt>{copy.skyReviewCount}</dt>
+            <dd className={reviewCount > 0 ? "drift-ink" : undefined}>
+              {reviewCount.toLocaleString()}
+            </dd>
+          </div>
+          <div>
             <dt>{copy.skyDriftingCount}</dt>
             <dd
               className={findings.driftingCount > 0 ? "drift-ink" : undefined}
             >
               {findings.driftingCount.toLocaleString()}
-            </dd>
-          </div>
-          <div>
-            <dt>{copy.skyMedianLag}</dt>
-            <dd>
-              {findings.medianLagDays?.toLocaleString() ?? copy.commonNone}{" "}
-              <small>{copy.skyDaysUnit}</small>
             </dd>
           </div>
         </dl>
@@ -137,6 +138,20 @@ export function SkyPage() {
   const [scope, setScope] = useState<SkyScope>("all");
   const [scanFilter, setScanFilter] = useState<SkyScanFilter>("all");
   const [search, setSearch] = useState("");
+  const inspect = (repo: string) => {
+    select(repo);
+    if (window.matchMedia("(max-width: 1050px)").matches) {
+      window.requestAnimationFrame(() =>
+        document.getElementById("selected-repo-panel")?.scrollIntoView({
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+            .matches
+            ? "auto"
+            : "smooth",
+          block: "start",
+        }),
+      );
+    }
+  };
   useEffect(() => {
     if (!me?.signedIn) return;
     const controller = new AbortController();
@@ -213,6 +228,7 @@ export function SkyPage() {
         )}
       {data && entries.length > 0 && (
         <>
+          <SkyFindings satellites={data.satellites} />
           <SkyFilters
             scope={scope}
             status={scanFilter}
@@ -221,26 +237,17 @@ export function SkyPage() {
             onStatus={setScanFilter}
             onSearch={setSearch}
           />
-          <ScanTiers />
-          {me?.signedIn && (
-            <SkyBulkScan
-              repos={entries.flatMap((entry) =>
-                entry.kind === "unscanned" ? [entry.account] : [],
-              )}
-            />
-          )}
           <div className="sky-grid">
             <div className="sky-main">
               <SkyCanvas
                 satellites={scanned}
                 unscanned={unscanned}
                 selectedRepo={selectedRepo}
-                onSelect={select}
+                onSelect={inspect}
               />
               <SkyLegend />
             </div>
             <div className="sky-side">
-              <SkyFindings satellites={data.satellites} />
               {selected && selected.kind !== "scanned" ? (
                 <UnscannedInspector repo={selected.account} />
               ) : (
@@ -259,8 +266,18 @@ export function SkyPage() {
             key={`${scope}:${scanFilter}:${search}`}
             entries={filtered}
             selectedRepo={selectedRepo}
-            onSelect={select}
+            onSelect={inspect}
           />
+          {me?.signedIn && (
+            <SkyBulkScan
+              repos={entries.flatMap((entry) =>
+                entry.kind === "unscanned" ? [entry.account] : [],
+              )}
+            />
+          )}
+          <div className="sky-help">
+            <ScanTiers />
+          </div>
         </>
       )}
       <ScanForm />

@@ -32,8 +32,9 @@ export function SkyBulkScan({ repos }: { repos: AccountRepoData[] }) {
         disabled={active || names.length === 0}
         onClick={() => void request()}
       >
-        {copy.accountReposScanAll} ({names.length})
+        {copy.skyBulkScanButton} ({names.length})
       </button>
+      <small>{copy.skyBulkScanHint}</small>
       {progress && (
         <p role="status">
           {progress.done === progress.total

@@ -21,37 +21,9 @@ type FilterProps = {
 };
 
 export function SkyFilters(props: FilterProps) {
+  const active = props.scope !== "all" || props.status !== "all";
   return (
     <div className="sky-catalog-controls">
-      <div>
-        <label htmlFor="sky-scope">{copy.skyScopeLabel}</label>
-        <select
-          id="sky-scope"
-          value={props.scope}
-          onChange={(event) => {
-            props.onScope(event.target.value as SkyScope);
-          }}
-        >
-          <option value="all">{copy.skyScopeAll}</option>
-          <option value="mine">{copy.skyScopeMine}</option>
-          <option value="public">{copy.skyScopePublic}</option>
-          <option value="private">{copy.skyScopePrivate}</option>
-        </select>
-      </div>
-      <div>
-        <label htmlFor="sky-scan-filter">{copy.skyScanFilterLabel}</label>
-        <select
-          id="sky-scan-filter"
-          value={props.status}
-          onChange={(event) => {
-            props.onStatus(event.target.value as SkyScanFilter);
-          }}
-        >
-          <option value="all">{copy.skyScanFilterAll}</option>
-          <option value="scanned">{copy.skyScanFilterScanned}</option>
-          <option value="unscanned">{copy.skyScanFilterUnscanned}</option>
-        </select>
-      </div>
       <div>
         <label htmlFor="satellite-search">{copy.skyBrowseSearch}</label>
         <input
@@ -63,6 +35,42 @@ export function SkyFilters(props: FilterProps) {
           placeholder={copy.skyBrowsePlaceholder}
         />
       </div>
+      <details className="sky-filter-options">
+        <summary>
+          {active ? copy.skyFiltersActive : copy.skyFiltersTitle}
+        </summary>
+        <div className="sky-filter-fields">
+          <div>
+            <label htmlFor="sky-scope">{copy.skyScopeLabel}</label>
+            <select
+              id="sky-scope"
+              value={props.scope}
+              onChange={(event) =>
+                props.onScope(event.target.value as SkyScope)
+              }
+            >
+              <option value="all">{copy.skyScopeAll}</option>
+              <option value="mine">{copy.skyScopeMine}</option>
+              <option value="public">{copy.skyScopePublic}</option>
+              <option value="private">{copy.skyScopePrivate}</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="sky-scan-filter">{copy.skyScanFilterLabel}</label>
+            <select
+              id="sky-scan-filter"
+              value={props.status}
+              onChange={(event) =>
+                props.onStatus(event.target.value as SkyScanFilter)
+              }
+            >
+              <option value="all">{copy.skyScanFilterAll}</option>
+              <option value="scanned">{copy.skyScanFilterScanned}</option>
+              <option value="unscanned">{copy.skyScanFilterUnscanned}</option>
+            </select>
+          </div>
+        </div>
+      </details>
     </div>
   );
 }
@@ -105,6 +113,9 @@ export function SkyCatalog(props: Props) {
                 ) : (
                   <span className="simulation-tag">{copy.skyUnscannedTag}</span>
                 )}
+                <span className="catalog-select-hint" aria-hidden="true">
+                  {copy.skyPreviewAction} →
+                </span>
               </button>
             </li>
           ))}

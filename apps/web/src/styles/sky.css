@@ -8,9 +8,25 @@
 }
 .sky-catalog-controls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 2fr) minmax(190px, 0.8fr);
   gap: 0.8rem;
+  align-items: end;
   margin-bottom: 1.2rem;
+}
+.sky-filter-options summary {
+  min-height: 44px;
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--rule);
+  cursor: pointer;
+}
+.sky-filter-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+.sky-filter-options[open] {
+  grid-column: 1 / -1;
 }
 .sky-catalog-controls label {
   display: block;
@@ -31,10 +47,13 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 0.8rem;
-  margin: 0 0 1.2rem;
+  margin: 1.2rem 0;
 }
 .sky-bulk-scan p {
   margin: 0;
+}
+.sky-bulk-scan small {
+  color: var(--mist);
 }
 .sky-heading h1 {
   margin-bottom: 0.35rem;
@@ -44,10 +63,18 @@
   margin-bottom: 0;
 }
 .provenance {
-  display: grid;
-  gap: 0.35rem;
-  justify-items: end;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem 0.8rem;
+  flex-wrap: wrap;
   color: var(--mist);
+}
+.provenance .subtle-button {
+  background: transparent;
+  color: var(--paper);
+  border: 0;
+  padding: 0.4rem;
+  text-decoration: underline;
 }
 .provenance strong {
   color: var(--paper);
@@ -81,8 +108,17 @@
   border-bottom: 1px solid var(--rule);
   padding: 1rem 0;
 }
-.sky-legend h2 {
-  margin-bottom: 0.8rem;
+.sky-legend summary,
+.scan-tiers summary,
+.sky-scan-details summary {
+  color: var(--paper);
+  cursor: pointer;
+  font-weight: 600;
+}
+.sky-legend[open] summary,
+.scan-tiers[open] summary,
+.sky-scan-details[open] summary {
+  margin-bottom: 1rem;
 }
 .legend-grid {
   display: grid;
@@ -117,8 +153,11 @@
   font-size: 0.82rem;
   color: var(--mist);
 }
-.sky-findings h2 {
-  margin-bottom: 1.2rem;
+.sky-findings {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  margin: 0 0 1.2rem;
+  padding: 0.85rem 0;
 }
 .findings-grid {
   display: grid;
@@ -134,10 +173,9 @@
 }
 .findings-grid dt {
   font-size: 0.8rem;
-  min-height: 2.5em;
 }
 .findings-grid dd {
-  font-size: clamp(1.25rem, 1.8vw, 2rem);
+  font-size: clamp(1.15rem, 1.8vw, 1.75rem);
   line-height: 1.1;
   margin-top: 0.45rem;
 }
@@ -146,7 +184,7 @@
   font-size: 0.65em;
 }
 .sky-inspector {
-  min-height: 390px;
+  scroll-margin-top: 1rem;
 }
 .sky-inspector .panel-heading {
   align-items: flex-start;
@@ -167,6 +205,27 @@
 .metric-list dd {
   overflow-wrap: anywhere;
   margin-top: 0.2rem;
+}
+.sky-run-preview {
+  border-left: 3px solid var(--drift);
+  padding: 0.4rem 0 0.4rem 1rem;
+  margin-top: 1.1rem;
+}
+.sky-run-preview strong {
+  font-size: 1.15rem;
+}
+.sky-run-preview p {
+  margin: 0.55rem 0 0;
+  color: var(--mist);
+}
+.sky-run-preview blockquote {
+  margin: 0.35rem 0 0;
+  overflow-wrap: anywhere;
+}
+.sky-scan-details {
+  border-top: 1px solid var(--rule);
+  margin-top: 1.35rem;
+  padding-top: 1rem;
 }
 .simulation-note {
   border: 1px dashed var(--mist);
@@ -218,7 +277,7 @@
   margin-top: 1.4rem;
 }
 .scan-tiers {
-  margin: 1rem 0 1.4rem;
+  margin: 1.4rem 0 0;
 }
 .scan-tiers ol {
   list-style: none;
@@ -260,10 +319,16 @@
   width: 100%;
   text-align: left;
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 0.65rem;
   padding: 0.6rem;
   font-weight: 400;
+}
+.catalog-select-hint {
+  color: var(--mist);
+  font-size: 0.78rem;
+  white-space: nowrap;
 }
 .satellite-list button:hover,
 .satellite-list button[aria-pressed="true"] {

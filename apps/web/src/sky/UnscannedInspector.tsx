@@ -16,7 +16,11 @@ export function UnscannedInspector({ repo }: { repo: AccountRepoData }) {
     setRequesting(false);
   };
   return (
-    <aside className="sky-inspector panel" aria-live="polite">
+    <aside
+      className="sky-inspector panel"
+      id="selected-repo-panel"
+      aria-live="polite"
+    >
       <p className="eyebrow">{copy.skyHoldingTitle}</p>
       <h2>{repo.repo}</h2>
       {repo.checked ? (

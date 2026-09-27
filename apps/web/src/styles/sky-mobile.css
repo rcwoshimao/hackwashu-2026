@@ -2,12 +2,15 @@
   .sky-catalog-controls {
     grid-template-columns: 1fr;
   }
+  .sky-filter-fields {
+    grid-template-columns: 1fr;
+  }
   .sky-heading {
     align-items: start;
     gap: 0.9rem;
   }
   .provenance {
-    justify-items: start;
+    justify-content: flex-start;
   }
   .sky-grid,
   .sky-side {

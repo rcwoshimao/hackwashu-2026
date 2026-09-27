@@ -7,17 +7,9 @@ export function ScanTiers() {
     [copy.scanTierDeep, copy.scanTierDeepBody],
   ] as const;
   return (
-    <section
-      className="scan-tiers panel"
-      id="scan-tiers"
-      aria-labelledby="scan-tiers-title"
-    >
-      <div className="panel-heading">
-        <div>
-          <h2 id="scan-tiers-title">{copy.scanTiersTitle}</h2>
-          <p>{copy.scanTiersIntro}</p>
-        </div>
-      </div>
+    <details className="scan-tiers panel" id="scan-tiers">
+      <summary>{copy.scanTiersSummary}</summary>
+      <p>{copy.scanTiersIntro}</p>
       <ol>
         {tiers.map(([name, description]) => (
           <li key={name}>
@@ -26,6 +18,6 @@ export function ScanTiers() {
           </li>
         ))}
       </ol>
-    </section>
+    </details>
   );
 }

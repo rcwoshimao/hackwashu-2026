@@ -3,7 +3,11 @@
   justify-content: space-between;
   align-items: center;
   gap: 2rem;
-  margin: 0.8rem 0 2rem;
+  margin: 0.8rem 0 1.2rem;
+}
+.repo-back-link {
+  display: inline-block;
+  margin-top: 0.7rem;
 }
 .repo-scan-status {
   display: flex;
@@ -24,39 +28,76 @@
   overflow-wrap: anywhere;
   margin-bottom: 0.7rem;
 }
-.degrees-dial {
-  width: min(260px, 28vw);
-  min-width: 180px;
-  position: relative;
-  flex: none;
+.repo-result {
+  margin-bottom: 1.4rem;
+  scroll-margin-top: 1rem;
 }
-.degrees-dial svg {
-  width: 100%;
-  display: block;
+.repo-result h2 {
+  margin-bottom: 0.5rem;
 }
-.degrees-dial svg path {
-  fill: none;
-  stroke-width: 3;
-}
-.dial-track {
-  stroke: var(--rule);
-}
-.dial-value {
-  stroke: var(--drift);
-}
-.degrees-dial > div {
-  position: absolute;
-  left: 12%;
-  bottom: 4%;
-  display: grid;
-}
-.degrees-dial strong {
-  font:
-    600 clamp(2rem, 3.6vw, 3.7rem) "IBM Plex Mono",
-    monospace;
-}
-.degrees-dial span {
+.repo-result > p:not(.eyebrow) {
   color: var(--mist);
+}
+.repo-result-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem 2rem;
+  margin: 1.2rem 0;
+}
+.repo-result-counts div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.repo-result-counts dt {
+  color: var(--mist);
+  font-size: 0.85rem;
+}
+.repo-result-counts dd {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 1.25rem;
+}
+.repo-finding-list {
+  list-style: none;
+  margin: 1rem 0;
+  padding: 0;
+  display: grid;
+  gap: 0.8rem;
+}
+.repo-finding-card {
+  border: 1px solid var(--rule);
+  padding: 1rem;
+}
+.repo-finding-card blockquote {
+  font-size: 1.1rem;
+  margin: 0.6rem 0;
+  overflow-wrap: anywhere;
+}
+.repo-finding-card p {
+  color: var(--mist);
+}
+.finding-review-tag {
+  color: var(--drift);
+}
+.repo-sources {
+  margin-bottom: 1.4rem;
+}
+.repo-source-details {
+  margin-top: 0.8rem;
+}
+.repo-source-details summary,
+.repo-technical > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.repo-technical > summary {
+  font-size: 1.1rem;
+}
+.repo-technical[open] > summary {
+  margin-bottom: 1.2rem;
+}
+.repo-technical .repo-runs {
+  margin-top: 1.2rem;
 }
 .trajectory {
   margin-bottom: 1.4rem;
@@ -275,16 +316,6 @@ th {
 @media (max-width: 760px) {
   .repo-heading {
     align-items: start;
-  }
-  .degrees-dial {
-    width: 130px;
-    min-width: 130px;
-  }
-  .degrees-dial strong {
-    font-size: 1.35rem;
-  }
-  .degrees-dial span {
-    font-size: 0.72rem;
   }
   .evidence-claim dl,
   .check-card dl {
