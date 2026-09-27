@@ -4,6 +4,8 @@ This plan follows `docs/CODEX_MASTER_PROMPT.md` and the user's later instruction
 
 ## Current implementation status
 
+- Deep-check onboarding revision: keep the GitHub Action in the opted-in repository, but replace the long setup list with a guided HTTPS origin, GitHub CLI secret/variable commands, a local checkout command, and a ready-to-download workflow. The browser never includes the one-time telemetry token in command text. Add focused UI and workflow-parity tests, then run the repository gate.
+
 - Sky flicker correction: measured marks keep steady brightness while the chart continues its slow positional motion. The Canvas retains its pixel buffer when a scene update does not change its dimensions, avoiding a blank resize frame. A rendering regression test checks steady fill opacity for normal, review, and drifting states.
 
 - Session and personal-scan correction: when `SESSION_SECRET` is blank but GitHub OAuth is configured, the API derives a stable, domain-separated session key from the OAuth client secret so Docker recreation does not invalidate the seven-day sign-in cookie. The account bulk action targets public, non-fork projects under the signed-in login only and labels its static plus optional AI tier; deep checks remain an explicit owner action in the target repository's Action or local checkout. Tests cover session recovery across server instances and the personal-repository selection boundary.

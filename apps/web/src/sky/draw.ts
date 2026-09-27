@@ -82,6 +82,8 @@ function drawPoint(context: CanvasRenderingContext2D, point: SkyPoint): void {
       status === "possible drift"
     ) {
       if (status === "possible drift") context.strokeStyle = drift;
+      if (status === "possible drift" || status === "drifting")
+        context.lineWidth = 0.8;
       context.setLineDash(status === "drifting" ? [3, 3] : []);
       context.beginPath();
       context.arc(x, y, radius + 3, 0, Math.PI * 2);

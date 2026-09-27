@@ -1,5 +1,6 @@
 import { copy } from "@ground-control/copy";
 import { useRef, useState } from "react";
+import { CopyCommand } from "./CopyCommand.tsx";
 
 function TokenControls({ token }: { token: string }) {
   const [revealed, setRevealed] = useState(false);
@@ -45,26 +46,66 @@ function TokenControls({ token }: { token: string }) {
 export function ConnectToken({
   token,
   serverUrl,
+  repo,
 }: {
-  token: string;
+  token?: string;
   serverUrl: string;
+  repo: string;
 }) {
-  const actionUrl = serverUrl.startsWith("https://")
-    ? serverUrl
-    : copy.connectPublicUrlPlaceholder;
+  const [url, setUrl] = useState(serverUrl.startsWith("https://") ? serverUrl : "");
+  const origin = publicHttpsOrigin(url);
+  const secretCommand = copy.connectSecretCommand.replace("{repo}", repo);
+  const variableCommand = origin
+    ? copy.connectVariableCommand.replace("{repo}", repo).replace("{url}", origin)
+    : null;
   return (
     <section className="connect-token" aria-label={copy.connectTokenTitle}>
-      <h2>{copy.connectTokenTitle}</h2>
-      <p>{copy.connectTokenOnce}</p>
-      <TokenControls token={token} />
+      <h3>{copy.connectTokenTitle}</h3>
+      {token ? (
+        <>
+          <p>{copy.connectTokenOnce}</p>
+          <TokenControls token={token} />
+        </>
+      ) : (
+        <p>{copy.connectTokenExisting}</p>
+      )}
+      <p>{copy.connectSecretPrompt}</p>
+      <CopyCommand command={secretCommand} />
       <p>
-        {copy.connectTokenSecret} <code>GROUND_CONTROL_TOKEN</code>
+        <a href={`https://github.com/${repo}/settings/secrets/actions`}>
+          {copy.connectSecretGitHub}
+        </a>
       </p>
+      <label htmlFor="connect-public-url">{copy.connectPublicUrlLabel}</label>
+      <input
+        id="connect-public-url"
+        type="url"
+        value={url}
+        placeholder={copy.connectPublicUrlPlaceholder}
+        onChange={(event) => setUrl(event.target.value)}
+      />
+      <p className="form-hint">{copy.connectPublicUrlHint}</p>
+      {variableCommand ? (
+        <CopyCommand command={variableCommand} />
+      ) : (
+        <p className="form-hint">{copy.connectVariableNeedsUrl}</p>
+      )}
       <p>
-        {copy.connectServerVariable} <code>GROUND_CONTROL_URL</code> ={" "}
-        <code>{actionUrl}</code>
+        <a href={`https://github.com/${repo}/settings/variables/actions`}>
+          {copy.connectVariableGitHub}
+        </a>
       </p>
-      <p className="form-hint">{copy.connectHostedActionHint}</p>
     </section>
   );
+}
+
+export function publicHttpsOrigin(value: string): string | null {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:" || url.username || url.password) return null;
+    if (url.pathname !== "/" || url.search || url.hash) return null;
+    return url.origin;
+  } catch {
+    return null;
+  }
 }

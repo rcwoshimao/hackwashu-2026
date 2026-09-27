@@ -53,3 +53,40 @@ test("measured dots keep steady brightness during map motion", () => {
     assert.ok(Math.max(...opacities) - Math.min(...opacities) < 0.05, label);
   }
 });
+
+test("amber status rings use a fine stroke", () => {
+  for (const label of ["Possible drift", "Drifting"]) {
+    const widths: number[] = [];
+    const surface = {
+      lineWidth: 1,
+      strokeStyle: "",
+      save() {},
+      restore() {},
+      fillRect() {},
+      beginPath() {},
+      arc() {},
+      moveTo() {},
+      lineTo() {},
+      closePath() {},
+      setLineDash() {},
+      fill() {},
+      stroke() {
+        if (surface.strokeStyle === "#F2B84B") widths.push(surface.lineWidth);
+      },
+    };
+    const layout = layoutSky([sample(label)], 600, 600);
+    drawSky(
+      surface as unknown as CanvasRenderingContext2D,
+      layout,
+      600,
+      600,
+      0,
+      null,
+      true,
+      new Map(),
+      [],
+    );
+    assert.ok(widths.length > 0, label);
+    assert.ok(widths.every((width) => width <= 0.8), label);
+  }
+});

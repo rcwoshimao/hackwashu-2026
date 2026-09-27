@@ -1,0 +1,45 @@
+const actionRef = "rcwoshimao/hackwashu-2026/action@hussein";
+
+export const workflow = `name: Ground Control
+on:
+  pull_request:
+  push:
+    branches: [main, "groundcontrol/**"]
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+permissions: {}
+jobs:
+  flight-checks:
+    if: \${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: \${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v6
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - uses: ${actionRef}
+        with: { mode: run }
+      - if: always()
+        uses: actions/upload-artifact@v5
+        with: { name: telemetry, path: .groundcontrol/telemetry.json }
+  report:
+    needs: flight-checks
+    if: \${{ always() && needs.flight-checks.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/download-artifact@v5
+        with: { name: telemetry, path: .groundcontrol }
+      - uses: ${actionRef}
+        with:
+          mode: report
+          server: \${{ vars.GROUND_CONTROL_URL }}
+          token: \${{ secrets.GROUND_CONTROL_TOKEN }}
+`;
