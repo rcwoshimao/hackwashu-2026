@@ -1,8 +1,15 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 import type { Satellite } from "../data.ts";
-import { layoutSky } from "./layout.ts";
-import { glidePeriodMs, placePoint, skyTurn } from "./motion.ts";
+import { layoutSky, topicKey, topicKeys } from "./layout.ts";
+import {
+  glidePeriodMs,
+  placePoint,
+  skyTurn,
+  swayAmplitudeRadians,
+  swayAngle,
+  swayPeriodMs,
+} from "./motion.ts";
 
 function satellite(index: number): Satellite {
   return {
@@ -61,7 +68,7 @@ test("moons never change distance, which encodes README lag", () => {
     }
 });
 
-test("moons stay inside their topic slice as the sky turns", () => {
+test("moons sway only a bounded amount around their slot", () => {
   for (const time of times)
     for (const point of layout.points) {
       const placed = placePoint(layout, point, time, false);
@@ -69,8 +76,13 @@ test("moons stay inside their topic slice as the sky turns", () => {
         placed.y - layout.centerY,
         placed.x - layout.centerX,
       );
-      const offset = wrap(angle - skyTurn(time) - point.sectorStart);
-      assert.ok(offset <= point.sectorSpan + 1e-9, `${point.satellite.repo}`);
+      const offset = wrap(
+        angle - skyTurn(time) - point.sectorStart + swayAmplitudeRadians,
+      );
+      assert.ok(
+        offset <= point.sectorSpan + 2 * swayAmplitudeRadians + 1e-9,
+        `${point.satellite.repo}`,
+      );
     }
 });
 
@@ -82,4 +94,42 @@ test("inner moons glide faster than outer moons", () => {
   const outer = sorted.at(-1);
   assert.ok(inner && outer);
   assert.ok(glidePeriodMs(layout, inner) < glidePeriodMs(layout, outer));
+});
+
+test("marks sway at different speeds, inner ones faster", () => {
+  const sorted = [...layout.points].sort(
+    (left, right) => left.distance - right.distance,
+  );
+  const inner = sorted.find((point) => point.distance > layout.innerRadius * 2);
+  const outer = sorted.at(-1);
+  assert.ok(inner && outer);
+  assert.ok(swayPeriodMs(layout, inner) < swayPeriodMs(layout, outer));
+  const periods = new Set(
+    layout.points.map((point) => Math.round(swayPeriodMs(layout, point))),
+  );
+  assert.ok(periods.size > layout.points.length / 2);
+});
+
+test("sway never exceeds its amplitude", () => {
+  for (const time of times)
+    for (const point of layout.points)
+      assert.ok(
+        Math.abs(swayAngle(layout, point, time)) <=
+          swayAmplitudeRadians + 1e-12,
+      );
+});
+
+test("swaying marks never leave their topic's slice of the map", () => {
+  const sector = (Math.PI * 2) / topicKeys.length;
+  for (const time of times)
+    for (const point of layout.points) {
+      const placed = placePoint(layout, point, time, false);
+      const angle = Math.atan2(
+        placed.y - layout.centerY,
+        placed.x - layout.centerX,
+      );
+      const group = topicKeys.indexOf(topicKey(point.satellite.topicCluster));
+      const offset = wrap(angle - skyTurn(time) + Math.PI / 2 - group * sector);
+      assert.ok(offset <= sector, `${point.satellite.repo}`);
+    }
 });

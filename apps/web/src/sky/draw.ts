@@ -58,7 +58,7 @@ function drawDiamond(context: CanvasRenderingContext2D, point: SkyPoint): void {
  */
 function twinkle(point: SkyPoint, timeMs: number): number {
   const phase = (point.spread * 7.31) % 1;
-  const cyclesPerSecond = 0.9 + phase * 1.1;
+  const cyclesPerSecond = 0.35 + phase * 0.45;
   const wave = Math.sin(
     (timeMs / 1000) * Math.PI * 2 * cyclesPerSecond + phase * Math.PI * 2,
   );
