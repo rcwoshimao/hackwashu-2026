@@ -18,6 +18,22 @@ export type RepoAccess = {
   canAdmin: boolean;
 };
 
+export type AccountRepo = {
+  repo: string;
+  visibility: "public" | "private";
+  canAdmin: boolean;
+  description: string | null;
+  language: string | null;
+  updatedAt: string | null;
+  archived: boolean;
+  fork: boolean;
+};
+
+export type AccountRepositories = {
+  repos: AccountRepo[];
+  truncated: boolean;
+};
+
 export interface GitHubPort {
   authorizationUrl(
     state: string,
@@ -31,6 +47,7 @@ export interface GitHubPort {
   ): Promise<Result<string>>;
   currentUser(token: string): Promise<Result<{ login: string }>>;
   repoAccess(token: string, repo: string): Promise<Result<RepoAccess>>;
+  listRepositories(token: string): Promise<Result<AccountRepositories>>;
 }
 
 export type SessionRecord = {

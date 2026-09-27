@@ -1,6 +1,11 @@
 import { expect } from "bun:test";
 import { HeuristicModel, MemoryModelCache } from "@ground-control/ai";
-import type { GitHubPort, RepoAccess, Result } from "@ground-control/auth";
+import type {
+  AccountRepositories,
+  GitHubPort,
+  RepoAccess,
+  Result,
+} from "@ground-control/auth";
 import { AuthService, Sessions } from "@ground-control/auth";
 import {
   FixtureRepositoryFiles,
@@ -12,6 +17,7 @@ import { createApi, EventHub } from "../src/index.ts";
 
 class FakeGitHub implements GitHubPort {
   calls = 0;
+  accountRepos: AccountRepositories = { repos: [], truncated: false };
   permission: RepoAccess = {
     visibility: "private",
     canRead: true,
@@ -33,6 +39,10 @@ class FakeGitHub implements GitHubPort {
   async repoAccess(): Promise<Result<RepoAccess>> {
     this.calls += 1;
     return { ok: true, value: this.permission };
+  }
+
+  async listRepositories(): Promise<Result<AccountRepositories>> {
+    return { ok: true, value: this.accountRepos };
   }
 }
 

@@ -1,6 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { MemoryStore } from "../../store/src/memory.ts";
-import type { GitHubPort, RepoAccess, Result } from "../src/index.ts";
+import type {
+  AccountRepositories,
+  GitHubPort,
+  RepoAccess,
+  Result,
+} from "../src/index.ts";
 import { AuthService, GitHubHttp, Sessions } from "../src/index.ts";
 
 class FakeGitHub implements GitHubPort {
@@ -29,6 +34,9 @@ class FakeGitHub implements GitHubPort {
   async repoAccess(): Promise<Result<RepoAccess>> {
     this.lookups += 1;
     return { ok: true, value: this.permission };
+  }
+  async listRepositories(): Promise<Result<AccountRepositories>> {
+    return { ok: true, value: { repos: [], truncated: false } };
   }
 }
 

@@ -1,5 +1,14 @@
 import { z } from "zod";
-import type { GitHubPort, RepoAccess, Result } from "./types.ts";
+import {
+  accountRepoPageSize,
+  maxAccountRepoPages,
+} from "../../../config/limits.ts";
+import type {
+  AccountRepositories,
+  GitHubPort,
+  RepoAccess,
+  Result,
+} from "./types.ts";
 
 const requestTimeoutMs = 8_000;
 const retryDelayMs = 200;
@@ -10,8 +19,20 @@ const repoSchema = z.object({
   private: z.boolean(),
   permissions: z.object({ admin: z.boolean().optional() }).optional(),
 });
+const accountRepoSchema = z.array(
+  z.object({
+    full_name: z.string().regex(/^[^/\s]+\/[^/\s]+$/),
+    private: z.boolean(),
+    permissions: z.object({ admin: z.boolean().optional() }).optional(),
+    description: z.string().nullable().optional(),
+    language: z.string().nullable().optional(),
+    updated_at: z.string().nullable().optional(),
+    archived: z.boolean(),
+    fork: z.boolean(),
+  }),
+);
 
-type JsonResponse = { status: number; body: unknown };
+type JsonResponse = { status: number; body: unknown; link: string | null };
 
 export class GitHubHttp implements GitHubPort {
   constructor(
@@ -62,6 +83,7 @@ export class GitHubHttp implements GitHubPort {
           value: {
             status: response.status,
             body: (await response.json()) as unknown,
+            link: response.headers.get("link"),
           },
         };
       } catch {
@@ -142,6 +164,38 @@ export class GitHubHttp implements GitHubPort {
         canAdmin: parsed.data.permissions?.admin === true,
       },
     };
+  }
+
+  async listRepositories(token: string): Promise<Result<AccountRepositories>> {
+    const repos: AccountRepositories["repos"] = [];
+    for (let page = 1; page <= maxAccountRepoPages; page += 1) {
+      const url = new URL("https://api.github.com/user/repos");
+      url.searchParams.set("visibility", "all");
+      url.searchParams.set("sort", "updated");
+      url.searchParams.set("direction", "desc");
+      url.searchParams.set("per_page", String(accountRepoPageSize));
+      url.searchParams.set("page", String(page));
+      const response = await this.json(url.toString(), {
+        headers: this.headers(token),
+      });
+      if (!response.ok) return response;
+      const parsed = accountRepoSchema.safeParse(response.value.body);
+      if (response.value.status !== 200 || !parsed.success)
+        return { ok: false, error: { code: "github_unavailable" } };
+      repos.push(...parsed.data.map((item) => ({
+        repo: item.full_name,
+        visibility: item.private ? "private" as const : "public" as const,
+        canAdmin: item.permissions?.admin === true,
+        description: item.description ?? null,
+        language: item.language ?? null,
+        updatedAt: item.updated_at ?? null,
+        archived: item.archived,
+        fork: item.fork,
+      })));
+      const hasNext = response.value.link?.includes('rel="next"') === true;
+      if (!hasNext) return { ok: true, value: { repos, truncated: false } };
+    }
+    return { ok: true, value: { repos, truncated: true } };
   }
 
   private headers(token: string): Record<string, string> {

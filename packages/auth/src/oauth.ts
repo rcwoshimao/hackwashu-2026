@@ -1,6 +1,12 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { Sessions } from "./session.ts";
-import type { AuthSession, GitHubPort, RepoAccess, Result } from "./types.ts";
+import type {
+  AccountRepositories,
+  AuthSession,
+  GitHubPort,
+  RepoAccess,
+  Result,
+} from "./types.ts";
 
 const pendingLifetimeMs = 10 * 60 * 1_000;
 const accessCacheMs = 10 * 60 * 1_000;
@@ -80,7 +86,7 @@ export class AuthService {
     const redirect =
       pending.mode === "extension"
         ? `https://${pending.extensionId}.chromiumapp.org/#token=${encodeURIComponent(token)}`
-        : this.publicUrl;
+        : `${this.publicUrl}/signin`;
     return { ok: true, value: { token, login: user.value.login, redirect } };
   }
 
@@ -104,5 +110,9 @@ export class AuthService {
         expiresAt: this.now() + accessCacheMs,
       });
     return checked;
+  }
+
+  repositories(session: AuthSession): Promise<Result<AccountRepositories>> {
+    return this.github.listRepositories(session.oauthToken);
   }
 }
