@@ -1,4 +1,4 @@
-import { scaleLog } from "d3-scale";
+import { scaleLog, scaleSymlog } from "d3-scale";
 import type { AccountRepoData, Satellite } from "../data.ts";
 
 export const topicKeys = [
@@ -69,7 +69,7 @@ function topicBands(
   for (const item of satellites.filter(
     (satellite) => topicKey(satellite.topicCluster) === key,
   )) {
-    const distance = lagScale(Math.max(0, item.readmeLagDays) + 1);
+    const distance = lagScale(Math.max(0, item.readmeLagDays));
     const band = Math.floor((distance - innerRadius) / 20);
     const items = bands.get(band) ?? [];
     items.push(item);
@@ -127,7 +127,7 @@ function skyPoint(
   starScale: (value: number) => number,
 ): SkyPoint {
   const angle = slot.start + slot.spread * slot.span;
-  const distance = lagScale(Math.max(0, satellite.readmeLagDays) + 1);
+  const distance = lagScale(Math.max(0, satellite.readmeLagDays));
   return {
     satellite,
     x: center.x + Math.cos(angle) * distance,
@@ -186,13 +186,15 @@ export function layoutSky(
     0,
     ...reference.map((satellite) => satellite.stars),
   );
-  const lagScale = scaleLog()
-    .domain([1, Math.max(2, maxLagDays + 1)])
+  // README lag is long-tailed: one repo years behind would pin every other
+  // mark to the inner ring on a linear scale.
+  const lagScale = scaleSymlog()
+    .domain([0, Math.max(1, maxLagDays)])
     .range([innerRadius, outerRadius])
     .clamp(true);
   const starScale = scaleLog()
     .domain([1, Math.max(2, maxStars)])
-    .range([3, width < 540 ? 6 : 8])
+    .range([1.8, width < 540 ? 4.5 : 6.5])
     .clamp(true);
   const slots = skySlots(satellites, lagScale, starScale, innerRadius);
   const points = spacePointRadii(

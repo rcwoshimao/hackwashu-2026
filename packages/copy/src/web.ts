@@ -60,6 +60,9 @@ export const webCopy = {
     "Hollow circles are scanned READMEs with no checkable results yet. The scan did not fail.",
   skyCanvasAlt:
     "Star chart showing every filtered repository by topic, README lag, stars, and check status, with unscanned account repositories in an outer holding orbit. The list below provides keyboard access.",
+  skyZoomIn: "Zoom in",
+  skyZoomOut: "Zoom out",
+  skyZoomHint: "Drag to pan when zoomed in.",
   skyTopicFrameworks: "Frameworks",
   skyTopicUi: "UI libraries",
   skyTopicBuild: "Build tools",

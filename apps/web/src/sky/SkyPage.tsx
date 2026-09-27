@@ -2,13 +2,7 @@ import { copy } from "@ground-control/copy";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "../api.ts";
 import { useMe } from "../auth/useMe.ts";
-import {
-  type AccountRepoData,
-  measuredFindings,
-  type Satellite,
-  type SkyData,
-} from "../data.ts";
-import { readableDate } from "../presentation.ts";
+import type { AccountRepoData } from "../data.ts";
 import { accountEventNames, watchEvents } from "../realtime.ts";
 import { catalogEntries, filterEntries, type SkyScope } from "./catalog.ts";
 import { ScanForm } from "./ScanForm.tsx";
@@ -16,10 +10,11 @@ import { ScanTiers } from "./ScanTiers.tsx";
 import { SkyBulkScan } from "./SkyBulkScan.tsx";
 import { SkyCanvas } from "./SkyCanvas.tsx";
 import { SkyCatalog, SkyFilters } from "./SkyCatalog.tsx";
+import { SkyFindings, SkyHeader } from "./SkyHeader.tsx";
 import { SkyInspector } from "./SkyInspector.tsx";
 import { SkyLegend } from "./SkyLegend.tsx";
 import { UnscannedInspector } from "./UnscannedInspector.tsx";
-import { type SkyLoadState, useSky } from "./useSky.ts";
+import { useSky } from "./useSky.ts";
 
 function useSelectedRepo(): [string | null, (repo: string) => void] {
   const [repo, setRepo] = useState(() =>
@@ -38,89 +33,6 @@ function useSelectedRepo(): [string | null, (repo: string) => void] {
     setRepo(next);
   };
   return [repo, select];
-}
-
-function SkyHeader({
-  data,
-  state,
-  refresh,
-}: {
-  data: SkyData | null;
-  state: SkyLoadState;
-  refresh: () => Promise<void>;
-}) {
-  const mode = data
-    ? {
-        live: copy.skyModeLive,
-        cached: copy.skyModeCached,
-        simulated: copy.skyModeSimulated,
-        empty: copy.skyModeEmpty,
-      }[data.mode]
-    : copy.skyModeUnavailable;
-  return (
-    <header className="sky-heading">
-      <div>
-        <p className="eyebrow">{copy.navSky}</p>
-        <h1>{copy.skyTitle}</h1>
-        <p>{copy.skySubtitle}</p>
-      </div>
-      <div className="provenance">
-        <strong>{mode}</strong>
-        {data && (
-          <span>
-            {copy.skyUpdated} {readableDate(data.updatedAt)}
-          </span>
-        )}
-        <button
-          type="button"
-          className="subtle-button"
-          onClick={() => void refresh()}
-        >
-          {copy.skyRefresh}
-        </button>
-      </div>
-      {state === "stale" && (
-        <p className="state-banner" role="status">
-          {copy.skyDataStale}
-        </p>
-      )}
-    </header>
-  );
-}
-
-function SkyFindings({ satellites }: { satellites: Satellite[] }) {
-  const findings = measuredFindings(satellites);
-  const reviewCount = satellites.filter(
-    (item) => !item.simulated && item.label.toLowerCase() === "possible drift",
-  ).length;
-  return (
-    <section className="sky-findings" aria-label={copy.skyFindingsTitle}>
-      {findings.realCount === 0 ? (
-        <p>{copy.skyNoFindings}</p>
-      ) : (
-        <dl className="findings-grid">
-          <div>
-            <dt>{copy.skyRealCount}</dt>
-            <dd>{findings.realCount.toLocaleString()}</dd>
-          </div>
-          <div>
-            <dt>{copy.skyReviewCount}</dt>
-            <dd className={reviewCount > 0 ? "drift-ink" : undefined}>
-              {reviewCount.toLocaleString()}
-            </dd>
-          </div>
-          <div>
-            <dt>{copy.skyDriftingCount}</dt>
-            <dd
-              className={findings.driftingCount > 0 ? "drift-ink" : undefined}
-            >
-              {findings.driftingCount.toLocaleString()}
-            </dd>
-          </div>
-        </dl>
-      )}
-    </section>
-  );
 }
 
 export function SkyPage() {
@@ -267,9 +179,9 @@ export function SkyPage() {
                     selectedRepo={selectedRepo}
                     onSelect={inspect}
                   />
-                  <SkyLegend />
                 </div>
                 <div className="sky-side">
+                  <SkyLegend />
                   {selected && selected.kind !== "scanned" ? (
                     <UnscannedInspector
                       repo={selected.account}
@@ -288,8 +200,10 @@ export function SkyPage() {
                   )}
                 </div>
               </div>
+              {scope === "public" && <ScanForm />}
               <SkyCatalog
                 key={`${scope}:${search}`}
+                title={copy.skyBrowseTitle}
                 entries={filtered}
                 selectedRepo={selectedRepo}
                 onSelect={inspect}
@@ -308,7 +222,7 @@ export function SkyPage() {
           )}
         </>
       )}
-      {scope === "public" && <ScanForm />}
+      {scope === "public" && !(data && entries.length > 0) && <ScanForm />}
     </main>
   );
 }
