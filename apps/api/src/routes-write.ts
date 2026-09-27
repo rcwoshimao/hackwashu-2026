@@ -6,8 +6,9 @@ import { z } from "zod";
 import { accessRepo, sessionToken } from "./access.ts";
 import { registerConnectRoute } from "./routes-connect.ts";
 import { registerSourceWriteRoutes } from "./routes-sources.ts";
+import { openScanFindings } from "./scan-fix.ts";
 import { ingestTelemetry, refreshTrust, telemetrySchema } from "./telemetry.ts";
-import type { ApiDeps } from "./types.ts";
+import type { ApiDeps, ScanResult } from "./types.ts";
 import { emit, fail, repoSchema, requestBody, sha256 } from "./write-shared.ts";
 
 async function publishStatus(
@@ -106,6 +107,8 @@ async function scan(c: Context, deps: ApiDeps) {
   try {
     const result = await deps.scanner.scan(parsed.data.repo);
     emit(deps, "scan", { repo: result.repo, state: result.state });
+    if (session && ownsRepo(session.login, result.repo))
+      notifyScanOwner(deps, session.login, result);
     return c.json(result, result.state === "queued" ? 202 : 200);
   } catch (error) {
     if (error instanceof Error && error.message === "not_public")
@@ -118,6 +121,59 @@ async function scan(c: Context, deps: ApiDeps) {
   }
 }
 
+function ownsRepo(login: string, repo: string): boolean {
+  return repo.split("/")[0]?.toLowerCase() === login.toLowerCase();
+}
+
+const scanNotifyTimeoutMs = 10 * 60_000;
+
+function sendScanAlert(deps: ApiDeps, login: string, runId: string): void {
+  const run = deps.store.getRun(runId);
+  if (run?.origin !== "public_scan" || !deps.messaging?.scanAlert) return;
+  void deps.messaging
+    .scanAlert(run, login)
+    .then((sent) => {
+      if (!sent.ok) emit(deps, "message_failed", { repo: run.repo, runId });
+    })
+    .catch(() => emit(deps, "message_failed", { repo: run.repo, runId }));
+}
+
+function notifyScanOwner(
+  deps: ApiDeps,
+  login: string,
+  result: ScanResult,
+): void {
+  if (!deps.messaging?.scanAlert) return;
+  if (result.state === "cached") {
+    const latest = deps.store.getRepo(result.repo)?.latestRunId;
+    if (latest) sendScanAlert(deps, login, latest);
+    return;
+  }
+  const stop = deps.events.subscribe((event) => {
+    const payload = event.payload as { repo?: string; runId?: string };
+    if (payload?.repo !== result.repo) return;
+    if (event.kind === "scan_failed") finish();
+    if (event.kind !== "scan_complete" || !payload.runId) return;
+    finish();
+    sendScanAlert(deps, login, payload.runId);
+  });
+  const timer = setTimeout(() => stop(), scanNotifyTimeoutMs);
+  function finish() {
+    clearTimeout(timer);
+    stop();
+  }
+}
+
+function triageable(
+  run: RunRecord,
+  repo: NonNullable<ReturnType<ApiDeps["store"]["getRepo"]>>,
+): boolean {
+  return (
+    repo.connected ||
+    (run.origin === "public_scan" && repo.visibility === "public")
+  );
+}
+
 async function trustAction(
   c: Context,
   deps: ApiDeps,
@@ -126,14 +182,15 @@ async function trustAction(
   const run = deps.store.getRun(c.req.param("id") ?? "");
   if (run === null) return fail(c, "run_not_found", 404);
   const repo = deps.store.getRepo(run.repo);
-  if (repo === null || !repo.connected)
+  if (repo === null || !triageable(run, repo))
     return fail(c, "repo_not_connected", 404);
   const allowed = await accessRepo(deps, c.req.raw, repo, true);
   if (!allowed.ok) return fail(c, "repo_access_denied", allowed.status);
   const claimId = c.req.param("claimId") ?? "";
   if (!run.results.some((item) => item.claimId === claimId))
     return fail(c, "claim_not_found", 404);
-  const latest = refreshTrust(deps.store, repo.repo, claimId, state);
+  const refreshed = refreshTrust(deps.store, repo.repo, claimId, state);
+  const latest = refreshed?.origin === "public_scan" ? null : refreshed;
   const statusPosted =
     latest === null ? null : await publishStatus(deps, latest);
   if (latest) await publishPrEvidence(deps, latest);
@@ -141,9 +198,62 @@ async function trustAction(
   return c.json({
     claimId,
     state,
-    latestVerdict: latest?.verdict ?? null,
+    latestVerdict: refreshed?.verdict ?? null,
     statusPosted,
   });
+}
+
+const fixSchema = z
+  .object({
+    claimIds: z
+      .array(z.string().regex(/^c_[0-9a-f]{10}$/))
+      .min(1)
+      .max(50)
+      .optional(),
+  })
+  .nullable();
+
+async function fixAction(c: Context, deps: ApiDeps) {
+  const run = deps.store.getRun(c.req.param("id") ?? "");
+  if (run === null) return fail(c, "run_not_found", 404);
+  const repo = deps.store.getRepo(run.repo);
+  if (
+    repo === null ||
+    run.origin !== "public_scan" ||
+    repo.visibility !== "public"
+  )
+    return fail(c, "fix_requires_scan", 404);
+  const parsed = fixSchema.safeParse(await requestBody(c.req.raw));
+  if (!parsed.success) return fail(c, "invalid_request", 400);
+  const allowed = await accessRepo(deps, c.req.raw, repo, true);
+  if (!allowed.ok || allowed.session === null)
+    return fail(c, "repo_access_denied", allowed.ok ? 401 : allowed.status);
+  if (!deps.scanFix) return fail(c, "fix_unavailable", 503);
+  const open = openScanFindings(run);
+  const claimIds = (parsed.data?.claimIds ?? open).filter((id) =>
+    open.includes(id),
+  );
+  if (claimIds.length === 0) return fail(c, "claim_not_found", 404);
+  const fixed = await deps.scanFix.fix(
+    run,
+    claimIds,
+    allowed.session.oauthToken,
+  );
+  if (!fixed.ok)
+    return fail(
+      c,
+      fixed.error.code === "no_fix" ? "no_fix_found" : "fix_unavailable",
+      fixed.error.code === "no_fix" ? 409 : 502,
+    );
+  emit(deps, "scan_fix", { repo: repo.repo, runId: run.id });
+  return c.json(
+    {
+      pullRequestUrl: fixed.value.pullRequestUrl,
+      fixedClaimIds: fixed.value.fixedClaimIds,
+      skippedClaimIds: fixed.value.skippedClaimIds,
+    },
+    201,
+  );
 }
 
 async function telemetry(c: Context, deps: ApiDeps) {
@@ -229,6 +339,7 @@ export function registerWriteRoutes(app: Hono, deps: ApiDeps): void {
   app.post("/api/runs/:id/claims/:claimId/drop", (c) =>
     trustAction(c, deps, "dropped"),
   );
+  app.post("/api/runs/:id/fix", (c) => fixAction(c, deps));
   app.post("/api/telemetry", (c) => telemetry(c, deps));
   app.post("/api/imessage/link", (c) => imessageLink(c, deps));
 }

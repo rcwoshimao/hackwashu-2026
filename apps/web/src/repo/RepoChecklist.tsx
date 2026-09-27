@@ -1,6 +1,8 @@
 import { copy } from "@ground-control/copy";
+import { useMe } from "../auth/useMe.ts";
 import type { RunData } from "../data.ts";
 import { safeExternalUrl } from "../presentation.ts";
+import { canTriage, FindingActions, FixAllButton } from "./FindingActions.tsx";
 import {
   type ChecklistItem,
   type ClaimVerdict,
@@ -16,7 +18,17 @@ const verdictView: Record<ClaimVerdict, { mark: string; label: string }> = {
   ok: { mark: copy.repoMarkOk, label: copy.repoClaimOk },
 };
 
-function ClaimRow({ item }: { item: ChecklistItem }) {
+function ClaimRow({
+  item,
+  run,
+  canAct,
+  onChange,
+}: {
+  item: ChecklistItem;
+  run: RunData;
+  canAct: boolean;
+  onChange: () => Promise<void>;
+}) {
   const { result, verdict } = item;
   const view = verdictView[verdict];
   const problem = verdict === "wrong" || verdict === "maybe";
@@ -47,20 +59,46 @@ function ClaimRow({ item }: { item: ChecklistItem }) {
             </>
           )}
         </p>
+        <FindingActions
+          run={run}
+          result={result}
+          canAct={canAct}
+          onChange={onChange}
+        />
       </div>
     </li>
   );
 }
 
-export function RepoChecklist({ run }: { run: RunData }) {
+export function RepoChecklist({
+  run,
+  onChange,
+}: {
+  run: RunData;
+  onChange: () => Promise<void>;
+}) {
+  const { me } = useMe();
+  const canAct = canTriage(run, me);
   const items = checklist(run);
   if (items.length === 0) return null;
   return (
     <section className="repo-checklist" aria-labelledby="repo-checklist-title">
       <h2 id="repo-checklist-title">{copy.repoChecklistTitle}</h2>
+      <FixAllButton
+        run={run}
+        findings={run.results}
+        canAct={canAct}
+        onChange={onChange}
+      />
       <ul>
         {items.slice(0, shownClaims).map((item) => (
-          <ClaimRow key={item.result.claimId} item={item} />
+          <ClaimRow
+            key={item.result.claimId}
+            item={item}
+            run={run}
+            canAct={canAct}
+            onChange={onChange}
+          />
         ))}
       </ul>
       {items.length > shownClaims && (

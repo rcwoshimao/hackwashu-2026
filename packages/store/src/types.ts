@@ -74,6 +74,13 @@ export type RunRecord = {
   evidence: readonly FactEvidence[];
 };
 
+export type ClaimFixRecord = {
+  repo: string;
+  claimId: string;
+  pullRequestUrl: string;
+  createdAt: string;
+};
+
 export type SatelliteRecord = {
   repo: string;
   stars: number;
@@ -118,6 +125,8 @@ export interface AppStore {
   listRuns(repo: string): readonly RunRecord[];
   getTrust(repo: string, claimId: string): TrustState | null;
   setTrust(repo: string, claimId: string, state: TrustState): void;
+  getClaimFix(repo: string, claimId: string): ClaimFixRecord | null;
+  putClaimFix(fix: ClaimFixRecord): void;
   getSatellite(repo: string): SatelliteRecord | null;
   putSatellite(satellite: SatelliteRecord): void;
   listSatellites(): readonly SatelliteRecord[];

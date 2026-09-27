@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import { canonicalJson, checkSchema, factKey } from "@ground-control/plan";
+import { driftDegrees, evidenceFor, labelFor } from "@ground-control/scanner";
 import type {
   AppStore,
   FactEvidence,
@@ -203,12 +204,42 @@ export function refreshTrust(
       ...old,
       results,
       verdict: verdictFor(results),
-      evidence: groupedEvidence(results),
+      evidence:
+        old.origin === "public_scan"
+          ? evidenceFor(results)
+          : groupedEvidence(results),
     });
   }
+  rescoreSatellite(store, repoName);
   const repo = store.getRepo(repoName);
   if (repo === null || repo.latestRunId === null) return null;
   const latest = store.getRun(repo.latestRunId);
-  if (latest !== null) store.putRepo(repoWithRun(repo, latest));
+  if (latest === null) return null;
+  store.putRepo(
+    latest.origin === "public_scan"
+      ? {
+          ...repo,
+          label: labelFor(latest.results),
+          driftDegrees: driftDegrees(latest.results),
+        }
+      : repoWithRun(repo, latest),
+  );
   return latest;
+}
+
+function rescoreSatellite(store: AppStore, repoName: string): void {
+  const satellite = store.getSatellite(repoName);
+  if (satellite === null || satellite.simulated) return;
+  const scan = store
+    .listRuns(repoName)
+    .find(
+      (run) =>
+        run.origin === "public_scan" && run.commitSha === satellite.commitSha,
+    );
+  if (scan === undefined) return;
+  store.putSatellite({
+    ...satellite,
+    label: labelFor(scan.results),
+    driftDegrees: driftDegrees(scan.results),
+  });
 }

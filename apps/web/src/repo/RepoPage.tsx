@@ -177,7 +177,7 @@ function OwnerPrompt({ data, me }: { data: RepoData; me: MeData | null }) {
 
 function RepoContent({ data }: { data: RepoData }) {
   const { me } = useMe();
-  const { run, loading } = useLatestRun(data.latestRunId);
+  const { run, loading, refresh } = useLatestRun(data.latestRunId);
   const github = safeExternalUrl(`https://github.com/${data.repo}`);
   return (
     <>
@@ -202,7 +202,7 @@ function RepoContent({ data }: { data: RepoData }) {
       ) : (
         <>
           <RepoSummary data={data} run={run} />
-          {run && <RepoChecklist run={run} />}
+          {run && <RepoChecklist run={run} onChange={refresh} />}
         </>
       )}
       <OwnerPrompt data={data} me={me} />

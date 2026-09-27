@@ -22,7 +22,7 @@ There are two ways to use Ground Control. Anyone can look at public repos. Repo 
 
 ### Anyone: look at public repos (the Sky)
 
-- Purpose: a visual demo of what our app can do, just for looking fancy. 
+- Purpose: a visual demo of what our app can do, just for looking fancy.
 - The home page is **the Sky**, a round map of about 100 sample public repos. Each dot is one repo.
 - The farther a dot is from the centre, the longer the README has gone without keeping up with the code. Amber dots have drift.
 - Click a dot to see what was checked and which README claims failed.
@@ -31,7 +31,7 @@ There are two ways to use Ground Control. Anyone can look at public repos. Repo 
 
 ### Repo owners: connect a repo you own
 
-- Purpose: the main chunk. Where the tests actually lie. 
+- Purpose: the main chunk. Where the tests actually lie.
 1. Sign in with GitHub and open **My repos**.
 2. Choose **Connect** on a repo.
 3. Ground Control writes a set of small tests ("flight checks") from the README's claims.

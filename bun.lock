@@ -120,6 +120,7 @@
       "name": "@ground-control/fixes",
       "version": "0.1.0",
       "dependencies": {
+        "@ground-control/ai": "workspace:*",
         "@ground-control/messaging": "workspace:*",
         "@ground-control/plan": "workspace:*",
         "@ground-control/store": "workspace:*",

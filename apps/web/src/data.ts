@@ -103,8 +103,11 @@ export const runSchema = z.object({
   commitSha: z.string(),
   createdAt: z.string(),
   verdict: z.string(),
+  origin: z.string().optional(),
   results: z.array(checkResultSchema),
   evidence: z.array(evidenceGroupSchema),
+  fixes: z.record(z.string(), z.string()).optional(),
+  fixAvailable: z.boolean().optional(),
 });
 
 export const meSchema = z.object({
