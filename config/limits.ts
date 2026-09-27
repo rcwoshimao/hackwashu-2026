@@ -1,0 +1,6 @@
+export const maxCandidateFileBytes = 2 * 1024 * 1024;
+export const sourceFetchTimeoutMs = 10_000;
+export const maxSourceHtmlBytes = 2 * 1024 * 1024;
+export const sourceFetchAttempts = 3;
+export const sourceRetryBaseMs = 200;
+export const planPublishDebounceMs = 10_000;

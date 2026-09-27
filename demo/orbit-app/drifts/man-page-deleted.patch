@@ -1,0 +1,18 @@
+diff --git a/man/orbit.1 b/man/orbit.1
+--- a/man/orbit.1
++++ /dev/null
+@@ -1,14 +1,0 @@
+-.TH ORBIT 1 "September 2026" "orbit-app 1.0.0" "User Commands"
+-.SH NAME
+-orbit \- list planets
+-.SH SYNOPSIS
+-.B orbit
+-.BR --format " json|table"
+-.SH DESCRIPTION
+-The development server listens on port 3000 by default.
+-Run npm run dev after npm install. Run npm test to verify the app.
+-Set PORT to change the port and ORBIT_GREETING to change the home-page text.
+-.SH OPTIONS
+-.TP
+-.B --format
+-Print the planets as json or table. The default is table.

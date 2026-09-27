@@ -1,0 +1,6 @@
+diff --git a/.env.example b/.env.example
+--- a/.env.example
++++ /dev/null
+@@ -1,2 +1,0 @@
+-PORT=3000
+-ORBIT_GREETING=Welcome aboard

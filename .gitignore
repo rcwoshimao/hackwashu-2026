@@ -1,0 +1,20 @@
+node_modules/
+.env
+.env.*
+!.env.example
+data/
+*.db
+*.db-journal
+coverage/
+.DS_Store
+apps/*/dist/
+packages/*/dist/
+.groundcontrol/
+# action/dist/ is committed on purpose: GitHub runs the bundled action from it.
+
+# Source handoff files remain local; their contents are copied into this repo.
+/files/
+/files.zip
+/Ground Control — Full Build Spec.md
+/.npm-cache/
+/.bun-cache/

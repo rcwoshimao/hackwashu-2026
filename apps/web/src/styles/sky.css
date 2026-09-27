@@ -1,0 +1,256 @@
+.sky-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.sky-heading h1 {
+  margin-bottom: 0.35rem;
+}
+.sky-heading p {
+  color: var(--mist);
+  margin-bottom: 0;
+}
+.provenance {
+  display: grid;
+  gap: 0.35rem;
+  justify-items: end;
+  color: var(--mist);
+}
+.provenance strong {
+  color: var(--paper);
+  font-weight: 500;
+}
+.sky-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.85fr) minmax(300px, 0.8fr);
+  gap: 1.4rem;
+  align-items: start;
+}
+.sky-main,
+.sky-side {
+  min-width: 0;
+  display: grid;
+  gap: 1.4rem;
+}
+.sky-canvas-wrap {
+  border: 1px solid var(--rule);
+  background: var(--night);
+  overflow: hidden;
+}
+.sky-canvas {
+  width: 100%;
+  display: block;
+  cursor: crosshair;
+  touch-action: manipulation;
+}
+.sky-legend {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 1rem 0;
+}
+.sky-legend h2 {
+  margin-bottom: 0.8rem;
+}
+.legend-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 1.2rem;
+}
+.legend-grid p {
+  margin: 0;
+  color: var(--mist);
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+.legend-grid span {
+  color: var(--paper);
+  min-width: 1.4rem;
+  font-size: 1.4rem;
+  line-height: 1.1;
+}
+.legend-grid .drift-ink {
+  color: var(--drift);
+}
+.topic-key {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+.topic-key span {
+  border: 1px solid var(--rule);
+  padding: 0.25rem 0.55rem;
+  font-size: 0.82rem;
+  color: var(--mist);
+}
+.sky-findings h2 {
+  margin-bottom: 1.2rem;
+}
+.findings-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+.findings-grid > div {
+  padding-right: 0.5rem;
+  border-right: 1px solid var(--rule);
+}
+.findings-grid > div:last-child {
+  border: 0;
+}
+.findings-grid dt {
+  font-size: 0.8rem;
+  min-height: 2.5em;
+}
+.findings-grid dd {
+  font-size: clamp(1.25rem, 1.8vw, 2rem);
+  line-height: 1.1;
+  margin-top: 0.45rem;
+}
+.findings-grid small {
+  font-family: "IBM Plex Sans", sans-serif;
+  font-size: 0.65em;
+}
+.sky-inspector {
+  min-height: 390px;
+}
+.sky-inspector .panel-heading {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.sky-inspector h2 {
+  overflow-wrap: anywhere;
+  margin-bottom: 0.9rem;
+}
+.metric-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+.metric-list dt {
+  font-size: 0.82rem;
+}
+.metric-list dd {
+  overflow-wrap: anywhere;
+  margin-top: 0.2rem;
+}
+.simulation-note {
+  border: 1px dashed var(--mist);
+  padding: 0.7rem;
+}
+.simulation-tag {
+  border: 1px dashed var(--mist);
+  padding: 0.1rem 0.4rem;
+  font-size: 0.75rem;
+}
+.inspector-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+  margin-top: 1.4rem;
+}
+.fact-list {
+  margin-top: 1.6rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1.4rem;
+}
+.fact {
+  border-top: 1px solid var(--rule);
+  padding-top: 0.8rem;
+  margin-top: 0.8rem;
+}
+.fact h4 {
+  text-transform: capitalize;
+}
+.fact-claim {
+  padding: 0.6rem 0 0.8rem;
+}
+.fact-claim dl {
+  display: grid;
+  gap: 0.5rem;
+}
+.fact-claim dt {
+  font-size: 0.8rem;
+}
+.fact-claim dd {
+  overflow-wrap: anywhere;
+}
+.satellite-browser label {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+.sky-grid + .satellite-browser {
+  margin-top: 1.4rem;
+}
+.satellite-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.8rem 0 0;
+  max-height: 370px;
+  overflow: auto;
+}
+.satellite-list li + li {
+  border-top: 1px solid var(--rule);
+}
+.satellite-list button {
+  border: 0;
+  background: transparent;
+  color: var(--paper);
+  width: 100%;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.65rem;
+  padding: 0.6rem;
+  font-weight: 400;
+}
+.satellite-list button:hover,
+.satellite-list button[aria-pressed="true"] {
+  background: var(--night);
+}
+.satellite-list .repo-name {
+  margin-right: auto;
+  overflow-wrap: anywhere;
+}
+.scan-form {
+  margin-top: 2rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 0.5rem 2rem;
+}
+.scan-form h2 {
+  margin-bottom: 0.3rem;
+}
+.scan-form p {
+  color: var(--mist);
+}
+.scan-form label {
+  grid-column: 2;
+}
+.inline-fields {
+  grid-column: 2;
+  display: flex;
+  gap: 0.6rem;
+}
+.inline-fields input {
+  min-width: 0;
+}
+.scan-form .form-feedback {
+  grid-column: 2;
+}
+
+@media (max-width: 1050px) {
+  .sky-grid {
+    grid-template-columns: 1fr;
+  }
+  .sky-side {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

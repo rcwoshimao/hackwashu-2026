@@ -1,0 +1,253 @@
+:root {
+  color-scheme: dark;
+  --night: #0d171b;
+  --hull: #18282e;
+  --rule: #627982;
+  --paper: #f2f3ed;
+  --mist: #c2cfca;
+  --drift: #f2b84b;
+  font-family: "IBM Plex Sans", system-ui, sans-serif;
+  font-synthesis: none;
+  background: var(--night);
+  color: var(--paper);
+}
+
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button,
+.button {
+  min-height: 44px;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid var(--paper);
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--night);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+button:hover,
+.button:hover {
+  background: var(--mist);
+  border-color: var(--mist);
+}
+button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+a {
+  color: var(--paper);
+  text-underline-offset: 0.2em;
+}
+a:hover {
+  color: var(--mist);
+}
+:focus-visible {
+  outline: 3px solid var(--paper);
+  outline-offset: 3px;
+}
+input,
+select {
+  width: 100%;
+  min-height: 46px;
+  padding: 0.65rem 0.8rem;
+  background: var(--night);
+  color: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+}
+input::placeholder {
+  color: var(--mist);
+  opacity: 0.75;
+}
+h1,
+h2,
+h3,
+h4,
+p {
+  margin-top: 0;
+}
+h1 {
+  font-size: clamp(2.4rem, 4.2vw, 4.8rem);
+  line-height: 1.06;
+  letter-spacing: -0.04em;
+}
+h2 {
+  font-size: clamp(1.25rem, 1.6vw, 1.7rem);
+  line-height: 1.2;
+}
+h3 {
+  font-size: 1.1rem;
+}
+p {
+  line-height: 1.55;
+}
+small {
+  font-size: 0.78em;
+}
+dl {
+  margin: 0;
+}
+dt {
+  color: var(--mist);
+}
+dd {
+  margin: 0;
+}
+blockquote {
+  margin: 0.65rem 0;
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--rule);
+  line-height: 1.5;
+}
+.mono,
+code,
+pre,
+.eyebrow,
+.metric-list dd,
+.findings-grid dd {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+.eyebrow {
+  color: var(--mist);
+  font-size: 0.8rem;
+  margin-bottom: 0.65rem;
+}
+.quiet-copy,
+.form-hint {
+  color: var(--mist);
+}
+.drift-ink {
+  color: var(--drift);
+}
+.skip-link {
+  position: absolute;
+  left: 1rem;
+  top: -5rem;
+  z-index: 100;
+  padding: 0.7rem;
+  background: var(--paper);
+  color: var(--night);
+}
+.skip-link:focus {
+  top: 1rem;
+}
+.app-shell {
+  min-height: 100vh;
+}
+.site-header {
+  max-width: 1760px;
+  margin: 0 auto;
+  padding: 1.4rem clamp(1rem, 3vw, 3rem);
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  align-items: center;
+  border-bottom: 1px solid var(--rule);
+}
+.brand a {
+  text-decoration: none;
+  font-size: 1.15rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.brand-mark {
+  display: inline-block;
+  margin-right: 0.55rem;
+  font-size: 1.55rem;
+  line-height: 0.7;
+  vertical-align: middle;
+}
+.brand small {
+  display: block;
+  padding-left: 2.15rem;
+  color: var(--mist);
+  margin-top: 0.15rem;
+}
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 2vw, 2.2rem);
+}
+.desktop-nav a {
+  color: var(--mist);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.desktop-nav a:hover {
+  color: var(--paper);
+}
+.mobile-nav {
+  display: none;
+}
+.page {
+  max-width: 1760px;
+  margin: 0 auto;
+  padding: clamp(1.2rem, 3vw, 3rem);
+}
+.panel {
+  border: 1px solid var(--rule);
+  background: var(--hull);
+  padding: clamp(1rem, 2vw, 1.8rem);
+}
+.panel-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.panel-heading h2 {
+  margin-bottom: 1rem;
+}
+.state-panel {
+  border: 1px solid var(--rule);
+  background: var(--hull);
+  padding: 2rem;
+  margin: 2rem 0;
+}
+.state-banner {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 1px dashed var(--rule);
+  margin: 0.5rem 0 0;
+}
+.status-badge {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  color: var(--paper);
+  white-space: nowrap;
+  font-size: 0.86rem;
+}
+.status-badge span {
+  font-size: 1.35em;
+  line-height: 0.8;
+}
+.status-badge.drifting {
+  color: var(--drift);
+}
+.subtle-button {
+  color: var(--paper);
+  background: transparent;
+  border-color: var(--rule);
+}
+.subtle-button:hover {
+  color: var(--night);
+}

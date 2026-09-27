@@ -1,0 +1,74 @@
+[
+  {
+    "signal": "inline_code",
+    "quote": "createBeacon()",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 39,
+    "endOffset": 53
+  },
+  {
+    "signal": "env_var",
+    "quote": "BEACON_API_URL",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 66,
+    "endOffset": 80
+  },
+  {
+    "signal": "inline_code",
+    "quote": "BEACON_API_URL",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 66,
+    "endOffset": 80
+  },
+  {
+    "signal": "version",
+    "quote": "Node.js 22.2 or newer",
+    "lineStart": 4,
+    "lineEnd": 4,
+    "startOffset": 108,
+    "endOffset": 129
+  },
+  {
+    "signal": "shell_command",
+    "quote": "pnpm install",
+    "lineStart": 7,
+    "lineEnd": 7,
+    "startOffset": 145,
+    "endOffset": 157
+  },
+  {
+    "signal": "shell_command",
+    "quote": "pnpm run test",
+    "lineStart": 8,
+    "lineEnd": 8,
+    "startOffset": 160,
+    "endOffset": 173
+  },
+  {
+    "signal": "http_example",
+    "quote": "GET /api/beacons",
+    "lineStart": 11,
+    "lineEnd": 11,
+    "startOffset": 203,
+    "endOffset": 219
+  },
+  {
+    "signal": "inline_code",
+    "quote": "GET /api/beacons",
+    "lineStart": 11,
+    "lineEnd": 11,
+    "startOffset": 203,
+    "endOffset": 219
+  },
+  {
+    "signal": "localhost_url",
+    "quote": "localhost:4242",
+    "lineStart": 11,
+    "lineEnd": 11,
+    "startOffset": 248,
+    "endOffset": 262
+  }
+]

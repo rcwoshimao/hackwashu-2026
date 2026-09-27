@@ -1,0 +1,74 @@
+[
+  {
+    "signal": "version",
+    "quote": "Node 22 or newer",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 18,
+    "endOffset": 34
+  },
+  {
+    "signal": "inline_code",
+    "quote": "launchControl()",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 53,
+    "endOffset": 68
+  },
+  {
+    "signal": "env_var",
+    "quote": "GROUND_CONTROL_HOME",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 80,
+    "endOffset": 99
+  },
+  {
+    "signal": "inline_code",
+    "quote": "GROUND_CONTROL_HOME",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 80,
+    "endOffset": 99
+  },
+  {
+    "signal": "shell_command",
+    "quote": "cp .env.example .env",
+    "lineStart": 6,
+    "lineEnd": 6,
+    "startOffset": 117,
+    "endOffset": 137
+  },
+  {
+    "signal": "shell_command",
+    "quote": "npm run start",
+    "lineStart": 7,
+    "lineEnd": 7,
+    "startOffset": 138,
+    "endOffset": 151
+  },
+  {
+    "signal": "localhost_url",
+    "quote": "http://localhost:5050/",
+    "lineStart": 10,
+    "lineEnd": 10,
+    "startOffset": 162,
+    "endOffset": 184
+  },
+  {
+    "signal": "http_example",
+    "quote": "POST /api/launch",
+    "lineStart": 10,
+    "lineEnd": 10,
+    "startOffset": 208,
+    "endOffset": 224
+  },
+  {
+    "signal": "inline_code",
+    "quote": "POST /api/launch",
+    "lineStart": 10,
+    "lineEnd": 10,
+    "startOffset": 208,
+    "endOffset": 224
+  }
+]

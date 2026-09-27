@@ -1,0 +1,22 @@
+{
+  "name": "@ground-control/extension",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "bun run build.ts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "bun test src"
+  },
+  "dependencies": {
+    "@fontsource/ibm-plex-mono": "5.2.6",
+    "@fontsource/ibm-plex-sans": "5.2.6",
+    "@ground-control/copy": "workspace:*",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/chrome": "0.3.0",
+    "linkedom": "0.18.12",
+    "vite": "7.3.6"
+  }
+}

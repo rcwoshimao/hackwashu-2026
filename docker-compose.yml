@@ -1,0 +1,44 @@
+services:
+  groundcontrol:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ground-control:local
+    ports:
+      - "127.0.0.1:${GROUND_CONTROL_PORT:-8787}:8787"
+    environment:
+      PORT: "8787"
+      DATABASE_PATH: /app/data/groundcontrol.db
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:${GROUND_CONTROL_PORT:-8787}}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GITHUB_SCAN_TOKEN: ${GITHUB_SCAN_TOKEN:-}
+      GITHUB_WRITE_TOKEN: ${GITHUB_WRITE_TOKEN:-}
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      EXTENSION_ID: ${EXTENSION_ID:-}
+      SPECTRUM_PROJECT_ID: ${SPECTRUM_PROJECT_ID:-}
+      SPECTRUM_PROJECT_SECRET: ${SPECTRUM_PROJECT_SECRET:-}
+      CONFLUENCE_SITE: ${CONFLUENCE_SITE:-}
+      CONFLUENCE_EMAIL: ${CONFLUENCE_EMAIL:-}
+      CONFLUENCE_API_TOKEN: ${CONFLUENCE_API_TOKEN:-}
+    volumes:
+      - groundcontrol-data:/app/data
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 128
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:8787/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 10s
+
+volumes:
+  groundcontrol-data:

@@ -1,0 +1,93 @@
+.form-page {
+  display: flex;
+  justify-content: center;
+  padding-top: clamp(2rem, 8vh, 6rem);
+}
+.form-panel {
+  width: min(620px, 100%);
+}
+.form-panel h1 {
+  font-size: clamp(2.1rem, 4vw, 3.5rem);
+}
+.form-panel > p {
+  color: var(--mist);
+}
+.form-panel form {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 2rem;
+}
+.form-panel label {
+  margin-top: 0.8rem;
+  font-weight: 500;
+}
+.form-panel .form-hint {
+  margin-bottom: 0.1rem;
+  font-size: 0.85rem;
+}
+.form-panel button {
+  justify-self: start;
+  margin-top: 0.8rem;
+}
+.form-feedback {
+  color: var(--paper);
+  border-left: 2px solid var(--paper);
+  padding-left: 0.8rem;
+  margin: 0.5rem 0 0;
+}
+.disclosure {
+  border: 1px solid var(--rule);
+  padding: 0.8rem;
+  margin: 0.7rem 0;
+  color: var(--mist);
+}
+.account-state {
+  border-top: 1px solid var(--rule);
+  margin-top: 2rem;
+  padding-top: 1rem;
+}
+
+.imessage-link p {
+  color: var(--mist);
+}
+
+.imessage-link button {
+  margin-top: 0.8rem;
+}
+
+.connect-token {
+  border: 1px solid var(--rule);
+  padding: 1rem;
+  margin-top: 1rem;
+  min-width: 0;
+}
+
+.connect-token h2 {
+  margin: 0 0 0.5rem;
+}
+
+.connect-token-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.connect-token-row input {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.connect-token-row button {
+  margin: 0;
+}
+
+.connect-token code {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .form-page {
+    padding-top: 1rem;
+  }
+}

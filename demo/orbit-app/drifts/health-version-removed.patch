@@ -1,0 +1,12 @@
+diff --git a/src/server.js b/src/server.js
+--- a/src/server.js
++++ b/src/server.js
+@@ -8,7 +8,7 @@
+   const greeting = process.env.ORBIT_GREETING ?? "Welcome aboard";
+   app.get("/", (_request, response) => response.status(200).send(greeting));
+   app.get("/api/health", (_request, response) =>
+-    response.json({ status: "ok", version: "1.0.0" }),
++    response.json({ status: "ok", build: "1.0.0" }),
+   );
+   app.get("/api/planets", (_request, response) =>
+     response.json({ planets: listPlanets() }),

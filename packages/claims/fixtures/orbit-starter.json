@@ -1,0 +1,90 @@
+[
+  {
+    "signal": "version",
+    "quote": "Node 24 or newer",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 26,
+    "endOffset": 42
+  },
+  {
+    "signal": "inline_code",
+    "quote": ".env.example",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 50,
+    "endOffset": 62
+  },
+  {
+    "signal": "inline_code",
+    "quote": ".env",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 68,
+    "endOffset": 72
+  },
+  {
+    "signal": "env_var",
+    "quote": "ORBIT_GREETING",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 83,
+    "endOffset": 97
+  },
+  {
+    "signal": "inline_code",
+    "quote": "ORBIT_GREETING",
+    "lineStart": 3,
+    "lineEnd": 3,
+    "startOffset": 83,
+    "endOffset": 97
+  },
+  {
+    "signal": "shell_command",
+    "quote": "npm install",
+    "lineStart": 6,
+    "lineEnd": 6,
+    "startOffset": 107,
+    "endOffset": 118
+  },
+  {
+    "signal": "shell_command",
+    "quote": "npm run dev",
+    "lineStart": 7,
+    "lineEnd": 7,
+    "startOffset": 119,
+    "endOffset": 130
+  },
+  {
+    "signal": "localhost_url",
+    "quote": "http://localhost:3000",
+    "lineStart": 10,
+    "lineEnd": 10,
+    "startOffset": 162,
+    "endOffset": 183
+  },
+  {
+    "signal": "http_example",
+    "quote": "curl http://localhost:3000/api/health",
+    "lineStart": 13,
+    "lineEnd": 13,
+    "startOffset": 207,
+    "endOffset": 244
+  },
+  {
+    "signal": "shell_command",
+    "quote": "curl http://localhost:3000/api/health",
+    "lineStart": 13,
+    "lineEnd": 13,
+    "startOffset": 207,
+    "endOffset": 244
+  },
+  {
+    "signal": "localhost_url",
+    "quote": "http://localhost:3000/api/health",
+    "lineStart": 13,
+    "lineEnd": 13,
+    "startOffset": 212,
+    "endOffset": 244
+  }
+]

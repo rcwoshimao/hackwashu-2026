@@ -1,0 +1,12 @@
+diff --git a/bin/orbit.js b/bin/orbit.js
+--- a/bin/orbit.js
++++ b/bin/orbit.js
+@@ -3,7 +3,7 @@
+ 
+ const args = process.argv.slice(2);
+ if (args.includes("--help")) {
+-  process.stdout.write("Usage: orbit --format json|table\n");
++  process.stdout.write("Usage: orbit [options]\n");
+   process.exit(0);
+ }
+ const formatIndex = args.indexOf("--format");

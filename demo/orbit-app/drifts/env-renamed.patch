@@ -1,0 +1,12 @@
+diff --git a/src/server.js b/src/server.js
+--- a/src/server.js
++++ b/src/server.js
+@@ -5,7 +5,7 @@
+ 
+ export function createApp() {
+   const app = express();
+-  const greeting = process.env.ORBIT_GREETING ?? "Welcome aboard";
++  const greeting = process.env.ORBIT_MESSAGE ?? "Welcome aboard";
+   app.get("/", (_request, response) => response.status(200).send(greeting));
+   app.get("/api/health", (_request, response) =>
+     response.json({ status: "ok", version: "1.0.0" }),

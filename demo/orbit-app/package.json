@@ -1,0 +1,20 @@
+{
+  "name": "orbit-app",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "orbit": "bin/orbit.js"
+  },
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test test/app.test.js"
+  },
+  "dependencies": {
+    "express": "5.1.0"
+  }
+}

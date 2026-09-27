@@ -1,0 +1,42 @@
+name: Ground Control
+on:
+  pull_request:
+  push:
+    branches: [main, "groundcontrol/**"]
+  schedule:
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+permissions: {}
+jobs:
+  flight-checks:
+    if: ${{ github.event.repository.private == true }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - uses: actions/setup-node@v6
+        with: { node-version: 24, cache: npm }
+      - run: npm ci
+      - uses: YOUR_GITHUB_USER/ground-control/action@main
+        with: { mode: run }
+      - if: always()
+        uses: actions/upload-artifact@v5
+        with: { name: telemetry, path: .groundcontrol/telemetry.json }
+  report:
+    needs: flight-checks
+    if: ${{ always() && github.event.repository.private == true && needs.flight-checks.result == 'success' }}
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/download-artifact@v5
+        with: { name: telemetry, path: .groundcontrol }
+      - uses: YOUR_GITHUB_USER/ground-control/action@main
+        with:
+          mode: report
+          server: ${{ vars.GROUND_CONTROL_URL }}
+          token: ${{ secrets.GROUND_CONTROL_TOKEN }}
