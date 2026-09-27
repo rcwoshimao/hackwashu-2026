@@ -1,4 +1,3 @@
-import { randomBytes } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import {
@@ -26,6 +25,7 @@ import { OctokitCommitAuthor } from "./commit-author.ts";
 import { createApi, EventHub, GitHubCommitStatus } from "./index.ts";
 import { startMessaging } from "./messaging.ts";
 import { FlightPlanPublishQueue } from "./publish-schedule.ts";
+import { sessionSecret } from "./session-secret.ts";
 
 const dbPath = process.env.DATABASE_PATH || "data/groundcontrol.db";
 mkdirSync(dirname(dbPath), { recursive: true });
@@ -38,7 +38,10 @@ const github = new GitHubHttp(
   process.env.GITHUB_CLIENT_ID || "",
   process.env.GITHUB_CLIENT_SECRET || "",
 );
-const secret = process.env.SESSION_SECRET || randomBytes(32).toString("hex");
+const secret = sessionSecret(
+  process.env.SESSION_SECRET,
+  process.env.GITHUB_CLIENT_SECRET,
+);
 const sessions = new Sessions(store, secret, Date.now);
 const auth = new AuthService(
   github,

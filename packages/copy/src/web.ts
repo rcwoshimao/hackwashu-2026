@@ -450,7 +450,9 @@ export const webCopy = {
   accountReposConnecting: "Connecting",
   accountReposScan: "Check README",
   accountReposScanning: "Requesting scan",
-  accountReposScanAll: "Scan all public READMEs",
+  accountReposScanAll: "Scan all personal projects",
+  accountReposScanAllHint:
+    "Static checks, plus AI when configured. Only your public projects are included. Deep checks run in an owner-approved local checkout or after you add the GitHub Action; this button never runs repository code.",
   accountReposScanAllProgress: "Public scans requested",
   accountReposScanAllDone: "Public scan requests finished",
   accountReposScanAllFailed: "Some public scans could not start",

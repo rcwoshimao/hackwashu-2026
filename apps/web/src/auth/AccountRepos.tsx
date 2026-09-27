@@ -4,7 +4,8 @@ import { api, type Connection } from "../api.ts";
 import { accountRepoRowsPerPage } from "../config.ts";
 import type { AccountRepoData } from "../data.ts";
 import { accountEventNames, watchEvents } from "../realtime.ts";
-import { canScan, RepoRow, type ScanState } from "./AccountRepoRow.tsx";
+import { RepoRow, type ScanState } from "./AccountRepoRow.tsx";
+import { personalScanRepos } from "./personalScans.ts";
 
 export function AccountRepos({ login }: { login: string }) {
   const [repos, setRepos] = useState<AccountRepoData[]>([]);
@@ -78,7 +79,7 @@ export function AccountRepos({ login }: { login: string }) {
   const currentPage = Math.min(page, pageCount);
   const pageStart = (currentPage - 1) * accountRepoRowsPerPage;
   const visible = shown.slice(pageStart, pageStart + accountRepoRowsPerPage);
-  const scannable = repos.filter(canScan);
+  const scannable = personalScanRepos(repos, login);
   const bulkActive =
     bulkProgress !== null && bulkProgress.done < bulkProgress.total;
 
@@ -205,6 +206,7 @@ export function AccountRepos({ login }: { login: string }) {
               {copy.accountReposScanAll} ({scannable.length})
             </button>
           </div>
+          <p className="form-hint">{copy.accountReposScanAllHint}</p>
           {bulkProgress && (
             <p role="status" className="form-feedback">
               {bulkProgress.done === bulkProgress.total
