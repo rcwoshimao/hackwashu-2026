@@ -38,6 +38,7 @@ export type CorrectionProposal = {
 export type DraftInput = {
   repo: string;
   baseSha: string;
+  basePullRequestNumber?: number;
   branch: string;
   files: readonly { path: string; content: string }[];
   title: string;

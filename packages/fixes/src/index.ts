@@ -1,4 +1,5 @@
 export { CompositeCorrection } from "./composite.ts";
+export { DeepCorrection } from "./deep-correction.ts";
 export { FakeGitHubFixes, OctokitFixes } from "./github.ts";
 export type { PrCommentPort, PrCommentResult } from "./pr-comment.ts";
 export { commentOnConfirmedDrift, prEvidenceMarker } from "./pr-comment.ts";

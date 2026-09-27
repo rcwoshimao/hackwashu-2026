@@ -31,13 +31,22 @@ export const messageCopy = {
     "The draft correction did not pass the repository's CI. Review {pr} and the evidence: {url}",
   fixPrTitle: "Update documented default port from {oldPort} to {newPort}",
   fixPrBody:
-    "Ground Control found a confirmed port mismatch. Update only cited wording at {citations} from {oldPort} to {newPort}. The flight plan and generated tests are updated. This draft awaits the repository's CI.",
+    "Source: deep scan in the repository's CI. Ground Control found a confirmed port mismatch. Update only cited wording at {citations} from {oldPort} to {newPort}. The flight plan and generated tests are updated. Review each changed line; this draft awaits the repository's CI.",
+  smokePrTitle: "Test Ground Control deep scan",
+  smokePrBody:
+    "Source: deep scan setup test. This draft contains an empty commit and no file edits. It checks that the repository's Ground Control workflow can run and report results. Close the draft after reviewing the Actions jobs; no merge is needed.",
+  deepFixPrTitle: "Review {count} deep scan documentation edit(s)",
+  deepFixBasePr:
+    "This draft targets the source pull request branch so its diff contains only these documentation edits.",
+  deepFixBaseDefault: "This draft targets the repository's default branch.",
+  deepFixPrBody:
+    "Source: deep scan in the repository's CI at commit {sha}. {base} Ground Control drafted line edits for confirmed findings:\n\n{changes}\n\nReview each changed line in Files changed. This draft is a proposal; the repository's CI determines whether its checks pass. Generated flight checks refresh from the documentation after merge.",
   fixEvidenceOnly:
     "External page evidence is available for {count} source(s) at {url}.",
   fixConfluencePosted:
     "I posted a correction comment on {count} Confluence page(s).",
   prEvidenceLead:
-    "Ground Control found {count} confirmed documentation mismatch(es) on commit {sha}.",
+    "Source: deep scan in the repository's CI. Ground Control found {count} confirmed documentation mismatch(es) on commit {sha}.",
   prEvidenceHeading:
     "| Source | Documented claim | Expected | Observed | Evidence |\n| --- | --- | --- | --- | --- |",
   prEvidenceRow:
@@ -57,7 +66,7 @@ export const messageCopy = {
     "Ignored {count} {noun}. They won't count toward this repo's drift or alert you again.",
   scanFixPrTitle: "Correct {count} README {noun} found by Ground Control",
   scanFixPrBody:
-    "Ground Control's README scan at commit {sha} found documentation that disagrees with the repository. An AI model drafted these line edits from the repository file list and package.json:\n\n{changes}\n\nReview each change before merging. Ground Control does not run repository code for this check.",
+    "Source: public README scan with static and optional AI assessment at commit {sha}; no repository code ran. An AI model drafted these line edits from the repository file list and package.json:\n\n{changes}\n\nReview each change before merging.",
   keepDone:
     "Kept the docs as written. The check stays failing until the code matches.",
   ignoreDone:

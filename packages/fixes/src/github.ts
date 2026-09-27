@@ -94,6 +94,9 @@ export class OctokitFixes implements GitHubFixPort {
       !names ||
       !/^[0-9a-f]{40}$/u.test(input.baseSha) ||
       !/^groundcontrol\/fix-[A-Za-z0-9_-]{1,64}$/u.test(input.branch) ||
+      (input.basePullRequestNumber !== undefined &&
+        (!Number.isSafeInteger(input.basePullRequestNumber) ||
+          input.basePullRequestNumber < 1)) ||
       input.files.length === 0 ||
       input.files.some((file) => !writable(file.path))
     )
@@ -102,6 +105,19 @@ export class OctokitFixes implements GitHubFixPort {
       const repository = await this.client.rest.repos.get(names);
       if (repository.data.permissions?.push === false)
         return { ok: false, error: { code: "github_failed" } };
+      let base = repository.data.default_branch;
+      if (input.basePullRequestNumber !== undefined) {
+        const source = await this.client.rest.pulls.get({
+          ...names,
+          pull_number: input.basePullRequestNumber,
+        });
+        if (
+          source.data.head.repo?.full_name !== input.repo ||
+          source.data.head.sha !== input.baseSha
+        )
+          return { ok: false, error: { code: "github_failed" } };
+        base = source.data.head.ref;
+      }
       const old = await this.client.rest.git.getCommit({
         ...names,
         commit_sha: input.baseSha,
@@ -132,7 +148,7 @@ export class OctokitFixes implements GitHubFixPort {
         title: input.title,
         body: input.body,
         head: input.branch,
-        base: repository.data.default_branch,
+        base,
         draft: true,
       });
       return {

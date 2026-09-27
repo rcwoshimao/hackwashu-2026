@@ -25,12 +25,34 @@ export interface CommitAuthorPort {
   lookup(repo: string, commitSha: string): Promise<CommitAuthorResult>;
 }
 
+export type SmokePrResult =
+  | { ok: true; url: string }
+  | { ok: false; reason: "setup_incomplete" | "github_unavailable" };
+
+export interface SmokePrPort {
+  create(repo: string): Promise<SmokePrResult>;
+}
+
+export type DeepFixResult =
+  | { ok: true; url: string; fixedClaimIds: readonly string[] }
+  | { ok: false; reason: "no_fix" | "unavailable" };
+
+export interface DeepFixPort {
+  fix(
+    run: RunRecord,
+    claimIds: readonly string[],
+    oauthToken: string,
+  ): Promise<DeepFixResult>;
+}
+
 export interface ApiDeps {
   store: AppStore;
   auth: AuthService;
   scanner?: PublicScanPort;
   status?: CommitStatusPort;
   commitAuthor?: CommitAuthorPort;
+  smokePr?: SmokePrPort;
+  deepFix?: DeepFixPort;
   prComments?: PrCommentPort;
   messaging?: Pick<MessagingHub, "alert"> &
     Partial<

@@ -24,11 +24,13 @@ import { ConfluenceCloud } from "@ground-control/sources";
 import { SqliteStore } from "@ground-control/store";
 import { planPublishDebounceMs } from "../../../config/limits.ts";
 import { OctokitCommitAuthor } from "./commit-author.ts";
+import { createDeepFix } from "./deep-fix.ts";
 import { createApi, EventHub, GitHubCommitStatus } from "./index.ts";
 import { startMessaging } from "./messaging.ts";
 import { FlightPlanPublishQueue } from "./publish-schedule.ts";
 import { createScanFix } from "./scan-fix.ts";
 import { sessionSecret } from "./session-secret.ts";
+import { OctokitSmokePr } from "./smoke-pr.ts";
 
 const dbPath = process.env.DATABASE_PATH || "data/groundcontrol.db";
 mkdirSync(dirname(dbPath), { recursive: true });
@@ -173,6 +175,10 @@ const scanFix = docFixModel
       serviceToken: process.env.GITHUB_WRITE_TOKEN,
     })
   : undefined;
+const deepFix = docFixModel ? createDeepFix(docFixModel) : undefined;
+const smokePr = process.env.GITHUB_WRITE_TOKEN
+  ? new OctokitSmokePr(process.env.GITHUB_WRITE_TOKEN)
+  : undefined;
 const messaging = await startMessaging({
   dbPath,
   secret,
@@ -206,6 +212,8 @@ const app = createApi({
   ...(prComments === undefined ? {} : { prComments }),
   ...(commitAuthor === undefined ? {} : { commitAuthor }),
   ...(scanFix === undefined ? {} : { scanFix }),
+  ...(smokePr === undefined ? {} : { smokePr }),
+  ...(deepFix === undefined ? {} : { deepFix }),
   now: () => new Date(),
   publicUrl,
   webDist: resolve(process.cwd(), "apps/web/dist"),

@@ -14,6 +14,7 @@ import {
 import { FixtureWebPage } from "@ground-control/sources";
 import { MemoryStore } from "@ground-control/store";
 import { createApi, EventHub } from "../src/index.ts";
+import type { ApiDeps } from "../src/types.ts";
 
 class FakeGitHub implements GitHubPort {
   calls = 0;
@@ -48,6 +49,7 @@ class FakeGitHub implements GitHubPort {
 
 export function setup(
   repositoryFiles = new Map<string, { text: string; version: string }>(),
+  extra: Partial<Pick<ApiDeps, "smokePr" | "deepFix">> = {},
 ) {
   const store = new MemoryStore();
   const github = new FakeGitHub();
@@ -88,6 +90,7 @@ export function setup(
         return { state: "queued", repo };
       },
     },
+    ...extra,
   });
   return {
     app,

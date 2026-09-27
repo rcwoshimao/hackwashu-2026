@@ -80,3 +80,53 @@ test("Octokit adapter reads at a commit, makes one draft commit, and checks its 
     value: "success",
   });
 });
+
+test("draft from a PR head targets that branch and refuses a stale head", async () => {
+  let headSha = oldSha;
+  const calls: Call[] = [];
+  const transport = async (input: RequestInfo | URL, init?: RequestInit) => {
+    const path = new URL(String(input)).pathname;
+    const body = init?.body ? (JSON.parse(String(init.body)) as unknown) : null;
+    calls.push({ method: init?.method ?? "GET", path, body });
+    if (path === "/repos/demo/orbit-app")
+      return response({ default_branch: "main" });
+    if (path.endsWith("/pulls/7"))
+      return response({
+        head: {
+          sha: headSha,
+          ref: "feature",
+          repo: { full_name: "demo/orbit-app" },
+        },
+      });
+    if (path.endsWith(`/git/commits/${oldSha}`))
+      return response({ tree: { sha: "old-tree" } });
+    if (path.endsWith("/git/trees")) return response({ sha: "new-tree" }, 201);
+    if (path.endsWith("/git/commits")) return response({ sha: newSha }, 201);
+    if (path.endsWith("/git/refs")) return response({ ref: "draft" }, 201);
+    if (path.endsWith("/pulls"))
+      return response(
+        { html_url: "https://github.com/demo/orbit-app/pull/8" },
+        201,
+      );
+    return response({ message: "unexpected" }, 404);
+  };
+  const github = new OctokitFixes(
+    "token",
+    new Octokit({ request: { fetch: transport } }),
+  );
+  const input = {
+    repo: "demo/orbit-app",
+    baseSha: oldSha,
+    basePullRequestNumber: 7,
+    branch: "groundcontrol/fix-deep-test",
+    files: [{ path: "README.md", content: "new" }],
+    title: "Review edit",
+    body: "Source: deep scan",
+  };
+  expect((await github.createDraft(input)).ok).toBe(true);
+  expect(
+    calls.find((call) => call.path.endsWith("/pulls") && call.body)?.body,
+  ).toMatchObject({ base: "feature", draft: true });
+  headSha = "c".repeat(40);
+  expect((await github.createDraft(input)).ok).toBe(false);
+});

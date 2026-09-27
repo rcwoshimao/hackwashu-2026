@@ -10,6 +10,7 @@ import {
   FixAllButton,
   RestoreButton,
 } from "../repo/FindingActions.tsx";
+import { DeepFixButton } from "./DeepFixButton.tsx";
 
 function useRun(id: string) {
   const [data, setData] = useState<RunData | null>(null);
@@ -101,11 +102,13 @@ function CheckCard({
   result,
   run,
   canAct,
+  canDeepFix,
   onChange,
 }: {
   result: CheckResult;
   run: RunData;
   canAct: boolean;
+  canDeepFix: boolean;
   onChange: () => Promise<void>;
 }) {
   const runId = run.id;
@@ -177,6 +180,12 @@ function CheckCard({
             </button>
           </>
         )}
+        {run.origin === "ci" &&
+          canDeepFix &&
+          result.state === "confirmed" &&
+          result.status === "fail" && (
+            <DeepFixButton runId={runId} claimId={result.claimId} />
+          )}
       </div>
       {scanFinding && (
         <>
@@ -212,6 +221,8 @@ function RunContent({
 }) {
   const { me } = useMe();
   const canAct = canTriage(data, me);
+  const canDeepFix =
+    data.origin === "ci" && !!me?.connectedRepos.includes(data.repo);
   return (
     <>
       <header className="detail-heading">
@@ -233,6 +244,7 @@ function RunContent({
       <EvidenceGroups data={data} />
       <section className="panel check-results">
         <h2>{copy.runChecks}</h2>
+        {canDeepFix && <p>{copy.runDeepFixIntro}</p>}
         <FixAllButton
           run={data}
           findings={data.results}
@@ -249,6 +261,7 @@ function RunContent({
                 result={result}
                 run={data}
                 canAct={canAct}
+                canDeepFix={canDeepFix}
                 onChange={refresh}
               />
             ))}
